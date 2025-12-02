@@ -1,146 +1,210 @@
-// components/Header.tsx
-'use client'; // Required for using useState and client-side interactions
+"use client";
 
-import Link from 'next/link';
-import { IoLogoApple, IoMenu, IoClose } from 'react-icons/io5';
-import { useState } from 'react';
+import Link from "next/link";
+import Head from "next/head";
+import { useEffect, useRef, useState } from "react";
+import {
+  IoMenu,
+  IoClose,
+  IoHome,
+  IoBriefcase,
+  IoPerson,
+  IoMail,
+  IoLayers,
+} from "react-icons/io5";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
+import { motion, AnimatePresence } from "framer-motion";
 
-// Define the structure for navigation items, including an optional dropdown
-const navItems = [
-  { name: 'Home', href: '/' },
-  { 
-    name: 'Work', 
-    href: '#', 
-    dropdown: [
-      { name: 'Featured Projects', href: '#projects' },
-      { name: 'Case Studies', href: '#studies' },
-      { name: 'Technologies', href: '#skills' },
-    ] 
-  },
-  { name: 'About', href: '#about' },
-  { name: 'Contact', href: '#contact' },
-];
-
-export default function Header() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-
-  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
-  const handleDropdownToggle = (name: string) => {
-    setActiveDropdown(activeDropdown === name ? null : name);
-  };
-  
-  // Custom styled link component for better reuse and hover effects
-  const NavLink = ({ href, children, ...props }: { href: string; children: React.ReactNode; [key: string]: any }) => (
-    <Link 
-      href={href} 
-      className="text-sm font-light tracking-wide text-gray-800 dark:text-gray-100 hover:text-blue-500 transition-colors duration-200 py-1"
-      {...props}
+// Magnetic hover effect wrapper
+function Magnetic({ children }: { children: React.ReactNode }) {
+  return (
+    <motion.div
+      whileHover={{ x: 2, y: -2 }}
+      transition={{ type: "spring", stiffness: 300, damping: 15 }}
     >
       {children}
-    </Link>
+    </motion.div>
   );
+}
+
+export default function Header() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showHeader, setShowHeader] = useState(true);
+  const drawerRef = useRef<HTMLDivElement | null>(null);
+  let lastScroll = typeof window !== "undefined" ? window.scrollY : 0;
+
+  const navItems = [
+    { name: "Home", href: "#home", Icon: IoHome },
+    { name: "Work", href: "#works", Icon: IoBriefcase },
+    { name: "About", href: "#about", Icon: IoPerson },
+    { name: "Skills", href: "#skills", Icon: IoLayers },
+    { name: "Contact", href: "#contact", Icon: IoMail },
+  ];
+
+  // Scroll-hide / show header
+  useEffect(() => {
+    const handleScroll = () => {
+      const current = window.scrollY;
+      setShowHeader(current < lastScroll || current < 10);
+      lastScroll = current;
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Close drawer when clicking outside
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (isMenuOpen && drawerRef.current && !drawerRef.current.contains(e.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [isMenuOpen]);
+
+  // Smooth scroll to element
+  const scrollToSection = (href: string) => (e: any) => {
+    e.preventDefault();
+    const id = href.replace("#", "");
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    else window.location.hash = href;
+    setIsMenuOpen(false);
+  };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-3xl bg-white/70 dark:bg-gray-900/70 shadow-sm transition-shadow duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center justify-between">
-        
-        {/* Left: Logo/Name */}
-        <NavLink href="/" className="text-lg font-semibold tracking-tight">    Nirupam Pal
-        </NavLink>
-        
-        {/* Center: Desktop Navigation Links with Dropdown */}
-        <nav className="hidden lg:flex space-x-8 text-sm font-medium h-full">
-          {navItems.map((item) => (
-            <div
-              key={item.name}
-              className="relative flex items-center h-full"
-              onMouseEnter={() => item.dropdown && setActiveDropdown(item.name)}
-              onMouseLeave={() => item.dropdown && setActiveDropdown(null)}
+    <>
+      {/* SEO */}
+      <Head>
+        <title>Nirupam Pal — Fullstack Developer</title>
+        <meta
+          name="description"
+          content="Portfolio of Nirupam Pal — Fullstack Developer specializing in modern UI engineering, high-performance systems, and elegant software design."
+        />
+      </Head>
+
+      {/* Header */}
+      <motion.header
+        animate={{
+          y: showHeader ? 0 : -80,
+          opacity: showHeader ? 1 : 0,
+        }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-white/60 dark:bg-black/40 border-b border-gray-200/40 dark:border-gray-700/40 shadow-md"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 md:h-16 flex items-center justify-between">
+
+          {/* Logo */}
+          <Magnetic>
+            <Link
+              href="/"
+              className="text-lg md:text-xl font-bold tracking-tight 
+              text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition"
             >
-              <NavLink href={item.href} onClick={() => item.dropdown && handleDropdownToggle(item.name)}>
-                {item.name}
-              </NavLink>
+              Nirupam Pal
+            </Link>
+          </Magnetic>
 
-              {/* Dropdown Menu (Conceptual Styling) */}
-              {item.dropdown && activeDropdown === item.name && (
-                <div className="absolute top-full mt-2 w-56 p-2 rounded-lg shadow-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 animate-fadeInUp">
-                  {item.dropdown.map((subItem) => (
-                    <Link
-                      key={subItem.name}
-                      href={subItem.href}
-                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors duration-150"
-                      onClick={() => setActiveDropdown(null)} // Close on click
-                    >
-                      {subItem.name}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </nav>
+          {/* Desktop Nav */}
+          <nav className="hidden lg:flex items-center space-x-6">
+            {navItems.map(({ name, href, Icon }) => (
+              <Magnetic key={name}>
+                <button
+                  onClick={scrollToSection(href)}
+                  className="group relative inline-flex items-center gap-2 px-3 py-1.5 rounded-md
+                  text-gray-700 dark:text-gray-200 font-medium hover:text-indigo-600 dark:hover:text-indigo-400 transition"
+                >
+                  <Icon className="w-5 h-5" />
 
-        {/* Right: CTA and Mobile Button */}
-        <div className="flex items-center space-x-4">
-          <a 
-            href="#contact"
-            className="hidden sm:inline-flex text-xs px-3 py-1 bg-gray-700 text-white rounded-full hover:bg-gray-600 transition-colors duration-200 transform hover:scale-[1.02]"
-          >
-            Get In Touch
-          </a>
-          
-          {/* Mobile Menu Button */}
+                  <span className="text-sm">{name}</span>
+
+                  {/* Animated underline */}
+                  <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-indigo-500 group-hover:w-full transition-all duration-300 rounded-full" />
+                </button>
+              </Magnetic>
+            ))}
+
+            {/* Theme Switcher */}
+            <Magnetic>
+              <ThemeSwitcher />
+            </Magnetic>
+          </nav>
+
+          {/* Mobile Toggle */}
           <button
-            onClick={toggleMobileMenu}
-            className="lg:hidden text-gray-800 dark:text-gray-100 p-1"
-            aria-expanded={isMobileMenuOpen}
-            aria-label="Toggle navigation"
+            onClick={() => setIsMenuOpen(true)}
+            className="lg:hidden p-2 text-gray-900 dark:text-gray-200"
           >
-            {isMobileMenuOpen ? <IoClose className="w-6 h-6" /> : <IoMenu className="w-6 h-6" />}
+            <IoMenu className="w-7 h-7" />
           </button>
         </div>
-      </div>
+      </motion.header>
 
-      {/* Mobile Menu Content */}
-      <div 
-        className={`lg:hidden overflow-hidden transition-all duration-500 ease-in-out ${
-          isMobileMenuOpen ? 'max-h-96 opacity-100 py-4' : 'max-h-0 opacity-0'
-        } bg-white/90 dark:bg-gray-900/90 border-t border-gray-200 dark:border-gray-800`}
-      >
-        <nav className="flex flex-col space-y-2 px-6">
-          {navItems.map((item) => (
-            <div key={item.name}>
-                <Link 
-                    href={item.href} 
-                    className="block py-2 text-base font-medium text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
+      {/* Mobile Drawer */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <>
+            {/* Dim background */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40 bg-black/50 backdrop-blur"
+            />
+
+            {/* Drawer */}
+            <motion.div
+              ref={drawerRef}
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", stiffness: 260, damping: 25 }}
+              className="fixed top-0 right-0 z-50 h-full w-72 bg-white dark:bg-gray-900 
+                         p-6 shadow-2xl border-l border-gray-300/30 dark:border-gray-700/30 flex flex-col"
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setIsMenuOpen(false)}
+                className="self-end p-2 text-gray-700 dark:text-gray-300"
+              >
+                <IoClose className="w-7 h-7" />
+              </button>
+
+              <nav className="mt-6 flex flex-col gap-4">
+                {navItems.map(({ name, href, Icon }) => (
+                  <button
+                    key={name}
+                    onClick={scrollToSection(href)}
+                    className="flex items-center gap-4 py-2 text-lg text-gray-900 dark:text-gray-200 
+                               hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md px-3 transition"
+                  >
+                    <Icon className="w-6 h-6" />
+                    {name}
+                  </button>
+                ))}
+              </nav>
+
+              {/* Mobile Theme Switcher */}
+              <div className="mt-auto pt-6 border-t border-gray-200 dark:border-gray-800">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Theme</span>
+                  <ThemeSwitcher />
+                </div>
+
+                <a
+                  href="/resume.pdf"
+                  download
+                  className="block text-center mt-5 px-4 py-2 rounded-full bg-gray-900 text-white 
+                             dark:bg-white dark:text-gray-900 font-semibold"
                 >
-                    {item.name}
-                </Link>
-                {/* Mobile Dropdown items can be handled here if needed */}
-            </div>
-          ))}
-        </nav>
-      </div>
-      
-      {/* Required Tailwind Animation Keyframes in globals.css (Conceptual) */}
-      <style jsx global>{`
-        /* Add this to your globals.css or ensure it's loaded */
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fadeInUp {
-          animation: fadeInUp 0.3s ease-out forwards;
-        }
-      `}</style>
-    </header>
+                  Download Resume
+                </a>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

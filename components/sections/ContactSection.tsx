@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Head from "next/head";
 import { motion, Variants, useReducedMotion } from "framer-motion";
 import { JSX } from "react/jsx-runtime";
 
@@ -34,12 +35,52 @@ export default function ContactSection(): JSX.Element {
         },
       };
 
+  // Structured data for ContactPoint + Person
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: "Nirupam Pal",
+    url: "https://nirupampal.vercel.app",
+    sameAs: [
+      "https://www.linkedin.com/in/nirupam-pal-0916a721b/",
+      "https://github.com/nirupampal"
+    ],
+    contactPoint: [
+      {
+        "@type": "ContactPoint",
+        contactType: "business",
+        email: "nirupampaldev@gmail.com",
+        description: "Primary contact for freelance & contract opportunities"
+      }
+    ]
+  };
+
   return (
     <section
       id="contact"
       aria-label="Contact"
       className="w-full bg-gradient-to-b from-white via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-900 transition-colors duration-500"
     >
+      {/* Page-level Head is ideal for SEO; including relevant meta & structured data here for convenience. If you prefer server-side, move these tags to the page-level `head`. */}
+      <Head>
+        <title>Contact — Nirupam Pal — Lead Fullstack Developer</title>
+        <meta name="description" content="Contact Nirupam Pal for freelance, contract or full-time opportunities. Email: nirupampaldev@gmail.com — typically replies within 1–2 business days." />
+        <meta name="robots" content="index,follow" />
+
+        {/* Open Graph / Social preview */}
+        <meta property="og:title" content="Contact — Nirupam Pal" />
+        <meta property="og:description" content="Get in touch with Nirupam Pal — Lead Fullstack Developer. Reach out for projects, collaborations, or job opportunities." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://nirupampal.vercel.app#contact" />
+
+        {/* Twitter card */}
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="Contact — Nirupam Pal" />
+        <meta name="twitter:description" content="Get in touch with Nirupam Pal — Lead Fullstack Developer. Reach out for projects, collaborations, or job opportunities." />
+
+        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+      </Head>
+
       {/* Full-width container with horizontal padding */}
       <div className="w-full px-6">
         {/* Centered frame — still full-width on small screens, constrained on large screens */}
@@ -74,7 +115,7 @@ export default function ContactSection(): JSX.Element {
                       className="inline-flex items-center justify-center px-8 py-4 rounded-xl text-lg font-semibold shadow-md bg-black text-white dark:bg-white dark:text-black min-w-[200px] hover:scale-[1.02] transform transition-shadow duration-200"
                       whileHover={{ scale: 1.035 }}
                       whileTap={{ scale: 0.98 }}
-                      aria-label="Email"
+                      aria-label="Email Nirupam Pal"
                     >
                       Say Hello
                     </motion.a>

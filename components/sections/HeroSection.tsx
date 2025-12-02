@@ -5,7 +5,13 @@ import React from "react";
 import { JSX } from "react/jsx-runtime";
 import { motion, useReducedMotion, Variants, TargetAndTransition } from "framer-motion";
 
-export default function HeroSection(): JSX.Element {
+export default function HeroSection({
+  siteUrl = "https://nirupampal.vercel.app",
+  ogImage = "/og-hero.png",
+}: {
+  siteUrl?: string;
+  ogImage?: string;
+}): JSX.Element {
   const reduce = useReducedMotion();
 
   /* Text/container variants (staggered entrance) */
@@ -23,8 +29,7 @@ export default function HeroSection(): JSX.Element {
     show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
   };
 
-  /* Ball motion helpers (each ball has its own timing & path)
-     Return type is TargetAndTransition (what motion.animate expects) */
+  /* Ball motion helpers */
   const getBallAnimation = (i: number): TargetAndTransition | undefined => {
     if (reduce) return undefined;
 
@@ -47,7 +52,6 @@ export default function HeroSection(): JSX.Element {
         duration: p.dur,
         ease: "easeInOut",
         repeat: Infinity,
-        // repeatType must be a valid RepeatType literal — use `"mirror"` typed as const
         repeatType: "mirror" as const,
       },
     };
@@ -63,6 +67,31 @@ export default function HeroSection(): JSX.Element {
         transition: { duration: 10, ease: "easeInOut", repeat: Infinity, repeatType: "loop" as const },
       };
 
+  /* Structured data (Person + WebSite) — improves rich results */
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Person",
+        name: "Nirupam Pal",
+        url: siteUrl,
+        sameAs: ["https://github.com/nirupampal", "https://www.linkedin.com/in/nirupam-pal-0916a721b/"],
+        jobTitle: "Fullstack Developer",
+        description: "Fullstack Developer specializing in modern UI and scalable Node/Next backends.",
+      },
+      {
+        "@type": "WebSite",
+        name: "Nirupam Pal — Portfolio",
+        url: siteUrl,
+        potentialAction: {
+          "@type": "SearchAction",
+          target: `${siteUrl}/?s={search_term_string}`,
+          "query-input": "required name=search_term_string",
+        },
+      },
+    ],
+  };
+
   return (
     <>
       <Head>
@@ -73,28 +102,33 @@ export default function HeroSection(): JSX.Element {
         />
         <meta name="robots" content="index, follow" />
         <meta name="author" content="Nirupam Pal" />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Person",
-              name: "Nirupam Pal",
-              url: "https://nirupampal.vercel.app",
-              sameAs: [
-                "https://github.com/nirupampal",
-                "https://www.linkedin.com/in/nirupam-pal-0916a721b/",
-              ],
-              jobTitle: "Fullstack Developer",
-              description: "Fullstack Developer specializing in modern UI and scalable Node/Next backends.",
-            }),
-          }}
+
+        {/* Open Graph */}
+        <meta property="og:title" content="Nirupam Pal — Fullstack Developer" />
+        <meta
+          property="og:description"
+          content="Fullstack developer building modern UIs and scalable Node/Next backends. Explore portfolio projects and contact information."
         />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={`${siteUrl}#home`} />
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:site_name" content="Nirupam Pal" />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:creator" content="@nirupampal" />
+        <meta name="twitter:title" content="Nirupam Pal — Fullstack Developer" />
+        <meta name="twitter:description" content="Fullstack developer building modern UIs and scalable Node/Next backends." />
+        <meta name="twitter:image" content={ogImage} />
+
+        <link rel="canonical" href={`${siteUrl}#home`} />
+
+        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Head>
 
       <section
         id="home"
-        className="relative min-h-screen flex flex-col justify-center items-center text-center pt-12 overflow-hidden bg-white dark:bg-black/95 transition-colors duration-500 border-b dark:border-gray-800"
+        className="relative pb-6 min-h-screen flex flex-col justify-center items-center text-center pt-12 overflow-hidden bg-white dark:bg-black/95 transition-colors duration-500 border-b dark:border-gray-800"
         aria-label="Hero section — introduction and primary call to action"
       >
         {/* Decorative animated background: transparent infinite balls (circles) + moving triangle */}
@@ -136,6 +170,7 @@ export default function HeroSection(): JSX.Element {
                 r="90"
                 style={{ opacity: 0.44, transformOrigin: "center" }}
                 animate={getBallAnimation(0)}
+                aria-hidden
               />
               <motion.circle
                 className="ball"
@@ -144,6 +179,7 @@ export default function HeroSection(): JSX.Element {
                 r="60"
                 style={{ opacity: 0.44, transformOrigin: "center" }}
                 animate={getBallAnimation(1)}
+                aria-hidden
               />
               <motion.circle
                 className="ball"
@@ -152,6 +188,7 @@ export default function HeroSection(): JSX.Element {
                 r="120"
                 style={{ opacity: 0.44, transformOrigin: "center" }}
                 animate={getBallAnimation(2)}
+                aria-hidden
               />
               <motion.circle
                 className="ball"
@@ -160,6 +197,7 @@ export default function HeroSection(): JSX.Element {
                 r="70"
                 style={{ opacity: 0.44, transformOrigin: "center" }}
                 animate={getBallAnimation(3)}
+                aria-hidden
               />
               <motion.circle
                 className="ball"
@@ -168,6 +206,7 @@ export default function HeroSection(): JSX.Element {
                 r="110"
                 style={{ opacity: 0.44, transformOrigin: "center" }}
                 animate={getBallAnimation(4)}
+                aria-hidden
               />
             </g>
 
@@ -180,6 +219,7 @@ export default function HeroSection(): JSX.Element {
                 r="140"
                 style={{ opacity: 0.44, transformOrigin: "center" }}
                 animate={getBallAnimation(5)}
+                aria-hidden
               />
               <motion.circle
                 className="ball"
@@ -188,6 +228,7 @@ export default function HeroSection(): JSX.Element {
                 r="90"
                 style={{ opacity: 0.44, transformOrigin: "center" }}
                 animate={getBallAnimation(6)}
+                aria-hidden
               />
               <motion.circle
                 className="ball"
@@ -196,6 +237,7 @@ export default function HeroSection(): JSX.Element {
                 r="100"
                 style={{ opacity: 0.44, transformOrigin: "center" }}
                 animate={getBallAnimation(7)}
+                aria-hidden
               />
             </g>
 
@@ -207,11 +249,12 @@ export default function HeroSection(): JSX.Element {
                 transform="translate(1100 80)"
                 animate={triangleAnim}
                 style={{ transformOrigin: "70px 40px" }}
+                aria-hidden
               />
             </g>
 
             {/* Decorative grid lines (very subtle) */}
-            <g className="grid-lines" stroke="currentColor" strokeOpacity="0.02">
+            <g className="grid-lines" stroke="currentColor" strokeOpacity="0.02" aria-hidden>
               <line x1="0" y1="150" x2="1600" y2="150" />
               <line x1="0" y1="450" x2="1600" y2="450" />
               <line x1="0" y1="750" x2="1600" y2="750" />
