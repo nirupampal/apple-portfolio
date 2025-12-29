@@ -84,60 +84,67 @@ export default function Header() {
         />
       </Head>
 
-      {/* Header */}
+      {/* Left Sidebar Header */}
       <motion.header
         animate={{
-          y: showHeader ? 0 : -80,
+          x: showHeader ? 0 : -80,
           opacity: showHeader ? 1 : 0,
         }}
         transition={{ duration: 0.35, ease: "easeOut" }}
-        className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-white/60 dark:bg-black/40 border-b border-gray-200/40 dark:border-gray-700/40 shadow-md"
+        className="fixed left-0 top-0 bottom-0 z-50 w-20 backdrop-blur-xl bg-white/50 dark:bg-black/30 border-r border-gray-200/40 dark:border-gray-700/40 shadow-md flex flex-col items-center py-6"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 md:h-16 flex items-center justify-between">
+        <div className="flex flex-col items-center justify-between h-full w-full">
 
-          {/* Logo */}
+          {/* Logo - Top */}
           <Magnetic>
             <Link
               href="/"
-              className="text-lg md:text-xl font-bold tracking-tight 
-              text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition"
+              className="flex items-center justify-center w-12 h-12 md:w-14 md:h-14 rounded-lg bg-linear-to-br from-indigo-600 to-indigo-400 
+              text-white font-bold text-xl md:text-2xl hover:shadow-lg hover:from-indigo-700 hover:to-indigo-500 transition-all duration-300"
+              title="Nirupam Pal"
             >
-              Nirupam Pal
+              N
             </Link>
           </Magnetic>
 
-          {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center space-x-6">
+          {/* Desktop Nav - Vertical Middle */}
+          <nav className="hidden lg:flex flex-col items-center space-y-4 bg-white/40 dark:bg-black/20 backdrop-blur-md 
+          rounded-2xl px-3 py-8 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
             {navItems.map(({ name, href, Icon }) => (
               <Magnetic key={name}>
                 <button
                   onClick={scrollToSection(href)}
-                  className="group relative inline-flex items-center gap-2 px-3 py-1.5 rounded-md
-                  text-gray-700 dark:text-gray-200 font-medium hover:text-indigo-600 dark:hover:text-indigo-400 transition"
+                  title={name}
+                  className="group relative inline-flex items-center justify-center w-10 h-10 rounded-lg
+                  text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 
+                  hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300"
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-5 h-5 md:w-6 md:h-6" />
 
-                  <span className="text-sm">{name}</span>
-
-                  {/* Animated underline */}
-                  <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-indigo-500 group-hover:w-full transition-all duration-300 rounded-full" />
+                  {/* Tooltip on hover - Right side */}
+                  <span className="absolute left-full ml-4 px-3 py-1 text-xs font-medium text-white bg-gray-900 dark:bg-gray-700 rounded 
+                  opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap pointer-events-none">
+                    {name}
+                  </span>
                 </button>
               </Magnetic>
             ))}
+          </nav>
 
-            {/* Theme Switcher */}
+          {/* Theme Switcher & Mobile Toggle - Bottom */}
+          <div className="flex flex-col items-center space-y-4">
             <Magnetic>
               <ThemeSwitcher />
             </Magnetic>
-          </nav>
 
-          {/* Mobile Toggle */}
-          <button
-            onClick={() => setIsMenuOpen(true)}
-            className="lg:hidden p-2 text-gray-900 dark:text-gray-200"
-          >
-            <IoMenu className="w-7 h-7" />
-          </button>
+            {/* Mobile Toggle */}
+            <button
+              onClick={() => setIsMenuOpen(true)}
+              className="lg:hidden p-2 text-gray-900 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition"
+            >
+              <IoMenu className="w-6 h-6" />
+            </button>
+          </div>
         </div>
       </motion.header>
 

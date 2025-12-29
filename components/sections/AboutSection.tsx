@@ -197,7 +197,7 @@ export default function AboutSection({ resumeUrl = "/resume.pdf" }: { resumeUrl?
               <ol className="mt-4 space-y-5">
                 {experiences.map((exp) => (
                   <li key={exp.title} className="flex gap-4">
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0">
                       <div className="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-900 grid place-items-center text-indigo-600 dark:text-indigo-200">
                         <exp.icon className="w-5 h-5" />
                       </div>

@@ -10,14 +10,13 @@ import SkillsSection from '@/components/sections/SkillsSection';
 export default function Home() {
   return (
     <>
-      {/* The Header is fixed, so it remains outside the main content flow */}
+      {/* The Header is fixed on the left, so it remains outside the main content flow */}
       <Header /> 
       
-      <main className="pt-16"> {/* Add padding top equal to the header height */}
+      <main className=""> {/* Sidebar is absolutely positioned, no margin needed */}
         <HeroSection />
         <WorksSection />
-                <AboutSection />
-
+        <AboutSection />
         <SkillsSection/>
         <ContactSection />
       </main>

@@ -114,13 +114,25 @@ export default function Footer() {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.8, ease: "easeOut" }}
-            className="flex justify-center gap-6 mt-6 text-xs"
+            className="flex justify-center gap-6 mt-6 text-xs flex-wrap"
           >
+            <a
+              href="#home"
+              className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+            >
+              Home
+            </a>
             <a
               href="#about"
               className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
             >
               About Me
+            </a>
+            <a
+              href="#skills"
+              className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+            >
+              Skills
             </a>
             <a
               href="#works"

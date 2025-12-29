@@ -81,7 +81,7 @@ const ProjectCard: React.FC<Project> = ({ title, description, image, link, type 
         />
 
         {/* Soft overlay to emulate Apple's tone */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/24 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/24 via-transparent to-transparent pointer-events-none" />
 
         {/* Badge */}
         <span className="absolute top-4 right-4 inline-flex items-center gap-2 rounded-full bg-black/70 text-white text-xs font-medium px-3 py-1 backdrop-blur-sm">
