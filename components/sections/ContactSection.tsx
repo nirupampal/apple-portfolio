@@ -1,176 +1,197 @@
 "use client";
 
 import React from "react";
-import Head from "next/head";
-import { motion, Variants, useReducedMotion } from "framer-motion";
-import { JSX } from "react/jsx-runtime";
+import { motion } from "framer-motion";
 
-export default function ContactSection(): JSX.Element {
-  const reduce = useReducedMotion();
+const contactMethods = [
+  {
+    id: "01",
+    label: "Email",
+    value: "nirupampaldev@gmail.com",
+    href: "mailto:nirupampaldev@gmail.com",
+    description: "For project inquiries & collaborations",
+  },
+  {
+    id: "02",
+    label: "LinkedIn",
+    value: "Nirupam Pal",
+    href: "https://www.linkedin.com/in/nirupam-pal-0916a721b/",
+    description: "Professional network & updates",
+  },
+  {
+    id: "03",
+    label: "GitHub",
+    value: "@nirupampal",
+    href: "https://github.com/nirupampal",
+    description: "Open source & code samples",
+  },
+];
 
-  const container: Variants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { staggerChildren: 0.08, duration: 0.6 },
-    },
-  };
-
-  const fadeUp: Variants = {
-    hidden: { opacity: 0, y: 8 },
-    visible: { opacity: 1, y: 0, transition: { ease: "easeOut", duration: 0.6 } },
-  };
-
-  // Accent animation (typed properly)
-  const accentAnimation = reduce
-    ? {}
-    : {
-        opacity: [0, 0.08, 0],
-        transition: {
-          duration: 1.6,
-          repeat: Infinity,
-          // repeatType literal typed correctly
-          repeatType: "reverse" as const,
-        },
-      };
-
-  // Structured data for ContactPoint + Person
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    name: "Nirupam Pal",
-    url: "https://nirupampal.vercel.app",
-    sameAs: [
-      "https://www.linkedin.com/in/nirupam-pal-0916a721b/",
-      "https://github.com/nirupampal"
-    ],
-    contactPoint: [
-      {
-        "@type": "ContactPoint",
-        contactType: "business",
-        email: "nirupampaldev@gmail.com",
-        description: "Primary contact for freelance & contract opportunities"
-      }
-    ]
-  };
-
+export default function ContactSection() {
   return (
     <section
       id="contact"
-      aria-label="Contact"
-      className="w-full bg-gradient-to-b from-white via-white to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-900 transition-colors duration-500"
+      className="relative min-h-screen bg-neutral-950 text-neutral-50 overflow-hidden"
     >
-      {/* Page-level Head is ideal for SEO; including relevant meta & structured data here for convenience. If you prefer server-side, move these tags to the page-level `head`. */}
-      <Head>
-        <title>Contact — Nirupam Pal — Lead Fullstack Developer</title>
-        <meta name="description" content="Contact Nirupam Pal for freelance, contract or full-time opportunities. Email: nirupampaldev@gmail.com — typically replies within 1–2 business days." />
-        <meta name="robots" content="index,follow" />
+      {/* Subtle grid background */}
+      <div className="absolute inset-0 opacity-[0.03]">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+            backgroundSize: "60px 60px",
+          }}
+        />
+      </div>
 
-        {/* Open Graph / Social preview */}
-        <meta property="og:title" content="Contact — Nirupam Pal" />
-        <meta property="og:description" content="Get in touch with Nirupam Pal — Lead Fullstack Developer. Reach out for projects, collaborations, or job opportunities." />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://nirupampal.vercel.app#contact" />
+      {/* Corner accents */}
+      <div className="absolute top-8 left-8 w-16 h-16 border-l border-t border-neutral-800" />
+      <div className="absolute top-8 right-8 w-16 h-16 border-r border-t border-neutral-800" />
+      <div className="absolute bottom-8 left-8 w-16 h-16 border-l border-b border-neutral-800" />
+      <div className="absolute bottom-8 right-8 w-16 h-16 border-r border-b border-neutral-800" />
 
-        {/* Twitter card */}
-        <meta name="twitter:card" content="summary" />
-        <meta name="twitter:title" content="Contact — Nirupam Pal" />
-        <meta name="twitter:description" content="Get in touch with Nirupam Pal — Lead Fullstack Developer. Reach out for projects, collaborations, or job opportunities." />
-
-        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
-      </Head>
-
-      {/* Full-width container with horizontal padding */}
-      <div className="w-full px-6">
-        {/* Centered frame — still full-width on small screens, constrained on large screens */}
+      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 py-32">
+        {/* Section header */}
         <motion.div
-          variants={container}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.20 }}
-          className="relative mx-auto w-full max-w-6xl"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="mb-20"
         >
-          {/* The visual card (fills available width but keeps padding & rounded corners) */}
-          <div className="w-full">
+          <span className="text-xs tracking-[0.4em] text-neutral-500 uppercase">
+            05 — Contact
+          </span>
+          <div className="mt-4 flex items-end gap-8">
+            <h2 className="text-5xl md:text-7xl font-extralight tracking-tight">
+              Let's Talk
+            </h2>
             <motion.div
-              className="w-full bg-white/60 dark:bg-gray-900/60 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-3xl shadow-2xl p-8 md:p-12 lg:p-16"
-              variants={fadeUp}
-            >
-              <div className="flex flex-col lg:flex-row items-center gap-10">
-                <motion.div variants={fadeUp} className="flex-1 text-center lg:text-left">
-                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-gray-900 dark:text-white">
-                    Let’s create something remarkable.
-                  </h2>
-
-                  <p className="mt-4 text-base md:text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto lg:mx-0 font-light">
-                    I design and build delightful digital experiences. If you have a project, collaboration or opportunity,
-                    I’d love to hear about it.
-                  </p>
-
-                  <div className="mt-8 flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 justify-center lg:justify-start">
-                    <motion.a
-                      variants={fadeUp}
-                      href="mailto:nirupampaldev@gmail.com"
-                      className="inline-flex items-center justify-center px-8 py-4 rounded-xl text-lg font-semibold shadow-md bg-black text-white dark:bg-white dark:text-black min-w-[200px] hover:scale-[1.02] transform transition-shadow duration-200"
-                      whileHover={{ scale: 1.035 }}
-                      whileTap={{ scale: 0.98 }}
-                      aria-label="Email Nirupam Pal"
-                    >
-                      Say Hello
-                    </motion.a>
-
-                    <motion.a
-                      variants={fadeUp}
-                      href="#works"
-                      className="inline-flex items-center px-6 py-3 rounded-xl text-base font-medium text-gray-700 dark:text-gray-300 border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all"
-                      whileHover={{ y: -3 }}
-                    >
-                      View portfolio
-                    </motion.a>
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  variants={fadeUp}
-                  className="w-full sm:w-96 md:w-[420px] bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 border border-gray-100 dark:border-gray-800 rounded-2xl p-6"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-xl font-semibold text-gray-700 dark:text-gray-200">
-                      ✉️
-                    </div>
-
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Prefer to message?</p>
-                      <p className="mt-1 font-medium text-gray-900 dark:text-white">nirupampaldev@gmail.com</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-6 text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                    <p>
-                      Typical response time: <span className="font-medium">1–2 business days</span>.
-                    </p>
-
-                    <p className="mt-3">Include a short description of your project and links (Figma, brief, repo) if you have them.</p>
-                  </div>
-                </motion.div>
-              </div>
-
-              {/* subtle floating accents similar to Apple aesthetic (positioned relative to the card) */}
-              <motion.div
-                aria-hidden
-                initial={reduce ? undefined : { opacity: 0 }}
-                animate={accentAnimation as any}
-                className="pointer-events-none absolute left-1/2 transform -translate-x-1/2 translate-y-8"
-                style={{ width: "420px", height: 120 }}
-              />
-            </motion.div>
+              initial={{ width: 0 }}
+              whileInView={{ width: "100%" }}
+              viewport={{ once: true }}
+              transition={{ duration: 1, delay: 0.3 }}
+              className="hidden md:block flex-1 h-px bg-neutral-800 mb-4"
+            />
           </div>
+        </motion.div>
 
-          {/* Bottom helper text */}
-          <p className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
-            Prefer other ways to connect? I’m on LinkedIn and GitHub.
-          </p>
+        {/* Main content grid */}
+        <div className="grid lg:grid-cols-2 gap-16 lg:gap-24">
+          {/* Left column - CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="space-y-8"
+          >
+            <p className="text-xl md:text-2xl font-light text-neutral-400 leading-relaxed max-w-lg">
+              Have a project in mind? I'm always open to discussing new
+              opportunities, creative ideas, or potential collaborations.
+            </p>
+
+            <motion.a
+              href="mailto:nirupampaldev@gmail.com"
+              className="group inline-flex items-center gap-4 text-lg font-light"
+              whileHover={{ x: 10 }}
+              transition={{ duration: 0.3 }}
+            >
+              <span className="text-neutral-50">Start a conversation</span>
+              <span className="w-12 h-px bg-neutral-50 group-hover:w-20 transition-all duration-300" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1}
+                  d="M17 8l4 4m0 0l-4 4m4-4H3"
+                />
+              </svg>
+            </motion.a>
+
+            {/* Availability indicator */}
+            <div className="pt-8 border-t border-neutral-800">
+              <div className="flex items-center gap-3">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+                </span>
+                <span className="text-sm text-neutral-400">
+                  Currently available for new projects
+                </span>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Right column - Contact methods */}
+          <div className="space-y-0">
+            {contactMethods.map((method, index) => (
+              <motion.a
+                key={method.id}
+                href={method.href}
+                target={method.href.startsWith("http") ? "_blank" : undefined}
+                rel={method.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.1 * index }}
+                className="group block py-8 border-b border-neutral-800 first:border-t hover:bg-neutral-900/50 -mx-4 px-4 transition-colors duration-300"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-6">
+                    <span className="text-xs text-neutral-600 font-mono mt-1">
+                      {method.id}
+                    </span>
+                    <div>
+                      <span className="text-xs tracking-[0.3em] text-neutral-500 uppercase block mb-2">
+                        {method.label}
+                      </span>
+                      <span className="text-xl font-light text-neutral-50 group-hover:text-white transition-colors">
+                        {method.value}
+                      </span>
+                      <p className="text-sm text-neutral-600 mt-1">
+                        {method.description}
+                      </p>
+                    </div>
+                  </div>
+                  <svg
+                    className="w-5 h-5 text-neutral-600 group-hover:text-neutral-400 group-hover:translate-x-1 group-hover:-translate-y-1 transition-all duration-300"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1}
+                      d="M7 17L17 7M17 7H7M17 7v10"
+                    />
+                  </svg>
+                </div>
+              </motion.a>
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom info bar */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.5 }}
+          className="mt-32 pt-8 border-t border-neutral-800"
+        >
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-neutral-600">
+            <span>Based in Kolkata, India</span>
+            <span>© {new Date().getFullYear()} Nirupam Pal</span>
+            <span>Open to Remote Work</span>
+          </div>
         </motion.div>
       </div>
     </section>

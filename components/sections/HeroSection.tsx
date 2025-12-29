@@ -1,9 +1,9 @@
 "use client";
 import Head from "next/head";
 import Link from "next/link";
-import React from "react";
+import React, { useRef } from "react";
 import { JSX } from "react/jsx-runtime";
-import { motion, useReducedMotion, Variants, TargetAndTransition } from "framer-motion";
+import { motion, useReducedMotion, Variants, useScroll, useTransform } from "framer-motion";
 
 export default function HeroSection({
   siteUrl = "https://nirupampal.vercel.app",
@@ -13,59 +13,37 @@ export default function HeroSection({
   ogImage?: string;
 }): JSX.Element {
   const reduce = useReducedMotion();
+  const containerRef = useRef<HTMLElement>(null);
+  
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"]
+  });
+  
+  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.95]);
+  const y = useTransform(scrollYProgress, [0, 0.5], [0, 100]);
 
   /* Text/container variants (staggered entrance) */
   const container: Variants = {
     hidden: {},
     show: {
       transition: {
-        staggerChildren: 0.12,
-        delayChildren: 0.08,
+        staggerChildren: 0.08,
+        delayChildren: 0.1,
       },
     },
   };
+  
   const fadeUp: Variants = {
-    hidden: { opacity: 0, y: 12 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+    hidden: { opacity: 0, y: 30 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.25, 0.1, 0.25, 1] } },
   };
 
-  /* Ball motion helpers */
-  const getBallAnimation = (i: number): TargetAndTransition | undefined => {
-    if (reduce) return undefined;
-
-    const patterns = [
-      { x: [0, 24, 48, 24, 0], y: [0, -30, 0, 30, 0], dur: 10 },
-      { x: [0, -18, -36, -18, 0], y: [0, 22, 0, -18, 0], dur: 11 },
-      { x: [0, 30, -12, 0], y: [0, -50, 12, 0], dur: 12 },
-      { x: [0, 20, 40, 20, 0], y: [0, -24, 0, 18, 0], dur: 9.5 },
-      { x: [0, -36, -18, -8, 0], y: [0, 30, -8, 0], dur: 10.5 },
-      { x: [0, 48, 16, -10, 0], y: [0, -40, 8, 0], dur: 13 },
-      { x: [0, -24, 24, 12, 0], y: [0, 30, -20, 0], dur: 12 },
-      { x: [0, -56, -28, -12, 0], y: [0, 18, -12, 0], dur: 14 },
-    ];
-    const p = patterns[i % patterns.length];
-
-    return {
-      x: p.x,
-      y: p.y,
-      transition: {
-        duration: p.dur,
-        ease: "easeInOut",
-        repeat: Infinity,
-        repeatType: "mirror" as const,
-      },
-    };
+  const lineReveal: Variants = {
+    hidden: { scaleX: 0 },
+    show: { scaleX: 1, transition: { duration: 1, ease: [0.25, 0.1, 0.25, 1], delay: 0.3 } },
   };
-
-  /* Triangle motion */
-  const triangleAnim: TargetAndTransition | {} = reduce
-    ? {}
-    : {
-        x: [-0, -120, -240, -80, 0],
-        y: [0, 80, -60, -160, 0],
-        rotate: [0, 18, 36, 18, 0],
-        transition: { duration: 10, ease: "easeInOut", repeat: Infinity, repeatType: "loop" as const },
-      };
 
   /* Structured data (Person + WebSite) — improves rich results */
   const jsonLd = {
@@ -127,226 +105,140 @@ export default function HeroSection({
       </Head>
 
       <section
+        ref={containerRef}
         id="home"
-        className="relative pb-6 min-h-screen flex flex-col justify-center items-center text-center pt-12 overflow-hidden bg-white dark:bg-black/95 transition-colors duration-500 border-b dark:border-gray-800"
+        className="relative min-h-screen flex flex-col justify-center items-center overflow-hidden bg-neutral-50 dark:bg-neutral-950 transition-colors duration-500"
         aria-label="Hero section — introduction and primary call to action"
       >
-        {/* Decorative animated background: transparent infinite balls (circles) + moving triangle */}
-        <div aria-hidden="true" className="absolute inset-0 pointer-events-none overflow-hidden">
-          <motion.svg
-            className="absolute inset-0 w-full h-full"
-            viewBox="0 0 1600 900"
-            preserveAspectRatio="xMidYMid slice"
-            xmlns="http://www.w3.org/2000/svg"
-            role="img"
-            initial={reduce ? undefined : { opacity: 0.98 }}
-            animate={reduce ? undefined : { opacity: [0.98, 1, 0.98], transition: { duration: 6, repeat: Infinity } }}
-          >
-            <defs>
-              <linearGradient id="g1" x1="0" x2="1">
-                <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.36" />
-                <stop offset="100%" stopColor="#7c3aed" stopOpacity="0.28" />
-              </linearGradient>
-              <linearGradient id="g2" x1="0" x2="1">
-                <stop offset="0%" stopColor="#34d399" stopOpacity="0.34" />
-                <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.26" />
-              </linearGradient>
-
-              <filter id="softBlur" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="8" result="b" />
-                <feMerge>
-                  <feMergeNode in="b" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            </defs>
-
-            {/* Balls group 1 */}
-            <g className="balls-group" fill="url(#g1)">
-              <motion.circle
-                className="ball"
-                cx="140"
-                cy="120"
-                r="90"
-                style={{ opacity: 0.44, transformOrigin: "center" }}
-                animate={getBallAnimation(0)}
-                aria-hidden
-              />
-              <motion.circle
-                className="ball"
-                cx="420"
-                cy="200"
-                r="60"
-                style={{ opacity: 0.44, transformOrigin: "center" }}
-                animate={getBallAnimation(1)}
-                aria-hidden
-              />
-              <motion.circle
-                className="ball"
-                cx="980"
-                cy="80"
-                r="120"
-                style={{ opacity: 0.44, transformOrigin: "center" }}
-                animate={getBallAnimation(2)}
-                aria-hidden
-              />
-              <motion.circle
-                className="ball"
-                cx="1260"
-                cy="300"
-                r="70"
-                style={{ opacity: 0.44, transformOrigin: "center" }}
-                animate={getBallAnimation(3)}
-                aria-hidden
-              />
-              <motion.circle
-                className="ball"
-                cx="300"
-                cy="520"
-                r="110"
-                style={{ opacity: 0.44, transformOrigin: "center" }}
-                animate={getBallAnimation(4)}
-                aria-hidden
-              />
-            </g>
-
-            {/* Balls group 2 */}
-            <g className="balls-group-2" fill="url(#g2)">
-              <motion.circle
-                className="ball"
-                cx="820"
-                cy="420"
-                r="140"
-                style={{ opacity: 0.44, transformOrigin: "center" }}
-                animate={getBallAnimation(5)}
-                aria-hidden
-              />
-              <motion.circle
-                className="ball"
-                cx="1200"
-                cy="620"
-                r="90"
-                style={{ opacity: 0.44, transformOrigin: "center" }}
-                animate={getBallAnimation(6)}
-                aria-hidden
-              />
-              <motion.circle
-                className="ball"
-                cx="520"
-                cy="740"
-                r="100"
-                style={{ opacity: 0.44, transformOrigin: "center" }}
-                animate={getBallAnimation(7)}
-                aria-hidden
-              />
-            </g>
-
-            {/* Moving triangle (polygon) */}
-            <g className="triangle-group" fill="#ffffff" opacity="0.08">
-              <motion.polygon
-                className="moving-triangle"
-                points="0,0 140,0 70,120"
-                transform="translate(1100 80)"
-                animate={triangleAnim}
-                style={{ transformOrigin: "70px 40px" }}
-                aria-hidden
-              />
-            </g>
-
-            {/* Decorative grid lines (very subtle) */}
-            <g className="grid-lines" stroke="currentColor" strokeOpacity="0.02" aria-hidden>
-              <line x1="0" y1="150" x2="1600" y2="150" />
-              <line x1="0" y1="450" x2="1600" y2="450" />
-              <line x1="0" y1="750" x2="1600" y2="750" />
-            </g>
-          </motion.svg>
+        {/* Minimal grid background */}
+        <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
+          {/* Horizontal lines */}
+          <div className="absolute inset-0 flex flex-col justify-between py-20 opacity-[0.03] dark:opacity-[0.05]">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="w-full h-px bg-neutral-900 dark:bg-neutral-100" />
+            ))}
+          </div>
+          {/* Vertical lines */}
+          <div className="absolute inset-0 flex justify-between px-20 opacity-[0.03] dark:opacity-[0.05]">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-full w-px bg-neutral-900 dark:bg-neutral-100" />
+            ))}
+          </div>
+          {/* Center crosshair accent */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 opacity-[0.02]">
+            <div className="absolute top-1/2 left-0 w-full h-px bg-neutral-900 dark:bg-neutral-100" />
+            <div className="absolute top-0 left-1/2 w-px h-full bg-neutral-900 dark:bg-neutral-100" />
+          </div>
+          {/* Subtle radial gradient */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(250,250,250,0.8)_70%)] dark:bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(10,10,10,0.8)_70%)]" />
         </div>
 
+        {/* Corner accents */}
+        <div className="absolute top-8 left-8 w-12 h-12 border-l border-t border-neutral-300 dark:border-neutral-700 opacity-60" />
+        <div className="absolute top-8 right-8 w-12 h-12 border-r border-t border-neutral-300 dark:border-neutral-700 opacity-60" />
+        <div className="absolute bottom-8 left-8 w-12 h-12 border-l border-b border-neutral-300 dark:border-neutral-700 opacity-60" />
+        <div className="absolute bottom-8 right-8 w-12 h-12 border-r border-b border-neutral-300 dark:border-neutral-700 opacity-60" />
+
         {/* Content container (motion) */}
-        <motion.div className="z-10 px-6 max-w-5xl" variants={container} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }}>
-          <motion.p className="text-xl md:text-2xl text-blue-600 dark:text-blue-400 font-medium tracking-wide mb-4" variants={fadeUp}>
-            Introducing <span className="font-semibold">Nirupam Pal</span>.
-          </motion.p>
+        <motion.div 
+          className="z-10 px-6 max-w-5xl"
+          style={reduce ? {} : { opacity, scale, y }}
+        >
+          <motion.div
+            variants={container} 
+            initial="hidden" 
+            whileInView="show" 
+            viewport={{ once: true, amount: 0.2 }}
+            className="flex flex-col items-center text-center"
+          >
+            {/* Eyebrow text */}
+            <motion.div variants={fadeUp} className="mb-8">
+              <span className="text-xs font-light tracking-[0.4em] text-neutral-500 dark:text-neutral-400 uppercase">
+                Fullstack Developer
+              </span>
+            </motion.div>
 
-          <motion.h1 className="text-4xl md:text-6xl lg:text-8xl font-extrabold tracking-tighter text-gray-900 dark:text-white transition-colors duration-500 leading-tight" variants={fadeUp}>
-            Crafting Digital Products That Define Experience.
-          </motion.h1>
-
-          <motion.p className="mt-6 md:mt-8 text-base md:text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto font-light" variants={fadeUp}>
-            I'm a Fullstack Developer focusing on <strong>modern UIs</strong> and <strong>scalable backend solutions</strong> with Next.js &amp; Node.js. I design delightful interfaces,
-            ship reliable APIs, and optimize performance for real-world scale.
-          </motion.p>
-
-          <motion.div className="mt-8 flex justify-center space-x-4" variants={fadeUp}>
-            <Link
-              href="#works"
-              className="inline-flex items-center space-x-2 px-6 py-3 bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 text-lg font-medium rounded-full transition-all duration-300 transform hover:scale-[1.03] shadow-xl hover:shadow-2xl"
-              aria-label="Explore my work — portfolio projects"
+            {/* Main heading */}
+            <motion.h1 
+              variants={fadeUp}
+              className="text-5xl md:text-7xl lg:text-8xl font-extralight tracking-tight text-neutral-900 dark:text-neutral-100 leading-[0.95] mb-6"
             >
-              <span>Explore My Work</span>
-            </Link>
+              <span className="block">Nirupam</span>
+              <span className="block font-light">Pal</span>
+            </motion.h1>
 
-            <Link
-              href="#contact"
-              className="inline-flex items-center px-6 py-3 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 text-lg font-medium rounded-full transition-all duration-300 hover:shadow-md"
-              aria-label="Contact — get in touch with Nirupam Pal"
+            {/* Divider line */}
+            <motion.div 
+              variants={lineReveal}
+              className="w-16 h-px bg-neutral-300 dark:bg-neutral-700 mb-8 origin-left"
+            />
+
+            {/* Subheading */}
+            <motion.p 
+              variants={fadeUp}
+              className="text-lg md:text-xl text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto font-light leading-relaxed mb-12"
             >
-              Contact
-            </Link>
+              Crafting refined digital experiences through{" "}
+              <span className="text-neutral-900 dark:text-neutral-100">modern interfaces</span>{" "}
+              and{" "}
+              <span className="text-neutral-900 dark:text-neutral-100">scalable architecture</span>.
+            </motion.p>
+
+            {/* CTA Buttons */}
+            <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center gap-4">
+              <Link
+                href="#works"
+                className="group relative inline-flex items-center justify-center px-8 py-4 text-sm font-light tracking-widest uppercase bg-neutral-900 text-neutral-100 dark:bg-neutral-100 dark:text-neutral-900 transition-all duration-500 hover:tracking-[0.2em]"
+                aria-label="Explore my work — portfolio projects"
+              >
+                <span className="relative z-10">View Work</span>
+                <div className="absolute inset-0 bg-neutral-800 dark:bg-neutral-200 scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+              </Link>
+
+              <Link
+                href="#contact"
+                className="group inline-flex items-center justify-center px-8 py-4 text-sm font-light tracking-widest uppercase text-neutral-600 dark:text-neutral-400 border border-neutral-300 dark:border-neutral-700 transition-all duration-500 hover:text-neutral-900 dark:hover:text-neutral-100 hover:border-neutral-900 dark:hover:border-neutral-100"
+                aria-label="Contact — get in touch with Nirupam Pal"
+              >
+                Get in Touch
+              </Link>
+            </motion.div>
           </motion.div>
-
-          <p className="sr-only">
-            Nirupam Pal is a fullstack developer with experience building user-centric web applications using modern
-            JavaScript frameworks. Services include frontend development, backend APIs, database design, performance
-            optimization, and deployment. Available for remote and on-site roles, open to opportunities in Kolkata and
-            beyond.
-          </p>
         </motion.div>
 
-        {/* Inline styles (keep fallback styles & accessibility) */}
-        <style jsx global>{`
-          /* keep fallback fade class for non-framer usage (harmless) */
-          .animate-fadeInUp {
-            animation: fadeInUp 700ms cubic-bezier(.2,.9,.2,1) both;
-          }
+        {/* Bottom info bar */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1, duration: 0.8 }}
+          className="absolute bottom-8 left-0 right-0 flex justify-center items-center gap-8 text-[10px] tracking-[0.3em] text-neutral-400 dark:text-neutral-600 uppercase"
+        >
+          <span>Based in India</span>
+          <div className="w-1 h-1 rounded-full bg-neutral-400 dark:bg-neutral-600" />
+          <span>Available for Work</span>
+        </motion.div>
 
-          @keyframes fadeInUp {
-            from { transform: translateY(10px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-          }
+        {/* Scroll indicator */}
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.2, duration: 0.8 }}
+          className="absolute bottom-20 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+        >
+          <motion.div 
+            animate={{ y: [0, 6, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            className="w-px h-8 bg-linear-to-b from-neutral-400 to-transparent dark:from-neutral-600"
+          />
+        </motion.div>
 
-          .ball { filter: url(#softBlur); }
-
-          /* Ensure SVG stays visible on small screens */
-          @media (max-width: 640px) {
-            .ball { opacity: 0.40; filter: none; }
-            .moving-triangle { opacity: 0.06; }
-          }
-
-          .balls-group,
-          .balls-group-2 {
-            mix-blend-mode: normal !important;
-          }
-
-          /* Reduced-motion CSS fallback */
-          @media (prefers-reduced-motion: reduce) {
-            .moving-triangle, .ball {
-              animation: none !important;
-            }
-          }
-
-          .sr-only {
-            position: absolute !important;
-            width: 1px !important;
-            height: 1px !important;
-            padding: 0 !important;
-            margin: -1px !important;
-            overflow: hidden !important;
-            clip: rect(0, 0, 0, 0) !important;
-            white-space: nowrap !important;
-            border: 0 !important;
-          }
-        `}</style>
+        {/* Hidden SEO text */}
+        <p className="sr-only">
+          Nirupam Pal is a fullstack developer with experience building user-centric web applications using modern
+          JavaScript frameworks. Services include frontend development, backend APIs, database design, performance
+          optimization, and deployment. Available for remote and on-site roles, open to opportunities in Kolkata and
+          beyond.
+        </p>
       </section>
     </>
   );

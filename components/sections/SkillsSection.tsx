@@ -1,125 +1,240 @@
-// components/sections/SkillsSection.tsx
 "use client";
 
-import React from "react";
-import { motion, Variants, useReducedMotion } from "framer-motion";
+import React, { useState } from "react";
+import { motion, Variants } from "framer-motion";
+import { useTheme } from "@/context/ThemeContext";
 import type { JSX } from "react/jsx-runtime";
 
 type Skill = {
   name: string;
-  level: number; // 0-100
-  category?: string;
-  icon?: string; // URL to tech icon/logo
+  category: string;
+  icon: string; // Simple Icons slug or custom
 };
 
-const defaultSkills: Skill[] = [
-  { name: "HTML", level: 95, category: "Frontend", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/html5/html5-original.svg" },
-  { name: "CSS / Tailwind", level: 92, category: "Frontend", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg" },
-  { name: "JavaScript", level: 94, category: "Frontend", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg" },
-  { name: "React", level: 90, category: "Frontend", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg" },
-  { name: "React Native", level: 78, category: "Frontend", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg" },
-  { name: "Next.js", level: 82, category: "Frontend", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nextjs/nextjs-original.svg" },
-  { name: "Node.js", level: 88, category: "Backend", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-original.svg" },
-  { name: "Express.js", level: 84, category: "Backend", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/express/express-original.svg" },
-  { name: "Socket.io", level: 82, category: "Backend", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/socketio/socketio-original.svg" },
-  { name: "Microservices", level: 76, category: "Backend", icon: "https://cdn-icons-png.flaticon.com/512/7042/7042452.png" },
-  { name: "Firebase", level: 79, category: "Backend", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/firebase/firebase-original.svg" },
-  { name: "MongoDB", level: 80, category: "Database", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mongodb/mongodb-original.svg" },
-  { name: "MySQL", level: 85, category: "Database", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mysql/mysql-original.svg" },
-  { name: "PostgreSQL", level: 83, category: "Database", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postgresql/postgresql-original.svg" },
-  { name: "JavaScript", level: 94, category: "Languages", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg" },
-  { name: "TypeScript", level: 75, category: "Languages", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/typescript/typescript-original.svg" },
-  { name: "Python", level: 78, category: "Languages", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg" },
-  { name: "Go", level: 45, category: "Languages", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/go/go-original.svg" },
-  { name: "Bash", level: 72, category: "Languages", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/bash/bash-original.svg" },
-  { name: "Docker", level: 68, category: "DevOps", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg" },
-  { name: "Kubernetes", level: 60, category: "DevOps", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/kubernetes/kubernetes-original.svg" },
-  { name: "AWS", level: 70, category: "DevOps", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/amazonwebservices/amazonwebservices-original.svg" },
-  { name: "Nginx", level: 75, category: "DevOps", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nginx/nginx-original.svg" },
-  { name: "Linux", level: 80, category: "OS & Tools", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/linux/linux-original.svg" },
-  { name: "Windows", level: 85, category: "OS & Tools", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/windows11/windows11-original.svg" },
+const skills: Skill[] = [
+  // Frontend
+  { name: "HTML5", category: "Frontend", icon: "html5" },
+  { name: "CSS3", category: "Frontend", icon: "css3" },
+  { name: "JavaScript", category: "Frontend", icon: "javascript" },
+  { name: "TypeScript", category: "Frontend", icon: "typescript" },
+  { name: "React", category: "Frontend", icon: "react" },
+  { name: "Next.js", category: "Frontend", icon: "nextdotjs" },
+  { name: "Tailwind CSS", category: "Frontend", icon: "tailwindcss" },
+  { name: "React Native", category: "Frontend", icon: "react" },
+  // Backend
+  { name: "Node.js", category: "Backend", icon: "nodedotjs" },
+  { name: "Express.js", category: "Backend", icon: "express" },
+  { name: "Socket.io", category: "Backend", icon: "socketdotio" },
+  { name: "REST APIs", category: "Backend", icon: "openapiinitiative" },
+  { name: "GraphQL", category: "Backend", icon: "graphql" },
+  { name: "Python", category: "Backend", icon: "python" },
+  // Database
+  { name: "MongoDB", category: "Database", icon: "mongodb" },
+  { name: "PostgreSQL", category: "Database", icon: "postgresql" },
+  { name: "MySQL", category: "Database", icon: "mysql" },
+  { name: "Redis", category: "Database", icon: "redis" },
+  { name: "Firebase", category: "Database", icon: "firebase" },
+  // DevOps
+  { name: "Docker", category: "DevOps", icon: "docker" },
+  { name: "Kubernetes", category: "DevOps", icon: "kubernetes" },
+  { name: "AWS", category: "DevOps", icon: "amazonwebservices" },
+  { name: "CI/CD", category: "DevOps", icon: "githubactions" },
+  { name: "Nginx", category: "DevOps", icon: "nginx" },
+  { name: "Linux", category: "DevOps", icon: "linux" },
+  // Tools
+  { name: "Git", category: "Tools", icon: "git" },
+  { name: "VS Code", category: "Tools", icon: "visualstudiocode" },
+  { name: "Figma", category: "Tools", icon: "figma" },
+  { name: "Postman", category: "Tools", icon: "postman" },
 ];
 
-const container: Variants = {
+const categories = ["All", "Frontend", "Backend", "Database", "DevOps", "Tools"];
+
+const containerVariants: Variants = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.06, delayChildren: 0.06 } },
-};
-const item: Variants = {
-  hidden: { opacity: 0, y: 8 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+  show: {
+    transition: {
+      staggerChildren: 0.05,
+      delayChildren: 0.2,
+    },
+  },
 };
 
-export default function SkillsSection({ skills = defaultSkills }: { skills?: Skill[] }): JSX.Element {
-  const reduce = useReducedMotion();
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.1, 0.25, 1] } },
+};
 
-  // group skills by category for a tidy UI
-  const grouped = skills.reduce<Record<string, Skill[]>>((acc, s) => {
-    const key = s.category || "Other";
-    acc[key] = acc[key] || [];
-    acc[key].push(s);
+const lineVariants: Variants = {
+  hidden: { scaleX: 0 },
+  show: { scaleX: 1, transition: { duration: 1, ease: [0.25, 0.1, 0.25, 1] } },
+};
+
+// Generate Simple Icons URL with theme-aware color
+function getIconUrl(slug: string, color: string): string {
+  return `https://cdn.simpleicons.org/${slug}/${color}`;
+}
+
+export default function SkillsSection(): JSX.Element {
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [hoveredSkill, setHoveredSkill] = useState<string | null>(null);
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
+  const filteredSkills = activeCategory === "All"
+    ? skills
+    : skills.filter(s => s.category === activeCategory);
+
+  // Group by category for display
+  const grouped = filteredSkills.reduce<Record<string, Skill[]>>((acc, s) => {
+    acc[s.category] = acc[s.category] || [];
+    acc[s.category].push(s);
     return acc;
   }, {});
 
   return (
-    <section id="skills" aria-labelledby="skills-heading" className="w-full bg-gray-50 dark:bg-[#030303] py-20 md:py-28 transition-colors duration-500">
-      <div className="max-w-6xl mx-auto px-6">
-        <header className="text-center mb-10 md:mb-14">
-          <h2 id="skills-heading" className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white">
-            Skills & Expertise
-          </h2>
-          <p className="mt-3 text-gray-600 dark:text-gray-400 max-w-2xl mx-auto font-light">
-            Technologies I use to build production-ready products. I focus on performance, accessibility, and maintainability.
-          </p>
-        </header>
+    <section
+      id="skills"
+      aria-labelledby="skills-heading"
+      className="w-full bg-neutral-50 dark:bg-neutral-950 py-32 transition-colors duration-500"
+    >
+      <div className="max-w-7xl mx-auto px-6 lg:px-12">
+        {/* Section Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+          className="mb-20"
+        >
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8">
+            <div>
+              <span className="text-xs font-light tracking-[0.4em] text-neutral-400 dark:text-neutral-500 uppercase mb-4 block">
+                04 — Expertise
+              </span>
+              <h2
+                id="skills-heading"
+                className="text-4xl md:text-6xl font-extralight tracking-tight text-neutral-900 dark:text-neutral-100"
+              >
+                Skills & Technologies
+              </h2>
+            </div>
 
-        <motion.div variants={container} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.18 }} className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {Object.entries(grouped).map(([category, list]) => (
-            <motion.div key={category} variants={item} className="bg-white dark:bg-[#060606] border border-gray-100 dark:border-gray-800 rounded-2xl p-6 shadow-sm">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">{category}</h3>
-              <div className="mt-4 space-y-4">
-                {list.map((s) => (
-                  <div key={s.name} className="">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        {s.icon && (
-                          <img
-                            src={s.icon}
-                            alt={s.name}
-                            className="w-5 h-5 object-contain"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).style.display = "none";
-                            }}
-                          />
-                        )}
-                        <div className="text-sm font-medium text-gray-800 dark:text-gray-100">{s.name}</div>
-                      </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">{s.level}%</div>
-                    </div>
+            {/* Filter Pills */}
+            <div className="flex flex-wrap gap-2">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setActiveCategory(cat)}
+                  className={`px-4 py-2 text-xs font-light tracking-wider uppercase transition-all duration-300 ${
+                    activeCategory === cat
+                      ? "bg-neutral-900 dark:bg-neutral-100 text-neutral-100 dark:text-neutral-900"
+                      : "text-neutral-500 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-800 hover:border-neutral-400 dark:hover:border-neutral-600"
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
 
-                    <div className="mt-2 h-2 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
-                      <div
-                        role="progressbar"
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                        aria-valuenow={s.level}
-                        className="h-full rounded-full"
-                        style={{ width: `${s.level}%`, background: "linear-gradient(90deg,#7c3aed,#60a5fa)" }}
-                      />
-                    </div>
-                  </div>
-                ))}
+          <motion.div
+            variants={lineVariants}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true }}
+            className="h-px bg-neutral-200 dark:bg-neutral-800 mt-12 origin-left"
+          />
+        </motion.div>
+
+        {/* Skills Grid */}
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
+          className="space-y-16"
+        >
+          {Object.entries(grouped).map(([category, categorySkills]) => (
+            <motion.div key={category} variants={itemVariants}>
+              <div className="flex items-center gap-4 mb-8">
+                <span className="text-xs font-mono text-neutral-300 dark:text-neutral-700">
+                  {String(categories.indexOf(category)).padStart(2, '0')}
+                </span>
+                <h3 className="text-xs font-light tracking-[0.3em] text-neutral-400 dark:text-neutral-500 uppercase">
+                  {category}
+                </h3>
+                <div className="flex-1 h-px bg-neutral-200 dark:bg-neutral-800" />
               </div>
 
-              <div className="mt-6 text-xs text-gray-500 dark:text-gray-400">Curious about other tools? Ask me — I learn fast.</div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {categorySkills.map((skill) => (
+                  <motion.div
+                    key={skill.name}
+                    variants={itemVariants}
+                    onMouseEnter={() => setHoveredSkill(skill.name)}
+                    onMouseLeave={() => setHoveredSkill(null)}
+                    className={`group relative py-6 px-5 border transition-all duration-300 cursor-default ${
+                      hoveredSkill === skill.name
+                        ? "border-neutral-900 dark:border-neutral-100 bg-neutral-900 dark:bg-neutral-100"
+                        : "border-neutral-200 dark:border-neutral-800 hover:border-neutral-400 dark:hover:border-neutral-600"
+                    }`}
+                  >
+                    <div className="flex items-center gap-4">
+                      {/* Skill Icon */}
+                      <div className="relative w-8 h-8 shrink-0">
+                        {/* Icon images (use simple <img> for external SVGs) */}
+                        <img
+                          src={getIconUrl(skill.icon, isDark ? "ffffff" : "171717")}
+                          alt={skill.name}
+                          width={32}
+                          height={32}
+                          className={`absolute inset-0 w-8 h-8 object-contain transition-opacity duration-300 ${
+                            hoveredSkill === skill.name ? "opacity-100" : "opacity-90"
+                          }`}
+                        />
+                      </div>
+
+                      {/* Skill Name */}
+                      <span
+                        className={`text-sm font-light tracking-wide transition-colors duration-300 ${
+                          hoveredSkill === skill.name
+                            ? "text-neutral-100 dark:text-neutral-900"
+                            : "text-neutral-700 dark:text-neutral-300"
+                        }`}
+                      >
+                        {skill.name}
+                      </span>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
             </motion.div>
           ))}
         </motion.div>
 
-        <div className="mt-10 text-center">
-          <a href="/skills.pdf" className="inline-block px-6 py-3 rounded-full bg-gray-900 text-white dark:bg-white dark:text-gray-900 font-semibold shadow hover:shadow-lg transition" download>
-            Download Skills PDF
-          </a>
-        </div>
+        {/* Bottom Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+          className="mt-24 pt-12 border-t border-neutral-200 dark:border-neutral-800"
+        >
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+            <p className="text-lg font-light text-neutral-500 dark:text-neutral-400 text-center md:text-left">
+              Always learning, always growing. These are the tools I use daily to build production-ready applications.
+            </p>
+            <a
+              href="#contact"
+              className="group inline-flex items-center gap-3 text-sm font-light tracking-widest uppercase text-neutral-900 dark:text-neutral-100 transition-all duration-300"
+            >
+              <span>Let's Work Together</span>
+              <span className="w-8 h-px bg-neutral-900 dark:bg-neutral-100 group-hover:w-12 transition-all duration-300" />
+            </a>
+          </div>
+        </motion.div>
       </div>
     </section>
   );

@@ -1,93 +1,92 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import Head from "next/head";
-import { Zap, Briefcase, Code } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import { motion, Variants, useReducedMotion, useAnimation } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 
 type Experience = {
   title: string;
-  icon: LucideIcon;
-  date?: string;
+  company: string;
+  date: string;
   description: string;
 };
 
 const experiences: Experience[] = [
   {
-    title: "Lead Fullstack Developer — Microace Software",
-    icon: Briefcase,
+    title: "Lead Fullstack Developer",
+    company: "Microace Software",
     date: "2024 — Present",
     description:
-      "Architected scalable web platforms, led a small engineering team, improved release cadence and observability across services.",
+      "Architecting scalable web platforms, leading engineering team, improving release cadence and observability across services.",
   },
   {
-    title: "Hands-On Project Experience",
-    icon: Zap,
+    title: "Fullstack Developer",
+    company: "Project-Based Work",
     date: "2022 — 2024",
     description:
-      "Built E-commerce platforms, real-time chat (Socket.IO), billing & finance apps, and custom mail systems — from DB design to pixel UI.",
+      "Built E-commerce platforms, real-time chat applications, billing systems, and custom mail solutions from database design to pixel-perfect UI.",
   },
   {
-    title: "Modern Tech Stack & DevOps",
-    icon: Code,
+    title: "Continuous Learning",
+    company: "Self-Development",
     date: "Ongoing",
     description:
-      "React/Next.js, Node/Express, MongoDB/SQL, TypeScript, Docker, Kubernetes, CI/CD, AWS, and Cloudflare for production delivery.",
+      "Expanding expertise in React/Next.js, Node.js, TypeScript, Docker, Kubernetes, CI/CD pipelines, AWS, and cloud infrastructure.",
   },
 ];
 
+const stats = [
+  { value: "3+", label: "Years Experience" },
+  { value: "20+", label: "Projects Delivered" },
+  { value: "10+", label: "Technologies" },
+  { value: "100%", label: "Commitment" },
+];
+
 const containerVariants: Variants = {
-  hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { staggerChildren: 0.08, when: "beforeChildren" } },
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
+    },
+  },
 };
+
 const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 8 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" } },
+  hidden: { opacity: 0, y: 40 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.25, 0.1, 0.25, 1] } },
 };
 
-export default function AboutSection({ resumeUrl = "/resume.pdf" }: { resumeUrl?: string }) {
-  const sectionRef = useRef<HTMLElement | null>(null);
-  const controls = useAnimation();
-  const reduce = useReducedMotion();
+const lineVariants: Variants = {
+  hidden: { scaleX: 0 },
+  show: { scaleX: 1, transition: { duration: 1, ease: [0.25, 0.1, 0.25, 1] } },
+};
 
-  // Observe the section safely and trigger show animation when it becomes visible
-  useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        const e = entries[0];
-        if (e && e.isIntersecting) {
-          controls.start("show");
-        }
-      },
-      { threshold: 0.18, root: null, rootMargin: "-8% 0px -8% 0px" }
-    );
-
-    io.observe(el);
-    return () => io.disconnect();
-  }, [controls]);
-
-  // JSON-LD structured data (kept minimal)
+export default function AboutSection({
+  resumeUrl = "/resume.pdf",
+}: {
+  resumeUrl?: string;
+}) {
+  // JSON-LD structured data
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Person",
     name: "Nirupam Pal",
     jobTitle: "Lead Fullstack Developer",
     url: "https://nirupampal.vercel.app",
-    sameAs: ["https://github.com/nirupampal", "https://www.linkedin.com/in/nirupam-pal-0916a721b/"],
+    sameAs: [
+      "https://github.com/nirupampal",
+      "https://www.linkedin.com/in/nirupam-pal-0916a721b/",
+    ],
   };
 
   return (
     <section
       id="about"
-      ref={sectionRef}
       aria-labelledby="about-heading"
-      style={{ scrollMarginTop: "64px" }} // adjust if your header height differs
-      className="w-full bg-gray-50 dark:bg-[#050505] transition-colors duration-500 py-20 md:py-28"
+      className="w-full bg-neutral-50 dark:bg-neutral-950 transition-colors duration-500 py-32"
     >
       <Head>
         <title>About — Nirupam Pal — Lead Fullstack Developer</title>
@@ -98,143 +97,190 @@ export default function AboutSection({ resumeUrl = "/resume.pdf" }: { resumeUrl?
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Head>
 
-      <div className="max-w-6xl mx-auto px-6">
-        <motion.header variants={containerVariants} initial="hidden" animate={controls} className="mb-8 md:mb-12">
-          <motion.h2 variants={itemVariants} id="about-heading" className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white">
-            About — <span className="text-indigo-600 dark:text-indigo-400">Nirupam Pal</span>
-          </motion.h2>
-
-          <motion.p variants={itemVariants} className="mt-3 text-gray-700 dark:text-gray-300 max-w-3xl font-light">
-            I build production-ready web applications with a focus on performance, maintainability and delightful user experiences.
-            I lead development teams and ship reliable backend systems designed for scale.
-          </motion.p>
-        </motion.header>
-
-        {/* Two-column layout: left profile & CTAs, right details & timeline */}
-        <motion.div variants={containerVariants} initial="hidden" animate={controls} className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-          {/* Left column */}
-          <motion.aside variants={itemVariants} className="md:col-span-4">
-            <div className="bg-white dark:bg-[#070707] rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm">
-              <div className="w-full mb-4 flex items-center justify-center">
-                <div className="w-36 h-36 rounded-full overflow-hidden relative">
-  <Image
-    src="/nirupam.jpeg"
-    alt="Nirupam"
-    fill
-    className="object-cover"
-  />
-</div>
-
-              </div>
-
-              <div className="text-center">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Nirupam Pal</h3>
-                <div className="text-sm text-gray-500 dark:text-gray-400">Lead Fullstack Developer</div>
-                <div className="mt-3 text-xs text-gray-500 dark:text-gray-400">Based in Kolkata · Open to remote & onsite</div>
-              </div>
-
-              <div className="mt-6 space-y-3">
-                <a
-                  href={resumeUrl}
-                  download
-                  className="block w-full text-center px-4 py-2 rounded-full bg-gray-900 text-white dark:bg-white dark:text-gray-900 font-semibold"
-                  aria-label="Download resume"
-                >
-                  Download Resume
-                </a>
-
-                <a
-                  href="mailto:nirupampaldev@gmail.com"
-                  className="block w-full text-center px-4 py-2 rounded-lg border border-gray-100 dark:border-gray-800 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
-                  aria-label="Email Nirupam Pal"
-                >
-                  Email — nirupampaldev@gmail.com
-                </a>
-              </div>
-
-              <div className="mt-6">
-                <h4 className="text-xs text-gray-500 uppercase tracking-wider">Core</h4>
-                <ul className="mt-2 flex flex-wrap gap-2">
-                  {["React", "Next.js", "Node.js", "TypeScript"].map((t) => (
-                    <li key={t} className="text-xs px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200">
-                      {t}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </motion.aside>
-
-          {/* Right column */}
-          <motion.div variants={itemVariants} className="md:col-span-8 space-y-6">
-            <article className="bg-white dark:bg-[#070707] rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">What I do</h3>
-              <p className="mt-3 text-gray-700 dark:text-gray-300 leading-relaxed">
-                I design and implement full product lifecycles — from prototyping UIs to designing resilient backend APIs.
-                I focus on performance, observability, and developer experience — helping teams ship with confidence.
-              </p>
-
-              {/* CTA: jump to SkillsSection (no duplicate skills here) */}
-              <div className="mt-6">
-                <a
-                  href="#skills"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    const el = document.getElementById("skills");
-                    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                  }}
-                  className="inline-block px-5 py-2 rounded-full bg-indigo-600 text-white font-semibold shadow hover:shadow-lg transition"
-                  aria-label="View full skills"
-                >
-                  View Full Skills
-                </a>
-              </div>
-            </article>
-
-            <article className="bg-white dark:bg-[#070707] rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Experience timeline</h3>
-
-              <ol className="mt-4 space-y-5">
-                {experiences.map((exp) => (
-                  <li key={exp.title} className="flex gap-4">
-                    <div className="shrink-0">
-                      <div className="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-900 grid place-items-center text-indigo-600 dark:text-indigo-200">
-                        <exp.icon className="w-5 h-5" />
-                      </div>
-                    </div>
-
-                    <div className="flex-1">
-                      <div className="flex items-baseline justify-between">
-                        <h4 className="text-sm font-semibold text-gray-900 dark:text-white">{exp.title}</h4>
-                        {exp.date && <div className="text-xs text-gray-400 dark:text-gray-500">{exp.date}</div>}
-                      </div>
-                      <p className="mt-1 text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{exp.description}</p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </article>
-
-            <div className="flex gap-4 items-center">
-              <a
-                href="#contact"
-                onClick={(e) => {
-                  e.preventDefault();
-                  const el = document.getElementById("contact");
-                  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                }}
-                className="inline-block px-6 py-3 rounded-full bg-indigo-600 text-white font-semibold shadow hover:shadow-lg transition"
-                aria-label="Contact Nirupam"
-              >
-                Contact me
-              </a>
-
-              <a href="/projects" className="text-sm text-gray-700 dark:text-gray-200 hover:underline" aria-label="View projects">
-                View Projects &rarr;
-              </a>
-            </div>
-          </motion.div>
+      <div className="max-w-7xl mx-auto px-6">
+        {/* Section Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+          className="mb-20"
+        >
+          <span className="text-xs font-light tracking-[0.4em] text-neutral-400 dark:text-neutral-500 uppercase mb-4 block">
+            About Me
+          </span>
+          <h2
+            id="about-heading"
+            className="text-4xl md:text-5xl font-extralight tracking-tight text-neutral-900 dark:text-neutral-100"
+          >
+            Nirupam Pal
+          </h2>
+          <motion.div
+            variants={lineVariants}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true }}
+            className="h-px bg-neutral-200 dark:bg-neutral-800 mt-8 origin-left max-w-md"
+          />
         </motion.div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24">
+          {/* Left Column - Image & Info */}
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true }}
+            className="lg:col-span-5"
+          >
+            {/* Profile Image */}
+            <motion.div variants={itemVariants} className="relative mb-12">
+              <div className="aspect-4/5 relative overflow-hidden bg-neutral-100 dark:bg-neutral-900">
+                <Image
+                  src="/nirupam.jpeg"
+                  alt="Nirupam Pal"
+                  fill
+                  className="object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                />
+                {/* Corner accents */}
+                <div className="absolute top-4 left-4 w-8 h-8 border-l border-t border-neutral-100/50" />
+                <div className="absolute bottom-4 right-4 w-8 h-8 border-r border-b border-neutral-100/50" />
+              </div>
+              {/* Image caption */}
+              <div className="mt-4 flex items-center justify-between text-xs text-neutral-400 dark:text-neutral-500">
+                <span className="tracking-wider uppercase">Kolkata, India</span>
+                <span className="tracking-wider">Available for Work</span>
+              </div>
+            </motion.div>
+
+            {/* Quick Info */}
+            <motion.div variants={itemVariants} className="space-y-6">
+              <div className="flex items-center gap-4 text-sm">
+                <span className="text-neutral-400 dark:text-neutral-500 w-20">Role</span>
+                <span className="text-neutral-900 dark:text-neutral-100 font-light">Lead Fullstack Developer</span>
+              </div>
+              <div className="flex items-center gap-4 text-sm">
+                <span className="text-neutral-400 dark:text-neutral-500 w-20">Focus</span>
+                <span className="text-neutral-900 dark:text-neutral-100 font-light">Web Applications & APIs</span>
+              </div>
+              <div className="flex items-center gap-4 text-sm">
+                <span className="text-neutral-400 dark:text-neutral-500 w-20">Email</span>
+                <a href="mailto:nirupampaldev@gmail.com" className="text-neutral-900 dark:text-neutral-100 font-light hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors">
+                  nirupampaldev@gmail.com
+                </a>
+              </div>
+            </motion.div>
+
+            {/* CTA Buttons */}
+            <motion.div variants={itemVariants} className="mt-12 flex flex-col sm:flex-row gap-4">
+              <a
+                href={resumeUrl}
+                download
+                className="group inline-flex items-center justify-center px-6 py-4 text-xs font-light tracking-widest uppercase bg-neutral-900 text-neutral-100 dark:bg-neutral-100 dark:text-neutral-900 transition-all duration-500 hover:tracking-[0.2em]"
+              >
+                Download Resume
+              </a>
+              <Link
+                href="#contact"
+                className="inline-flex items-center justify-center px-6 py-4 text-xs font-light tracking-widest uppercase text-neutral-600 dark:text-neutral-400 border border-neutral-300 dark:border-neutral-700 transition-all duration-500 hover:text-neutral-900 dark:hover:text-neutral-100 hover:border-neutral-900 dark:hover:border-neutral-100"
+              >
+                Get in Touch
+              </Link>
+            </motion.div>
+          </motion.div>
+
+          {/* Right Column - Content */}
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true }}
+            className="lg:col-span-7 space-y-16"
+          >
+            {/* Bio */}
+            <motion.div variants={itemVariants}>
+              <p className="text-2xl md:text-3xl font-extralight leading-relaxed text-neutral-700 dark:text-neutral-300">
+                I build production-ready web applications with a focus on{" "}
+                <span className="text-neutral-900 dark:text-neutral-100">performance</span>,{" "}
+                <span className="text-neutral-900 dark:text-neutral-100">maintainability</span>, and{" "}
+                <span className="text-neutral-900 dark:text-neutral-100">delightful user experiences</span>.
+              </p>
+              <p className="mt-8 text-base font-light leading-relaxed text-neutral-500 dark:text-neutral-400">
+                I lead development teams and ship reliable backend systems designed for scale. 
+                From prototyping UIs to designing resilient APIs, I focus on the entire product 
+                lifecycle — helping teams ship with confidence through observability and developer experience.
+              </p>
+            </motion.div>
+
+            {/* Stats */}
+            <motion.div variants={itemVariants}>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 py-12 border-t border-b border-neutral-200 dark:border-neutral-800">
+                {stats.map((stat, i) => (
+                  <div key={i} className="text-center md:text-left">
+                    <div className="text-3xl md:text-4xl font-extralight text-neutral-900 dark:text-neutral-100">
+                      {stat.value}
+                    </div>
+                    <div className="mt-2 text-xs tracking-wider uppercase text-neutral-400 dark:text-neutral-500">
+                      {stat.label}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Experience Timeline */}
+            <motion.div variants={itemVariants}>
+              <h3 className="text-xs font-light tracking-[0.4em] text-neutral-400 dark:text-neutral-500 uppercase mb-8">
+                Experience
+              </h3>
+              <div className="space-y-8">
+                {experiences.map((exp, index) => (
+                  <div key={exp.title} className="group">
+                    <div className="flex items-start gap-8">
+                      {/* Index */}
+                      <span className="text-xs font-mono text-neutral-300 dark:text-neutral-700 pt-1">
+                        {String(index + 1).padStart(2, '0')}
+                      </span>
+                      
+                      <div className="flex-1">
+                        <div className="flex flex-col md:flex-row md:items-baseline md:justify-between gap-1 md:gap-4 mb-2">
+                          <h4 className="text-lg font-light text-neutral-900 dark:text-neutral-100">
+                            {exp.title}
+                          </h4>
+                          <span className="text-xs tracking-wider text-neutral-400 dark:text-neutral-500">
+                            {exp.date}
+                          </span>
+                        </div>
+                        <p className="text-xs tracking-wider uppercase text-neutral-400 dark:text-neutral-500 mb-3">
+                          {exp.company}
+                        </p>
+                        <p className="text-sm font-light text-neutral-500 dark:text-neutral-400 leading-relaxed">
+                          {exp.description}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {index < experiences.length - 1 && (
+                      <div className="mt-8 ml-8 h-px bg-neutral-100 dark:bg-neutral-800" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Skills CTA */}
+            <motion.div variants={itemVariants}>
+              <Link
+                href="#skills"
+                className="group inline-flex items-center gap-4 text-sm font-light text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors duration-300"
+              >
+                <span className="tracking-widest uppercase">View Full Skills</span>
+                <span className="w-8 h-px bg-current group-hover:w-12 transition-all duration-300" />
+              </Link>
+            </motion.div>
+          </motion.div>
+        </div>
       </div>
     </section>
   );
