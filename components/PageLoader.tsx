@@ -6,6 +6,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Sphere, Icosahedron, Points, PointMaterial } from "@react-three/drei";
 import { EffectComposer, Bloom, Noise, Vignette } from "@react-three/postprocessing";
 import * as THREE from "three";
+import { Group, Mesh } from "three";
 
 // --- Custom Hook to detect system theme ---
 function useSystemTheme() {
@@ -27,8 +28,8 @@ function useSystemTheme() {
 }
 
 // --- 3D Particle Field ---
-function Particles({ isDark }) {
-  const ref = useRef();
+function Particles({ isDark }: { isDark: boolean }) {
+  const ref = useRef<THREE.Points>(null);
   // Generate random points on a sphere
   const sphere = useMemo(() => {
     const text = new Float32Array(1500 * 3); // 1500 points
@@ -66,12 +67,12 @@ function Particles({ isDark }) {
 }
 
 // --- The Main 3D "Mind Fuck" Object ---
-function QuantumEngine({ isDark }) {
-  const groupRef = useRef();
-  const outerRef = useRef();
-  const middleRef = useRef();
-  const innerRef = useRef();
-  const coreRef = useRef();
+function QuantumEngine({ isDark }: { isDark: boolean }) {
+  const groupRef = useRef<Group>(null);
+  const outerRef = useRef<Mesh>(null);
+  const middleRef = useRef<Mesh>(null);
+  const innerRef = useRef<Mesh>(null);
+  const coreRef = useRef<Mesh>(null);
 
   // Define colors based on theme
   const colors = useMemo(() => ({
@@ -85,6 +86,8 @@ function QuantumEngine({ isDark }) {
 
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
+    
+    if (!groupRef.current || !outerRef.current || !middleRef.current || !innerRef.current || !coreRef.current) return;
     
     // Complex, counter-rotating movements
     groupRef.current.rotation.y = t * 0.2;
@@ -185,7 +188,7 @@ export default function PageLoader() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0, transition: { duration: 0.8, ease: "easeInOut" } }}
           // Using CSS variables for background to ensure it matches system theme exactly
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden bg-white dark:bg-black transition-colors duration-500"
+          className="fixed inset-0 z-9999 flex flex-col items-center justify-center overflow-hidden bg-white dark:bg-black transition-colors duration-500"
         >
           {/* The Canvas is the window into the 3D world.
             We set dpr (device pixel ratio) for sharp edges on high-res screens.
