@@ -1,12 +1,15 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig & { eslint?: { ignoreDuringBuilds?: boolean } } = {
-  
-  eslint: {
-    ignoreDuringBuilds: true,
+const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "cdn.simpleicons.org",
+        pathname: "/**",
+      },
+    ],
   },
-
-  /* config options here */
 };
 
 export default nextConfig;

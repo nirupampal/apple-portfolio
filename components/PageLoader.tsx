@@ -3,14 +3,14 @@
 import { useEffect, useState, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Sphere, Icosahedron, Points, PointMaterial } from "@react-three/drei";
-import { EffectComposer, Bloom, Noise, Vignette } from "@react-three/postprocessing";
+import { Float, MeshDistortMaterial, Sphere } from "@react-three/drei";
+import { EffectComposer, Bloom, ChromaticAberration } from "@react-three/postprocessing";
+import { BlendFunction } from "postprocessing";
 import * as THREE from "three";
-import { Group, Mesh } from "three";
+import { Mesh, Group } from "three";
 
 // --- Custom Hook to detect system theme ---
 function useSystemTheme() {
-  // Default to dark if server-side or unavailble
   const [isDark, setIsDark] = useState(true);
 
   useEffect(() => {
@@ -27,141 +27,125 @@ function useSystemTheme() {
   return isDark;
 }
 
-// --- 3D Particle Field ---
-function Particles({ isDark }: { isDark: boolean }) {
-  const ref = useRef<THREE.Points>(null);
-  // Generate random points on a sphere
-  const sphere = useMemo(() => {
-    const text = new Float32Array(1500 * 3); // 1500 points
-    for (let i = 0; i < 1500; i++) {
-        const i3 = i * 3;
-        // Random position within a sphere radius of 4
-        const r = 4 * Math.cbrt(Math.random());
-        const theta = Math.random() * 2 * Math.PI;
-        const phi = Math.acos(2 * Math.random() - 1);
-        text[i3] = r * Math.sin(phi) * Math.cos(theta);
-        text[i3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-        text[i3 + 2] = r * Math.cos(phi);
-    }
-    return text;
-  }, []);
-
-  useFrame((state, delta) => {
-    if (ref.current) {
-      ref.current.rotation.x -= delta / 10;
-      ref.current.rotation.y -= delta / 15;
+// --- Minimal Floating Grid Lines ---
+function GridLines({ isDark }: { isDark: boolean }) {
+  const groupRef = useRef<Group>(null);
+  
+  useFrame(({ clock }) => {
+    if (groupRef.current) {
+      groupRef.current.rotation.y = clock.getElapsedTime() * 0.03;
     }
   });
 
+  const lineColor = isDark ? "#1a1a2e" : "#e5e5e5";
+  
+  const horizontalLines = useMemo(() => {
+    return [-2, -1, 0, 1, 2].map((y) => {
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute([-8, y, -5, 8, y, -5], 3));
+      return { y, geometry };
+    });
+  }, []);
+
+  const verticalLines = useMemo(() => {
+    return [-3, -1.5, 0, 1.5, 3].map((x) => {
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute([x, -3, -5, x, 3, -5], 3));
+      return { x, geometry };
+    });
+  }, []);
+  
   return (
-    <Points ref={ref} positions={sphere} stride={3} frustumCulled={false}>
-        <PointMaterial
-            transparent
-            color={isDark ? "#8b5cf6" : "#3b82f6"} // Purple dark, Blue light
-            size={0.02}
-            sizeAttenuation={true}
-            depthWrite={false}
+    <group ref={groupRef}>
+      {/* Horizontal lines */}
+      {horizontalLines.map(({ y, geometry }) => (
+        <primitive
+          key={`h-${y}`}
+          object={new THREE.Line(
+            geometry,
+            new THREE.LineBasicMaterial({ color: lineColor, transparent: true, opacity: 0.15 })
+          )}
         />
-    </Points>
+      ))}
+      {/* Vertical lines */}
+      {verticalLines.map(({ x, geometry }) => (
+        <primitive
+          key={`v-${x}`}
+          object={new THREE.Line(
+            geometry,
+            new THREE.LineBasicMaterial({ color: lineColor, transparent: true, opacity: 0.1 })
+          )}
+        />
+      ))}
+    </group>
   );
 }
 
-// --- The Main 3D "Mind Fuck" Object ---
-function QuantumEngine({ isDark }: { isDark: boolean }) {
-  const groupRef = useRef<Group>(null);
-  const outerRef = useRef<Mesh>(null);
-  const middleRef = useRef<Mesh>(null);
-  const innerRef = useRef<Mesh>(null);
-  const coreRef = useRef<Mesh>(null);
-
-  // Define colors based on theme
-  const colors = useMemo(() => ({
-    outer: isDark ? "#4f46e5" : "#0ea5e9",    // Indigo / Sky Blue
-    middle: isDark ? "#a855f7" : "#6366f1",   // Purple / Indigo
-    inner: isDark ? "#ec4899" : "#8b5cf6",    // Pink / Purple
-    core: isDark ? "#ffffff" : "#000000",     // White / Black
-    emissiveIntensity: isDark ? 2 : 1.2
-  }), [isDark]);
-
-
+// --- Central Morphing Sphere ---
+function MorphingSphere({ isDark }: { isDark: boolean }) {
+  const meshRef = useRef<Mesh>(null);
+  
   useFrame(({ clock }) => {
-    const t = clock.getElapsedTime();
-    
-    if (!groupRef.current || !outerRef.current || !middleRef.current || !innerRef.current || !coreRef.current) return;
-    
-    // Complex, counter-rotating movements
-    groupRef.current.rotation.y = t * 0.2;
-    groupRef.current.rotation.z = Math.sin(t * 0.3) * 0.2;
-
-    // Outer shell tumbles slowly
-    outerRef.current.rotation.x = t * 0.4;
-    outerRef.current.rotation.y = t * 0.3;
-    
-    // Middle shell rotates faster opposite direction
-    middleRef.current.rotation.x = -t * 0.8;
-    middleRef.current.rotation.z = -t * 0.5;
-
-    // Inner shell spins fast on different axis
-    innerRef.current.rotation.y = t * 1.2;
-    innerRef.current.rotation.x = Math.sin(t) * 0.5;
-
-    // Core pulses and wobbles
-    const pulse = 1 + Math.sin(t * 3) * 0.1;
-    coreRef.current.scale.set(pulse, pulse, pulse);
-    coreRef.current.position.y = Math.sin(t * 2) * 0.1;
+    if (meshRef.current) {
+      meshRef.current.rotation.x = clock.getElapsedTime() * 0.15;
+      meshRef.current.rotation.y = clock.getElapsedTime() * 0.2;
+    }
   });
 
-  // Shared material props for the wireframe look
-  const wireframeMaterial = {
-      wireframe: true,
-      transparent: true,
-      opacity: 0.8,
-      toneMapped: false, // Crucial for bloom effect to work properly
-  };
+  return (
+    <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.3}>
+      <Sphere ref={meshRef} args={[1, 64, 64]}>
+        <MeshDistortMaterial
+          color={isDark ? "#0a0a0a" : "#fafafa"}
+          attach="material"
+          distort={0.3}
+          speed={1.5}
+          roughness={0.1}
+          metalness={0.9}
+          envMapIntensity={0.5}
+        />
+      </Sphere>
+      {/* Subtle glow ring */}
+      <mesh rotation={[Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[1.2, 1.25, 64]} />
+        <meshBasicMaterial
+          color={isDark ? "#ffffff" : "#000000"}
+          transparent
+          opacity={0.1}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+    </Float>
+  );
+}
 
+// --- Orbiting Dots ---
+function OrbitingDots({ isDark }: { isDark: boolean }) {
+  const groupRef = useRef<Group>(null);
+  
+  useFrame(({ clock }) => {
+    if (groupRef.current) {
+      groupRef.current.rotation.z = clock.getElapsedTime() * 0.5;
+    }
+  });
+
+  const dotColor = isDark ? "#ffffff" : "#000000";
+  
   return (
     <group ref={groupRef}>
-      {/* Outer Hull */}
-      <Icosahedron ref={outerRef} args={[2, 1]}>
-        <meshStandardMaterial 
-            {...wireframeMaterial} 
-            color={colors.outer} 
-            emissive={colors.outer}
-            emissiveIntensity={colors.emissiveIntensity}
-        />
-      </Icosahedron>
-
-      {/* Middle Mechanism */}
-      <Icosahedron ref={middleRef} args={[1.5, 2]}>
-        <meshStandardMaterial 
-            {...wireframeMaterial} 
-            color={colors.middle} 
-            emissive={colors.middle}
-            emissiveIntensity={colors.emissiveIntensity}
-            opacity={0.6}
-        />
-      </Icosahedron>
-
-       {/* Inner Structure */}
-       <Icosahedron ref={innerRef} args={[1, 0]}>
-        <meshStandardMaterial 
-            {...wireframeMaterial} 
-            color={colors.inner} 
-            emissive={colors.inner}
-            emissiveIntensity={colors.emissiveIntensity * 1.5}
-            wireframeLinewidth={2}
-        />
-      </Icosahedron>
-
-      {/* The Core Energy Sphere */}
-      <Sphere ref={coreRef} args={[0.4, 32, 32]}>
-         <meshStandardMaterial 
-            color={colors.core}
-            emissive={colors.core}
-            emissiveIntensity={isDark ? 5 : 3}
-            toneMapped={false}
-         />
-      </Sphere>
+      {[0, 1, 2].map((i) => (
+        <mesh
+          key={i}
+          position={[
+            Math.cos((i * Math.PI * 2) / 3) * 1.8,
+            Math.sin((i * Math.PI * 2) / 3) * 1.8,
+            0,
+          ]}
+        >
+          <sphereGeometry args={[0.03, 16, 16]} />
+          <meshBasicMaterial color={dotColor} />
+        </mesh>
+      ))}
     </group>
   );
 }
@@ -169,13 +153,29 @@ function QuantumEngine({ isDark }: { isDark: boolean }) {
 // --- Main Component ---
 export default function PageLoader() {
   const [isLoading, setIsLoading] = useState(true);
+  const [progress, setProgress] = useState(0);
   const isDark = useSystemTheme();
 
   useEffect(() => {
-    // Simulate page load duration
+    // Smooth progress animation
+    const duration = 2800;
+    const startTime = Date.now();
+    
+    const updateProgress = () => {
+      const elapsed = Date.now() - startTime;
+      const newProgress = Math.min((elapsed / duration) * 100, 100);
+      setProgress(newProgress);
+      
+      if (newProgress < 100) {
+        requestAnimationFrame(updateProgress);
+      }
+    };
+    
+    requestAnimationFrame(updateProgress);
+
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 3500); // Increased slightly to enjoy the view
+    }, 3000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -186,67 +186,109 @@ export default function PageLoader() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0, transition: { duration: 0.8, ease: "easeInOut" } }}
-          // Using CSS variables for background to ensure it matches system theme exactly
-          className="fixed inset-0 z-9999 flex flex-col items-center justify-center overflow-hidden bg-white dark:bg-black transition-colors duration-500"
+          exit={{ 
+            opacity: 0,
+            scale: 1.02,
+            filter: "blur(10px)",
+            transition: { duration: 0.6, ease: [0.4, 0, 0.2, 1] } 
+          }}
+          className="fixed inset-0 z-9999 flex flex-col items-center justify-center overflow-hidden bg-neutral-50 dark:bg-neutral-950"
         >
-          {/* The Canvas is the window into the 3D world.
-            We set dpr (device pixel ratio) for sharp edges on high-res screens.
-          */}
-          <div className="absolute inset-0 z-0">
-            <Canvas camera={{ position: [0, 0, 6], fov: 50 }} dpr={[1, 2]}>
-                {/* Basic Lighting (needed for standard materials, though emissive does most work) */}
-                <ambientLight intensity={0.5} />
-                <pointLight position={[10, 10, 10]} intensity={1} />
-                
-                {/* The 3D Objects */}
-                <QuantumEngine isDark={isDark} />
-                <Particles isDark={isDark} />
+          {/* Subtle gradient overlay */}
+          <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-neutral-100/50 dark:to-neutral-900/50" />
+          
+          {/* 3D Canvas */}
+          <div className="absolute inset-0">
+            <Canvas
+              camera={{ position: [0, 0, 4], fov: 45 }}
+              dpr={[1, 2]}
+              gl={{ antialias: true, alpha: true }}
+            >
+              <ambientLight intensity={0.5} />
+              <directionalLight position={[5, 5, 5]} intensity={0.5} />
+              
+              <GridLines isDark={isDark} />
+              <MorphingSphere isDark={isDark} />
+              <OrbitingDots isDark={isDark} />
 
-                {/* Mouse controls to look around (optional, remove if unwanted) */}
-                <OrbitControls 
-                    enableZoom={false} 
-                    enablePan={false} 
-                    autoRotate={true} 
-                    autoRotateSpeed={0.5} 
+              <EffectComposer>
+                <Bloom
+                  luminanceThreshold={0.9}
+                  luminanceSmoothing={0.9}
+                  intensity={0.2}
                 />
-
-                {/* Post Processing Effects for the "Tech Glow" */}
-                <EffectComposer>
-                    {/* Bloom creates the neon glow effect from bright/emissive materials */}
-                    <Bloom 
-                        luminanceThreshold={isDark ? 0.2 : 0.5} // Lower threshold in dark mode makes things glow easier
-                        luminanceSmoothing={0.9} 
-                        height={300} 
-                        intensity={isDark ? 1.5 : 1.2} 
-                    />
-                    <Noise opacity={0.02} />
-                    <Vignette eskil={false} offset={0.1} darkness={1.1} />
-                </EffectComposer>
+                <ChromaticAberration
+                  blendFunction={BlendFunction.NORMAL}
+                  offset={new THREE.Vector2(0.0005, 0.0005)}
+                />
+              </EffectComposer>
             </Canvas>
           </div>
 
-          {/* Overlay Content (Text) */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.8 }}
-            className="relative z-10 mt-[40vh] flex flex-col items-center gap-4"
+          {/* Content Overlay */}
+          <div className="relative z-10 flex flex-col items-center">
+            {/* Logo/Name */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+              className="mb-16"
+            >
+              <h1 className="text-4xl md:text-5xl font-extralight tracking-[0.3em] text-neutral-900 dark:text-neutral-100 uppercase">
+                Nirupam
+              </h1>
+              <motion.div
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ delay: 0.6, duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+                className="h-px bg-neutral-300 dark:bg-neutral-700 mt-4 origin-left"
+              />
+            </motion.div>
+
+            {/* Progress Section */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8, duration: 0.6 }}
+              className="flex flex-col items-center gap-6"
+            >
+              {/* Minimal Progress Bar */}
+              <div className="w-48 h-px bg-neutral-200 dark:bg-neutral-800 relative overflow-hidden">
+                <motion.div
+                  className="absolute inset-y-0 left-0 bg-neutral-900 dark:bg-neutral-100"
+                  style={{ width: `${progress}%` }}
+                  transition={{ duration: 0.1 }}
+                />
+              </div>
+              
+              {/* Progress Text */}
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-mono text-neutral-400 dark:text-neutral-500 tracking-wider">
+                  {Math.round(progress).toString().padStart(3, '0')}
+                </span>
+                <div className="w-px h-3 bg-neutral-300 dark:bg-neutral-700" />
+                <span className="text-xs font-light text-neutral-500 dark:text-neutral-400 tracking-widest uppercase">
+                  Loading
+                </span>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Corner Accents */}
+          <div className="absolute top-8 left-8 w-8 h-8 border-l border-t border-neutral-300 dark:border-neutral-700" />
+          <div className="absolute top-8 right-8 w-8 h-8 border-r border-t border-neutral-300 dark:border-neutral-700" />
+          <div className="absolute bottom-8 left-8 w-8 h-8 border-l border-b border-neutral-300 dark:border-neutral-700" />
+          <div className="absolute bottom-8 right-8 w-8 h-8 border-r border-b border-neutral-300 dark:border-neutral-700" />
+
+          {/* Bottom Tag */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.2, duration: 0.6 }}
+            className="absolute bottom-8 text-[10px] font-light tracking-[0.4em] text-neutral-400 dark:text-neutral-600 uppercase"
           >
-            <h2 className="text-2xl md:text-3xl font-bold tracking-[0.2em] text-gray-900 dark:text-white uppercase">
-              Nirupam
-            </h2>
-            <div className="flex items-center gap-2">
-               <motion.div 
-                  animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                  className="w-2 h-2 rounded-full bg-indigo-600 dark:bg-indigo-400" 
-               />
-              <p className="text-sm font-mono text-gray-600 dark:text-gray-400">
-                Initializing Quantum Core...
-              </p>
-            </div>
-          </motion.div>
+            Software Developer
+          </motion.p>
         </motion.div>
       )}
     </AnimatePresence>
