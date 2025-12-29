@@ -34,15 +34,7 @@ const projects: Project[] = [
     year: "2024",
     tech: ["React", "Node.js", "WebRTC"],
   },
-  {
-    title: "Realtime Chat Application",
-    description: "Socket.IO-powered chat with presence, typing indicators, and a robust Node.js/Express API backend.",
-    image: "/chat.png",
-    link: "#",
-    type: "Realtime",
-    year: "2023",
-    tech: ["Socket.IO", "Express", "MongoDB"],
-  },
+ 
   {
     title: "Weather App",
     description: "A responsive weather dashboard built with React, consuming external weather APIs and providing forecasts.",
@@ -54,7 +46,7 @@ const projects: Project[] = [
   },
 ];
 
-const categories = ["All", "Fullstack", "Frontend", "Realtime", "EdTech"];
+const categories = ["All", "Fullstack", "Frontend", "EdTech"];
 
 const containerVariants: Variants = {
   hidden: {},
