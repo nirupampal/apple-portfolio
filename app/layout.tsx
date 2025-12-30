@@ -6,6 +6,9 @@ import PageLoader from "@/components/PageLoader";
 export const metadata: Metadata = {
   title: "Nirupam Pal",
   description: "Nirupam Pal -Fullstack Developer",
+  icons: {
+    icon: "/image.png",
+  },
 };
 
 export default function RootLayout({
