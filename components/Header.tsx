@@ -123,6 +123,16 @@ export default function Header() {
 
             {/* Right side - Theme & Menu */}
             <div className="flex items-center gap-4">
+              {/* Desktop Resume Button */}
+              <a
+                href="https://drive.google.com/file/d/1WdiR6QzRi3tsuMX-d5JHZ3_t3tnH_F-z/view"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hidden lg:inline-flex items-center px-4 py-2 text-xs tracking-[0.2em] uppercase border border-neutral-900 dark:border-neutral-100 text-neutral-900 dark:text-neutral-100 hover:bg-neutral-900 hover:text-neutral-100 dark:hover:bg-neutral-100 dark:hover:text-neutral-900 transition-colors duration-300"
+              >
+                Resume
+              </a>
+              
               <ThemeSwitcher />
 
               {/* Mobile Menu Button */}
@@ -231,14 +241,15 @@ export default function Header() {
                   <ThemeSwitcher />
                 </div>
                 <motion.a
-                  href="/resume.pdf"
-                  download
+                  href="https://drive.google.com/file/d/1WdiR6QzRi3tsuMX-d5JHZ3_t3tnH_F-z/view"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.5 }}
                   className="mt-6 block w-full py-4 text-center text-xs tracking-[0.3em] uppercase border border-neutral-900 dark:border-neutral-100 text-neutral-900 dark:text-neutral-100 hover:bg-neutral-900 hover:text-neutral-100 dark:hover:bg-neutral-100 dark:hover:text-neutral-900 transition-colors duration-300"
                 >
-                  Download Resume
+                  View Resume
                 </motion.a>
               </div>
             </motion.div>

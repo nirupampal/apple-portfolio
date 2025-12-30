@@ -14,7 +14,7 @@ type Skill = {
 const skills: Skill[] = [
   // Frontend
   { name: "HTML5", category: "Frontend", icon: "html5" },
-  { name: "CSS3", category: "Frontend", icon: "css3" },
+  { name: "CSS3", category: "Frontend", icon: "css" },
   { name: "JavaScript", category: "Frontend", icon: "javascript" },
   { name: "TypeScript", category: "Frontend", icon: "typescript" },
   { name: "React", category: "Frontend", icon: "react" },
@@ -37,13 +37,13 @@ const skills: Skill[] = [
   // DevOps
   { name: "Docker", category: "DevOps", icon: "docker" },
   { name: "Kubernetes", category: "DevOps", icon: "kubernetes" },
-  { name: "AWS", category: "DevOps", icon: "amazonwebservices" },
+  { name: "AWS", category: "DevOps", icon: "amazonaws" },
   { name: "CI/CD", category: "DevOps", icon: "githubactions" },
   { name: "Nginx", category: "DevOps", icon: "nginx" },
   { name: "Linux", category: "DevOps", icon: "linux" },
   // Tools
   { name: "Git", category: "Tools", icon: "git" },
-  { name: "VS Code", category: "Tools", icon: "visualstudiocode" },
+  { name: "VS Code", category: "Tools", icon: "vscode" },
   { name: "Figma", category: "Tools", icon: "figma" },
   { name: "Postman", category: "Tools", icon: "postman" },
 ];
@@ -175,23 +175,34 @@ export default function SkillsSection(): JSX.Element {
                     variants={itemVariants}
                     onMouseEnter={() => setHoveredSkill(skill.name)}
                     onMouseLeave={() => setHoveredSkill(null)}
-                    className={`group relative py-6 px-5 border transition-all duration-300 cursor-default ${
+                    whileHover={{ y: -5, scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
+                    className={`group relative py-6 px-5 border rounded-lg transition-all duration-300 cursor-default overflow-hidden ${
                       hoveredSkill === skill.name
-                        ? "border-neutral-900 dark:border-neutral-100 bg-neutral-900 dark:bg-neutral-100"
-                        : "border-neutral-200 dark:border-neutral-800 hover:border-neutral-400 dark:hover:border-neutral-600"
+                        ? "border-transparent bg-neutral-900 dark:bg-neutral-100 shadow-lg"
+                        : "border-neutral-200 dark:border-neutral-800 hover:border-neutral-400 dark:hover:border-neutral-600 hover:shadow-md"
                     }`}
                   >
-                    <div className="flex items-center gap-4">
+                    {/* Gradient glow effect on hover */}
+                    {hoveredSkill === skill.name && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="absolute -inset-1 bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 rounded-lg blur opacity-20"
+                      />
+                    )}
+                    
+                    <div className="relative flex items-center gap-4">
                       {/* Skill Icon */}
                       <div className="relative w-8 h-8 shrink-0">
                         {/* Icon images (use simple <img> for external SVGs) */}
                         <img
-                          src={getIconUrl(skill.icon, isDark ? "ffffff" : "171717")}
+                          src={getIconUrl(skill.icon, hoveredSkill === skill.name ? (isDark ? "171717" : "ffffff") : (isDark ? "ffffff" : "171717"))}
                           alt={skill.name}
                           width={32}
                           height={32}
-                          className={`absolute inset-0 w-8 h-8 object-contain transition-opacity duration-300 ${
-                            hoveredSkill === skill.name ? "opacity-100" : "opacity-90"
+                          className={`absolute inset-0 w-8 h-8 object-contain transition-all duration-300 ${
+                            hoveredSkill === skill.name ? "scale-110" : ""
                           }`}
                         />
                       </div>
@@ -206,6 +217,11 @@ export default function SkillsSection(): JSX.Element {
                       >
                         {skill.name}
                       </span>
+                    </div>
+                    
+                    {/* Shine effect */}
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                     </div>
                   </motion.div>
                 ))}

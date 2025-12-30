@@ -6,6 +6,7 @@ import WorksSection from '@/components/sections/WorksSection';
 import AboutSection from '@/components/sections/AboutSection';
 import ContactSection from '@/components/sections/ContactSection';
 import SkillsSection from '@/components/sections/SkillsSection';
+import ParallaxSection from '@/components/sections/ParallaxSection';
 
 export default function Home() {
   return (
@@ -16,8 +17,24 @@ export default function Home() {
       <main className=""> {/* Sidebar is absolutely positioned, no margin needed */}
         <HeroSection />
         <WorksSection />
+        
+        {/* Parallax Break - Innovation */}
+        <ParallaxSection
+          title="Building the Future"
+          subtitle="Philosophy"
+          quote="Great software is not just about code—it's about solving real problems with elegant solutions."
+        />
+        
         <AboutSection />
         <SkillsSection/>
+        
+        {/* Parallax Break - Vision */}
+        <ParallaxSection
+          title="Crafting Digital Experiences"
+          subtitle="Vision"
+          quote="Every line of code is an opportunity to create something that matters."
+        />
+        
         <ContactSection />
       </main>
 

@@ -188,7 +188,7 @@ export default function ContactSection() {
           className="mt-32 pt-8 border-t border-neutral-800"
         >
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-neutral-600">
-            <span>Based in Kolkata, India</span>
+            <span>Based in Krishnanagar, India</span>
             <span>© {new Date().getFullYear()} Nirupam Pal</span>
             <span>Open to Remote Work</span>
           </div>

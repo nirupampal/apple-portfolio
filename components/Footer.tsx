@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 
 const socialLinks = [
   {
@@ -27,6 +28,15 @@ const navLinks = [
 
 export default function Footer() {
   const year = new Date().getFullYear();
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 500);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const scrollToSection = (href: string) => (e: React.MouseEvent) => {
     e.preventDefault();
@@ -35,8 +45,39 @@ export default function Footer() {
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
-    <footer className="relative bg-neutral-50 dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-800">
+    <>
+      {/* Back to Top Button */}
+      <motion.button
+        onClick={scrollToTop}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: showBackToTop ? 1 : 0, y: showBackToTop ? 0 : 20 }}
+        transition={{ duration: 0.3 }}
+        className="fixed bottom-8 right-8 z-50 w-12 h-12 rounded-full bg-neutral-900 dark:bg-neutral-100 text-neutral-100 dark:text-neutral-900 flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300"
+        aria-label="Back to top"
+      >
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M5 10l7-7m0 0l7 7m-7-7v18"
+          />
+        </svg>
+      </motion.button>
+
+      <footer className="relative bg-neutral-50 dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-800 overflow-hidden">
+        {/* Subtle gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-neutral-100/50 dark:to-neutral-950/50 pointer-events-none" />
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-6 lg:px-12 py-16">
         <div className="grid md:grid-cols-3 gap-12 md:gap-8">
@@ -134,12 +175,21 @@ export default function Footer() {
             <p className="text-xs text-neutral-500">
               © {year} Nirupam Pal. All rights reserved.
             </p>
-            <p className="text-xs text-neutral-400">
-              Designed & Built with precision
+            <p className="text-xs text-neutral-400 flex items-center gap-2">
+              <span>Designed & Built with</span>
+              <motion.span
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 1, repeat: Infinity }}
+                className="text-emerald-500"
+              >
+                ♥
+              </motion.span>
+              <span>precision</span>
             </p>
           </motion.div>
         </div>
       </div>
     </footer>
+    </>
   );
 }

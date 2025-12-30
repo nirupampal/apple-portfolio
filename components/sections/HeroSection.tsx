@@ -195,13 +195,15 @@ export default function HeroSection({
                 <div className="absolute inset-0 bg-neutral-800 dark:bg-neutral-200 scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
               </Link>
 
-              <Link
-                href="#contact"
+              <a
+                href="https://drive.google.com/file/d/1WdiR6QzRi3tsuMX-d5JHZ3_t3tnH_F-z/view"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="group inline-flex items-center justify-center px-8 py-4 text-sm font-light tracking-widest uppercase text-neutral-600 dark:text-neutral-400 border border-neutral-300 dark:border-neutral-700 transition-all duration-500 hover:text-neutral-900 dark:hover:text-neutral-100 hover:border-neutral-900 dark:hover:border-neutral-100"
-                aria-label="Contact — get in touch with Nirupam Pal"
+                aria-label="View Resume — Nirupam Pal"
               >
-                Get in Touch
-              </Link>
+                View Resume
+              </a>
             </motion.div>
           </motion.div>
         </motion.div>
@@ -236,7 +238,7 @@ export default function HeroSection({
         <p className="sr-only">
           Nirupam Pal is a fullstack developer with experience building user-centric web applications using modern
           JavaScript frameworks. Services include frontend development, backend APIs, database design, performance
-          optimization, and deployment. Available for remote and on-site roles, open to opportunities in Kolkata and
+          optimization, and deployment. Available for remote and on-site roles, open to opportunities in Krishnanagar and
           beyond.
         </p>
       </section>

@@ -20,7 +20,7 @@ const projects: Project[] = [
     title: "E-Commerce Platform",
     description: "Fullstack Next.js store with Stripe payments, inventory management, and optimized performance for scale.",
     image: "/e-commerce.png",
-    link: "#",
+    link: "https://delacruash.vercel.app/",
     type: "Fullstack",
     year: "2024",
     tech: ["Next.js", "Stripe", "PostgreSQL"],
@@ -34,16 +34,34 @@ const projects: Project[] = [
     year: "2024",
     tech: ["React", "Node.js", "WebRTC"],
   },
+  {
+    title: "Agriculture Website",
+    description: "Agriculture consulting firm website showcasing services, team, and client testimonials with a modern design.",
+    image: "/agriculture.png",
+    link: "https://swastik-bio.vercel.app/",
+    type: "Agriculture",
+    year: "2025",
+    tech: ["React", "Node.js", "Tailwind"],
+  },
  
   {
     title: "Weather App",
     description: "A responsive weather dashboard built with React, consuming external weather APIs and providing forecasts.",
     image: "/weather.png",
-    link: "#",
+    link: "https://weather-app-by-nirupampal.vercel.app/",
     type: "Frontend",
     year: "2023",
     tech: ["React", "API", "Tailwind"],
   },
+  {
+    title: "Calculator App",
+    description: "A simple and intuitive calculator app built with React, featuring basic arithmetic operations and a clean UI.",
+    image: "/calculator.png",
+    link: "https://calculator-app-alpha-olive.vercel.app//",
+    type: "Frontend",
+    year: "2023",
+    tech: ["React", "CSS"],
+  }
 ];
 
 const categories = ["All", "Fullstack", "Frontend", "EdTech"];
@@ -69,7 +87,7 @@ const ProjectCard: React.FC<Project & { index: number }> = ({ title, description
       href={link}
       target="_blank"
       rel="noopener noreferrer"
-      className="group block"
+      className="group block rounded-2xl overflow-hidden bg-white dark:bg-neutral-900 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
@@ -77,7 +95,7 @@ const ProjectCard: React.FC<Project & { index: number }> = ({ title, description
       aria-label={`Open project ${title}`}
     >
       {/* Image Container */}
-      <div className="relative aspect-4/3 overflow-hidden bg-neutral-100 dark:bg-neutral-900 mb-6">
+      <div className="relative aspect-video overflow-hidden bg-neutral-100 dark:bg-neutral-800">
         <Image
           src={image}
           alt={title}
@@ -104,7 +122,7 @@ const ProjectCard: React.FC<Project & { index: number }> = ({ title, description
       </div>
 
       {/* Content */}
-      <div className="space-y-3">
+      <div className="p-5 space-y-3">
         {/* Meta row */}
         <div className="flex items-center justify-between text-xs tracking-wider text-neutral-400 dark:text-neutral-500 uppercase">
           <span>{type}</span>
@@ -122,11 +140,11 @@ const ProjectCard: React.FC<Project & { index: number }> = ({ title, description
         </p>
 
         {/* Tech stack */}
-        <div className="flex flex-wrap gap-2 pt-2">
+        <div className="flex flex-wrap gap-2 pt-3">
           {tech.map((t, i) => (
             <span
               key={i}
-              className="text-[10px] tracking-wider uppercase text-neutral-400 dark:text-neutral-500 border border-neutral-200 dark:border-neutral-800 px-2 py-1"
+              className="text-[10px] tracking-wider uppercase text-neutral-500 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800 px-3 py-1.5 rounded-full"
             >
               {t}
             </span>
@@ -201,7 +219,7 @@ export default function WorksSection() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-16"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
             {filteredProjects.map((project, idx) => (
               <ProjectCard key={project.title} {...project} index={idx} />

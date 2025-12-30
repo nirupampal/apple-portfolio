@@ -5,6 +5,7 @@ import Head from "next/head";
 import { motion, Variants } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
+import AnimatedCounter from "@/components/ui/AnimatedCounter";
 
 type Experience = {
   title: string;
@@ -38,10 +39,10 @@ const experiences: Experience[] = [
 ];
 
 const stats = [
-  { value: "3+", label: "Years Experience" },
-  { value: "20+", label: "Projects Delivered" },
-  { value: "10+", label: "Technologies" },
-  { value: "100%", label: "Commitment" },
+  { value: 3, suffix: "+", label: "Years Experience" },
+  { value: 20, suffix: "+", label: "Projects Delivered" },
+  { value: 10, suffix: "+", label: "Technologies" },
+  { value: 100, suffix: "%", label: "Commitment" },
 ];
 
 const containerVariants: Variants = {
@@ -65,7 +66,7 @@ const lineVariants: Variants = {
 };
 
 export default function AboutSection({
-  resumeUrl = "/resume.pdf",
+  resumeUrl = "https://drive.google.com/file/d/1WdiR6QzRi3tsuMX-d5JHZ3_t3tnH_F-z/view",
 }: {
   resumeUrl?: string;
 }) {
@@ -135,21 +136,26 @@ export default function AboutSection({
             className="lg:col-span-5"
           >
             {/* Profile Image */}
-            <motion.div variants={itemVariants} className="relative mb-12">
-              <div className="aspect-4/5 relative overflow-hidden bg-neutral-100 dark:bg-neutral-900">
+            <motion.div variants={itemVariants} className="relative mb-12 group">
+              {/* Gradient border effect */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 rounded-sm opacity-20 group-hover:opacity-40 blur transition-all duration-500" />
+              
+              <div className="relative aspect-4/5 overflow-hidden bg-neutral-100 dark:bg-neutral-900">
                 <Image
                   src="/nirupam.jpeg"
                   alt="Nirupam Pal"
                   fill
-                  className="object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                  className="object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
                 />
+                {/* Overlay gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-neutral-900/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 {/* Corner accents */}
-                <div className="absolute top-4 left-4 w-8 h-8 border-l border-t border-neutral-100/50" />
-                <div className="absolute bottom-4 right-4 w-8 h-8 border-r border-b border-neutral-100/50" />
+                <div className="absolute top-4 left-4 w-8 h-8 border-l border-t border-white/50" />
+                <div className="absolute bottom-4 right-4 w-8 h-8 border-r border-b border-white/50" />
               </div>
               {/* Image caption */}
               <div className="mt-4 flex items-center justify-between text-xs text-neutral-400 dark:text-neutral-500">
-                <span className="tracking-wider uppercase">Kolkata, India</span>
+                <span className="tracking-wider uppercase">Krishnanagar, India</span>
                 <span className="tracking-wider">Available for Work</span>
               </div>
             </motion.div>
@@ -217,9 +223,13 @@ export default function AboutSection({
             <motion.div variants={itemVariants}>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8 py-12 border-t border-b border-neutral-200 dark:border-neutral-800">
                 {stats.map((stat, i) => (
-                  <div key={i} className="text-center md:text-left">
-                    <div className="text-3xl md:text-4xl font-extralight text-neutral-900 dark:text-neutral-100">
-                      {stat.value}
+                  <div key={i} className="text-center md:text-left group">
+                    <div className="text-3xl md:text-4xl font-extralight text-neutral-900 dark:text-neutral-100 group-hover:text-gradient transition-all duration-300">
+                      <AnimatedCounter 
+                        value={stat.value} 
+                        suffix={stat.suffix} 
+                        duration={2 + i * 0.3}
+                      />
                     </div>
                     <div className="mt-2 text-xs tracking-wider uppercase text-neutral-400 dark:text-neutral-500">
                       {stat.label}
