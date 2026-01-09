@@ -34,15 +34,7 @@ const projects: Project[] = [
     year: "2024",
     tech: ["React", "Node.js", "WebRTC"],
   },
-  {
-    title: "Agriculture Website",
-    description: "Agriculture consulting firm website showcasing services, team, and client testimonials with a modern design.",
-    image: "/agriculture.png",
-    link: "https://swastik-bio.vercel.app/",
-    type: "Agriculture",
-    year: "2025",
-    tech: ["React", "Node.js", "Tailwind"],
-  },
+ 
  
   {
     title: "Weather App",
