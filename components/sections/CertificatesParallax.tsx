@@ -14,7 +14,7 @@ const certificates = [
     title: 'Software Engineer',
     issuer: 'HackerRank',
     issuedOn: '09 Jan 2026',
-    image: '/hacker-rank-software-engineer.jpg',
+    image: '/hacker-rank-software-engineer.png',
     verifyUrl: 'https://www.hackerrank.com/certificates/iframe/db1cfdf0bbf4',
   },
   // Add more certificates here as needed
