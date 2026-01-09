@@ -1,9 +1,77 @@
 "use client";
+
 import Head from "next/head";
 import Link from "next/link";
-import React, { useRef } from "react";
-import { JSX } from "react/jsx-runtime";
-import { motion, useReducedMotion, Variants, useScroll, useTransform } from "framer-motion";
+import React, { useRef, useState, useEffect } from "react";
+import { motion, useScroll, useTransform, useSpring, useMotionValue, useMotionTemplate } from "framer-motion";
+import type { JSX } from "react/jsx-runtime";
+
+// --- COMPONENTS ---
+
+// 1. The Grain/Noise Overlay
+const GrainOverlay = () => (
+  <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden opacity-20">
+    <div className="absolute inset-[-200%] h-[400%] w-[400%] animate-noise bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-repeat opacity-20 contrast-150 brightness-100" />
+  </div>
+);
+
+// 2. The Moving Aurora Background
+const AuroraBackground = () => {
+  return (
+    <div className="absolute inset-0 z-0 overflow-hidden bg-neutral-950">
+        {/* Primary Glow */}
+        <motion.div 
+            animate={{ 
+                rotate: [0, 360],
+                scale: [1, 1.2, 1],
+                opacity: [0.3, 0.5, 0.3] 
+            }}
+            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+            className="absolute -top-[20%] -left-[10%] h-[80vh] w-[80vh] rounded-full bg-purple-900/30 blur-[120px]" 
+        />
+        {/* Secondary Glow */}
+        <motion.div 
+            animate={{ 
+                rotate: [360, 0],
+                scale: [1, 1.5, 1],
+                opacity: [0.2, 0.4, 0.2]
+            }}
+            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+            className="absolute top-[10%] right-[-10%] h-[70vh] w-[70vh] rounded-full bg-blue-900/20 blur-[120px]" 
+        />
+        {/* Bottom Glow */}
+        <motion.div 
+             animate={{ 
+                x: [-100, 100],
+                opacity: [0.1, 0.3, 0.1]
+            }}
+            transition={{ duration: 10, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" }}
+            className="absolute -bottom-[20%] left-[20%] h-[60vh] w-[60vh] rounded-full bg-emerald-900/10 blur-[100px]" 
+        />
+    </div>
+  );
+};
+
+// 3. Magnetic Button Component
+const MagneticButton = ({ children, href, primary = false }: { children: React.ReactNode, href: string, primary?: boolean }) => {
+    return (
+        <Link href={href} className="group relative">
+            <div className={`
+                relative z-10 flex items-center justify-center px-8 py-4 
+                text-sm font-medium tracking-widest uppercase transition-all duration-300
+                ${primary 
+                    ? "text-neutral-950 bg-white hover:bg-neutral-200" 
+                    : "text-white border border-white/20 hover:border-white/50 hover:bg-white/5"}
+            `}>
+                {children}
+            </div>
+            {/* Glow effect for primary button */}
+            {primary && (
+                <div className="absolute inset-0 -z-10 bg-white/50 blur-lg opacity-0 group-hover:opacity-70 transition-opacity duration-500" />
+            )}
+        </Link>
+    );
+}
 
 export default function HeroSection({
   siteUrl = "https://nirupampal.vercel.app",
@@ -12,40 +80,25 @@ export default function HeroSection({
   siteUrl?: string;
   ogImage?: string;
 }): JSX.Element {
-  const reduce = useReducedMotion();
   const containerRef = useRef<HTMLElement>(null);
   
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end start"]
-  });
-  
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.95]);
-  const y = useTransform(scrollYProgress, [0, 0.5], [0, 100]);
+  // Parallax Scroll Effects
+  const { scrollY } = useScroll();
+  const y1 = useTransform(scrollY, [0, 500], [0, 200]); // Text moves down slower
+  const opacity = useTransform(scrollY, [0, 300], [1, 0]); // Fades out
+  const blur = useTransform(scrollY, [0, 300], ["0px", "10px"]); // Blurs out
 
-  /* Text/container variants (staggered entrance) */
-  const container: Variants = {
-    hidden: {},
-    show: {
-      transition: {
-        staggerChildren: 0.08,
-        delayChildren: 0.1,
-      },
-    },
-  };
-  
-  const fadeUp: Variants = {
-    hidden: { opacity: 0, y: 30 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.25, 0.1, 0.25, 1] } },
-  };
+  // Mouse Spotlight Effect
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
 
-  const lineReveal: Variants = {
-    hidden: { scaleX: 0 },
-    show: { scaleX: 1, transition: { duration: 1, ease: [0.25, 0.1, 0.25, 1], delay: 0.3 } },
-  };
+  function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
+    const { left, top } = currentTarget.getBoundingClientRect();
+    mouseX.set(clientX - left);
+    mouseY.set(clientY - top);
+  }
 
-  /* Structured data (Person + WebSite) — improves rich results */
+  // SEO Data
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -74,173 +127,163 @@ export default function HeroSection({
     <>
       <Head>
         <title>Nirupam Pal — Fullstack Developer | Modern UI & Scalable Backend</title>
-        <meta
-          name="description"
-          content="Nirupam Pal is a Fullstack Developer specializing in modern user interfaces and scalable backend solutions using Next.js and Node.js. Explore portfolio projects, services and contact information."
-        />
+        <meta name="description" content="Nirupam Pal is a Fullstack Developer specializing in modern user interfaces and scalable backend solutions using Next.js and Node.js." />
         <meta name="robots" content="index, follow" />
-        <meta name="author" content="Nirupam Pal" />
-
-        {/* Open Graph */}
         <meta property="og:title" content="Nirupam Pal — Fullstack Developer" />
-        <meta
-          property="og:description"
-          content="Fullstack developer building modern UIs and scalable Node/Next backends. Explore portfolio projects and contact information."
-        />
+        <meta property="og:description" content="Building modern UIs and scalable backends." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={`${siteUrl}#home`} />
         <meta property="og:image" content={ogImage} />
-        <meta property="og:site_name" content="Nirupam Pal" />
-
-        {/* Twitter */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:creator" content="@nirupampal" />
-        <meta name="twitter:title" content="Nirupam Pal — Fullstack Developer" />
-        <meta name="twitter:description" content="Fullstack developer building modern UIs and scalable Node/Next backends." />
-        <meta name="twitter:image" content={ogImage} />
-
-        <link rel="canonical" href={`${siteUrl}#home`} />
-
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Head>
 
       <section
         ref={containerRef}
         id="home"
-        className="relative min-h-screen flex flex-col justify-center items-center overflow-hidden bg-neutral-50 dark:bg-neutral-950 transition-colors duration-500"
-        aria-label="Hero section — introduction and primary call to action"
+        onMouseMove={handleMouseMove}
+        className="relative min-h-screen pt-20 w-full flex flex-col items-center justify-center overflow-hidden bg-neutral-950 text-white selection:bg-white/30"
       >
-        {/* Minimal grid background */}
-        <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
-          {/* Horizontal lines */}
-          <div className="absolute inset-0 flex flex-col justify-between py-20 opacity-[0.03] dark:opacity-[0.05]">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="w-full h-px bg-neutral-900 dark:bg-neutral-100" />
-            ))}
-          </div>
-          {/* Vertical lines */}
-          <div className="absolute inset-0 flex justify-between px-20 opacity-[0.03] dark:opacity-[0.05]">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-full w-px bg-neutral-900 dark:bg-neutral-100" />
-            ))}
-          </div>
-          {/* Center crosshair accent */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 opacity-[0.02]">
-            <div className="absolute top-1/2 left-0 w-full h-px bg-neutral-900 dark:bg-neutral-100" />
-            <div className="absolute top-0 left-1/2 w-px h-full bg-neutral-900 dark:bg-neutral-100" />
-          </div>
-          {/* Subtle radial gradient */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(250,250,250,0.8)_70%)] dark:bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(10,10,10,0.8)_70%)]" />
-        </div>
+        <GrainOverlay />
+        <AuroraBackground />
 
-        {/* Corner accents */}
-        <div className="absolute top-8 left-8 w-12 h-12 border-l border-t border-neutral-300 dark:border-neutral-700 opacity-60" />
-        <div className="absolute top-8 right-8 w-12 h-12 border-r border-t border-neutral-300 dark:border-neutral-700 opacity-60" />
-        <div className="absolute bottom-8 left-8 w-12 h-12 border-l border-b border-neutral-300 dark:border-neutral-700 opacity-60" />
-        <div className="absolute bottom-8 right-8 w-12 h-12 border-r border-b border-neutral-300 dark:border-neutral-700 opacity-60" />
+        {/* Mouse Spotlight (Subtle lighting on cursor) */}
+        <motion.div
+            className="pointer-events-none absolute -inset-px opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
+            style={{
+                background: useMotionTemplate`
+                    radial-gradient(
+                        600px circle at ${mouseX}px ${mouseY}px,
+                        rgba(255, 255, 255, 0.03),
+                        transparent 40%
+                    )
+                `,
+            }}
+        />
 
-        {/* Content container (motion) */}
+        {/* Content Container */}
         <motion.div 
-          className="z-10 px-6 max-w-5xl"
-          style={reduce ? {} : { opacity, scale, y }}
+            style={{ y: y1, opacity, filter: useMotionTemplate`blur(${blur})` }}
+            className="relative z-30 px-6 text-center max-w-7xl mx-auto flex flex-col items-center gap-8"
         >
-          <motion.div
-            variants={container} 
-            initial="hidden" 
-            whileInView="show" 
-            viewport={{ once: true, amount: 0.2 }}
-            className="flex flex-col items-center text-center"
-          >
-            {/* Eyebrow text */}
-            <motion.div variants={fadeUp} className="mb-8">
-              <span className="text-xs font-light tracking-[0.4em] text-neutral-500 dark:text-neutral-400 uppercase">
-                Fullstack Developer
-              </span>
+            {/* Status Pill */}
+            <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 backdrop-blur-md"
+            >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span className="text-xs font-mono text-neutral-300 tracking-wider uppercase">
+                    Available for new projects
+                </span>
             </motion.div>
 
-            {/* Main heading */}
-            <motion.h1 
-              variants={fadeUp}
-              className="text-5xl md:text-7xl lg:text-8xl font-extralight tracking-tight text-neutral-900 dark:text-neutral-100 leading-[0.95] mb-6"
-            >
-              <span className="block">Nirupam</span>
-              <span className="block font-light">Pal</span>
-            </motion.h1>
-
-            {/* Divider line */}
-            <motion.div 
-              variants={lineReveal}
-              className="w-16 h-px bg-neutral-300 dark:bg-neutral-700 mb-8 origin-left"
-            />
+            {/* Main Title */}
+            <div className="relative">
+                <motion.h1 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                    className="text-[12vw] leading-[0.8] font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-neutral-500"
+                >
+                    NIRUPAM
+                    <br />
+                    <span className="text-neutral-800 outline-text">PAL</span>
+                </motion.h1>
+                
+                {/* Decorative floating elements */}
+                <motion.div 
+                    animate={{ y: [-10, 10, -10] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute -right-8 top-1/2 w-24 h-24 hidden md:block opacity-20"
+                >
+                    <svg viewBox="0 0 100 100" className="fill-white spin-slow">
+                        <path d="M50 0 L100 50 L50 100 L0 50 Z" />
+                    </svg>
+                </motion.div>
+            </div>
 
             {/* Subheading */}
             <motion.p 
-              variants={fadeUp}
-              className="text-lg md:text-xl text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto font-light leading-relaxed mb-12"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1, delay: 0.4 }}
+                className="text-lg md:text-2xl font-light text-neutral-400 max-w-2xl leading-relaxed"
             >
-              Crafting refined digital experiences through{" "}
-              <span className="text-neutral-900 dark:text-neutral-100">modern interfaces</span>{" "}
-              and{" "}
-              <span className="text-neutral-900 dark:text-neutral-100">scalable architecture</span>.
+                Engineering <span className="text-white font-normal">digital excellence</span>. 
+                I build scalable backend architecture and fluid interfaces that define the modern web.
             </motion.p>
 
-            {/* CTA Buttons */}
-            <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center gap-4">
-              <Link
-                href="#works"
-                className="group relative inline-flex items-center justify-center px-8 py-4 text-sm font-light tracking-widest uppercase bg-neutral-900 text-neutral-100 dark:bg-neutral-100 dark:text-neutral-900 transition-all duration-500 hover:tracking-[0.2em]"
-                aria-label="Explore my work — portfolio projects"
-              >
-                <span className="relative z-10">View Work</span>
-                <div className="absolute inset-0 bg-neutral-800 dark:bg-neutral-200 scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
-              </Link>
-
-              <a
-                href="https://drive.google.com/file/d/1WdiR6QzRi3tsuMX-d5JHZ3_t3tnH_F-z/view"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group inline-flex items-center justify-center px-8 py-4 text-sm font-light tracking-widest uppercase text-neutral-600 dark:text-neutral-400 border border-neutral-300 dark:border-neutral-700 transition-all duration-500 hover:text-neutral-900 dark:hover:text-neutral-100 hover:border-neutral-900 dark:hover:border-neutral-100"
-                aria-label="View Resume — Nirupam Pal"
-              >
-                View Resume
-              </a>
+            {/* CTA Actions */}
+            <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.6 }}
+                className="flex flex-col sm:flex-row gap-6 mt-8"
+            >
+                <MagneticButton href="#works" primary>
+                    View Selected Works
+                </MagneticButton>
+                <MagneticButton href="https://drive.google.com/file/d/1WdiR6QzRi3tsuMX-d5JHZ3_t3tnH_F-z/view">
+                    Download CV
+                </MagneticButton>
             </motion.div>
-          </motion.div>
+
         </motion.div>
 
-        {/* Bottom info bar */}
+        {/* Scroll Indicator */}
         <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1, duration: 0.8 }}
-          className="absolute bottom-8 left-0 right-0 flex justify-center items-center gap-8 text-[10px] tracking-[0.3em] text-neutral-400 dark:text-neutral-600 uppercase"
+            style={{ opacity }}
+            className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 z-30"
         >
-          <span>Based in India</span>
-          <div className="w-1 h-1 rounded-full bg-neutral-400 dark:bg-neutral-600" />
-          <span>Available for Work</span>
+            <span className="text-[10px] uppercase tracking-[0.3em] text-neutral-500">Scroll</span>
+            <div className="h-12 w-[1px] bg-gradient-to-b from-neutral-800 to-transparent overflow-hidden">
+                <motion.div 
+                    animate={{ y: ["-100%", "100%"] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                    className="h-1/2 w-full bg-white"
+                />
+            </div>
         </motion.div>
 
-        {/* Scroll indicator */}
-        <motion.div 
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.2, duration: 0.8 }}
-          className="absolute bottom-20 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
-        >
-          <motion.div 
-            animate={{ y: [0, 6, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-            className="w-px h-8 bg-linear-to-b from-neutral-400 to-transparent dark:from-neutral-600"
-          />
-        </motion.div>
-
-        {/* Hidden SEO text */}
-        <p className="sr-only">
-          Nirupam Pal is a fullstack developer with experience building user-centric web applications using modern
-          JavaScript frameworks. Services include frontend development, backend APIs, database design, performance
-          optimization, and deployment. Available for remote and on-site roles, open to opportunities in Krishnanagar and
-          beyond.
-        </p>
+        {/* Custom Styles for text outline support */}
+        <style jsx global>{`
+            .outline-text {
+                -webkit-text-stroke: 2px #333; /* Dark outline */
+                color: transparent;
+            }
+            @media (min-width: 768px) {
+                .outline-text {
+                    -webkit-text-stroke: 3px #333;
+                }
+            }
+            .spin-slow {
+                animation: spin 10s linear infinite;
+            }
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+            @keyframes noise {
+                0% { transform: translate(0,0) }
+                10% { transform: translate(-5%,-5%) }
+                20% { transform: translate(-10%,5%) }
+                30% { transform: translate(5%,-10%) }
+                40% { transform: translate(-5%,15%) }
+                50% { transform: translate(-10%,5%) }
+                60% { transform: translate(15%,0) }
+                70% { transform: translate(0,10%) }
+                80% { transform: translate(-15%,0) }
+                90% { transform: translate(10%,5%) }
+                100% { transform: translate(5%,0) }
+            }
+            .animate-noise {
+                animation: noise 0.2s steps(10) infinite;
+            }
+        `}</style>
       </section>
     </>
   );

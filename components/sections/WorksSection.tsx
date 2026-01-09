@@ -3,8 +3,9 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion, Variants, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
+// --- TYPES ---
 interface Project {
   title: string;
   description: string;
@@ -34,8 +35,6 @@ const projects: Project[] = [
     year: "2024",
     tech: ["React", "Node.js", "WebRTC"],
   },
- 
- 
   {
     title: "Weather App",
     description: "A responsive weather dashboard built with React, consuming external weather APIs and providing forecasts.",
@@ -58,191 +57,156 @@ const projects: Project[] = [
 
 const categories = ["All", "Fullstack", "Frontend", "EdTech"];
 
-const containerVariants: Variants = {
-  hidden: {},
-  show: {
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2,
-    },
-  },
-};
+// --- COMPONENTS ---
 
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 40 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.25, 0.1, 0.25, 1] } },
-};
-
-const ProjectCard: React.FC<Project & { index: number }> = ({ title, description, image, link, type, year, tech, index }) => {
+const ProjectCard = ({ project, index }: { project: Project; index: number }) => {
   return (
-    <motion.a
-      href={link}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group block rounded-2xl overflow-hidden bg-white dark:bg-neutral-900 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1], delay: index * 0.1 }}
-      aria-label={`Open project ${title}`}
+    <motion.div
+      layout
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
     >
-      {/* Image Container */}
-      <div className="relative aspect-video overflow-hidden bg-neutral-100 dark:bg-neutral-800">
-        <Image
-          src={image}
-          alt={title}
-          fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className="object-cover transition-all duration-700 ease-out group-hover:scale-105"
-          priority={false}
-        />
+      <Link href={project.link} target="_blank" className="group relative block h-[450px] w-full overflow-hidden rounded-2xl bg-neutral-900 border border-white/5">
         
-        {/* Overlay on hover */}
-        <div className="absolute inset-0 bg-neutral-900/0 group-hover:bg-neutral-900/20 dark:group-hover:bg-neutral-100/10 transition-colors duration-500" />
-        
-        {/* View Project indicator */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-          <span className="px-4 py-2 bg-neutral-900 dark:bg-neutral-100 text-neutral-100 dark:text-neutral-900 text-xs font-light tracking-widest uppercase">
-            View Project
-          </span>
+        {/* Background Image with Zoom Effect */}
+        <div className="absolute inset-0 z-0 h-full w-full transition-transform duration-700 ease-in-out group-hover:scale-110">
+          <Image
+            src={project.image}
+            alt={project.title}
+            fill
+            className="object-cover opacity-60 transition-all duration-500 group-hover:opacity-40 group-hover:blur-sm grayscale group-hover:grayscale-0"
+          />
+          {/* Dark Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent opacity-90 transition-opacity duration-500 group-hover:opacity-95" />
         </div>
 
-        {/* Index number */}
-        <div className="absolute bottom-4 left-4 text-xs font-mono text-neutral-400 dark:text-neutral-500">
-          {String(index + 1).padStart(2, '0')}
-        </div>
-      </div>
+        {/* Content Content */}
+        <div className="absolute inset-0 z-10 flex flex-col justify-between p-8">
+          
+          {/* Top: Year & Type */}
+          <div className="flex justify-between items-start translate-y-[-20px] opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
+             <span className="rounded-full border border-white/10 bg-black/50 px-3 py-1 text-[10px] uppercase tracking-widest text-neutral-400 backdrop-blur-md">
+                {project.year}
+             </span>
+             <div className="h-8 w-8 rounded-full bg-white text-black flex items-center justify-center transform rotate-45 group-hover:rotate-0 transition-transform duration-500">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="7" y1="17" x2="17" y2="7"></line>
+                    <polyline points="7 7 17 7 17 17"></polyline>
+                </svg>
+             </div>
+          </div>
 
-      {/* Content */}
-      <div className="p-5 space-y-3">
-        {/* Meta row */}
-        <div className="flex items-center justify-between text-xs tracking-wider text-neutral-400 dark:text-neutral-500 uppercase">
-          <span>{type}</span>
-          <span>{year}</span>
-        </div>
-
-        {/* Title */}
-        <h3 className="text-xl font-light text-neutral-900 dark:text-neutral-100 group-hover:text-neutral-600 dark:group-hover:text-neutral-300 transition-colors duration-300">
-          {title}
-        </h3>
-
-        {/* Description */}
-        <p className="text-sm font-light text-neutral-500 dark:text-neutral-400 leading-relaxed line-clamp-2">
-          {description}
-        </p>
-
-        {/* Tech stack */}
-        <div className="flex flex-wrap gap-2 pt-3">
-          {tech.map((t, i) => (
-            <span
-              key={i}
-              className="text-[10px] tracking-wider uppercase text-neutral-500 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800 px-3 py-1.5 rounded-full"
-            >
-              {t}
+          {/* Bottom: Info */}
+          <div className="transform transition-transform duration-500 group-hover:-translate-y-2">
+            <span className="mb-3 block text-xs font-medium uppercase tracking-[0.2em] text-emerald-500">
+              {project.type}
             </span>
-          ))}
+            <h3 className="mb-3 text-3xl font-bold text-white leading-tight">
+              {project.title}
+            </h3>
+            <p className="max-w-[90%] text-sm leading-relaxed text-neutral-400 opacity-0 transition-all duration-500 group-hover:opacity-100">
+              {project.description}
+            </p>
+            
+            {/* Tech Stack Pills */}
+            <div className="mt-6 flex flex-wrap gap-2 opacity-0 transition-all duration-500 delay-100 group-hover:opacity-100">
+               {project.tech.map((t) => (
+                  <span key={t} className="text-[10px] uppercase tracking-wide text-neutral-300 border border-white/10 px-2 py-1 rounded-md bg-white/5">
+                    {t}
+                  </span>
+               ))}
+            </div>
+          </div>
         </div>
-      </div>
-    </motion.a>
+      </Link>
+    </motion.div>
   );
 };
 
 export default function WorksSection() {
   const [activeFilter, setActiveFilter] = useState("All");
 
-  const filteredProjects = activeFilter === "All" 
-    ? projects 
-    : projects.filter(p => p.type === activeFilter);
+  const filteredProjects = activeFilter === "All"
+    ? projects
+    : projects.filter((p) => p.type === activeFilter);
 
   return (
-    <section id="works" className="py-32 bg-neutral-50 dark:bg-neutral-950 transition-colors duration-500">
-      {/* Section Header */}
-      <div className="max-w-7xl mx-auto px-6 mb-20">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-          className="flex flex-col md:flex-row md:items-end md:justify-between gap-8"
-        >
+    <section id="works" className="relative min-h-screen bg-black py-32 text-white overflow-hidden">
+      
+      {/* Background Noise Texture */}
+      <div className="pointer-events-none absolute inset-0 z-0 opacity-20">
+         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] brightness-100 contrast-150"></div>
+      </div>
+
+      <div className="relative z-10 mx-auto max-w-7xl px-6">
+        
+        {/* Header Section */}
+        <div className="mb-24 flex flex-col md:flex-row md:items-end md:justify-between gap-10">
           <div>
-            <span className="text-xs font-light tracking-[0.4em] text-neutral-400 dark:text-neutral-500 uppercase mb-4 block">
-              Selected Work
-            </span>
-            <h2 className="text-4xl md:text-5xl font-extralight tracking-tight text-neutral-900 dark:text-neutral-100">
-              Projects
-            </h2>
+            <motion.span 
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                className="mb-4 block font-mono text-sm text-emerald-500"
+            >
+                02 / PORTFOLIO
+            </motion.span>
+            <motion.h2 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
+                className="text-5xl md:text-7xl font-bold tracking-tighter text-white"
+            >
+              Selected<br /><span className="text-neutral-600">Works.</span>
+            </motion.h2>
           </div>
-          
-          {/* Filter Pills */}
-          <div className="flex flex-wrap gap-2">
+
+          {/* Filters */}
+          <div className="flex flex-wrap gap-4">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveFilter(cat)}
-                className={`px-4 py-2 text-xs font-light tracking-wider uppercase transition-all duration-300 ${
+                className={`px-6 py-2 rounded-full text-xs uppercase tracking-widest transition-all duration-300 border ${
                   activeFilter === cat
-                    ? "bg-neutral-900 dark:bg-neutral-100 text-neutral-100 dark:text-neutral-900"
-                    : "text-neutral-500 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-800 hover:border-neutral-400 dark:hover:border-neutral-600"
+                    ? "bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.3)]"
+                    : "bg-transparent text-neutral-500 border-neutral-800 hover:border-neutral-600 hover:text-white"
                 }`}
               >
                 {cat}
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Project Grid */}
+        <motion.div 
+            layout 
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8"
+        >
+          <AnimatePresence mode="popLayout">
+            {filteredProjects.map((project, index) => (
+              <ProjectCard key={project.title} project={project} index={index} />
+            ))}
+          </AnimatePresence>
         </motion.div>
 
-        {/* Divider */}
-        <motion.div
-          initial={{ scaleX: 0 }}
-          whileInView={{ scaleX: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1], delay: 0.2 }}
-          className="h-px bg-neutral-200 dark:bg-neutral-800 mt-12 origin-left"
-        />
-      </div>
-
-      {/* Projects Grid */}
-      <div className="max-w-7xl mx-auto px-6">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeFilter}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          >
-            {filteredProjects.map((project, idx) => (
-              <ProjectCard key={project.title} {...project} index={idx} />
-            ))}
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      {/* Bottom CTA */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-        className="max-w-7xl mx-auto px-6 mt-24"
-      >
-        <div className="flex flex-col md:flex-row items-center justify-between py-12 border-t border-b border-neutral-200 dark:border-neutral-800">
-          <p className="text-lg font-light text-neutral-600 dark:text-neutral-400 mb-6 md:mb-0">
-            Want to see more of my work?
-          </p>
-          <Link
-            href="https://github.com/nirupampal"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group inline-flex items-center gap-3 text-sm font-light tracking-widest uppercase text-neutral-900 dark:text-neutral-100 transition-all duration-300"
-          >
-            <span>View GitHub</span>
-            <span className="w-8 h-px bg-neutral-900 dark:bg-neutral-100 group-hover:w-12 transition-all duration-300" />
-          </Link>
+        {/* Footer CTA */}
+        <div className="mt-32 flex justify-center border-t border-white/10 pt-16">
+           <Link 
+              href="https://github.com/nirupampal" 
+              target="_blank"
+              className="group flex items-center gap-4 text-xl font-light text-neutral-400 hover:text-white transition-colors"
+           >
+              <span>More on GitHub</span>
+              <span className="block h-[1px] w-12 bg-neutral-600 group-hover:w-24 group-hover:bg-white transition-all duration-300" />
+           </Link>
         </div>
-      </motion.div>
+
+      </div>
     </section>
   );
 }

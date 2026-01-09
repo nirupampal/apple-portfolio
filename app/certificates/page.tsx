@@ -1,0 +1,92 @@
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import Image from 'next/image';
+import Link from 'next/link';
+
+export const metadata = {
+  title: 'Certificates - Nirupam Pal',
+  description: 'Professional certificates and achievements',
+};
+
+const certificates = [
+  {
+    id: 'hr-se-2026',
+    title: 'Software Engineer',
+    issuer: 'HackerRank',
+    issuedOn: '09 Jan 2026',
+    image: '/hacker-rank-software-engineer.jpg',
+    verifyUrl: 'https://www.hackerrank.com/certificates/iframe/db1cfdf0bbf4',
+  },
+  // Add more certificates here as needed
+];
+
+export default function CertificatesPage() {
+  return (
+    <>
+      <Header />
+
+      <main className="min-h-screen py-24">
+        <div className="max-w-6xl mx-auto px-6">
+          <header className="mb-10">
+            <h1 className="text-4xl md:text-5xl font-extralight text-neutral-900 dark:text-neutral-100">Certificates</h1>
+            <p className="mt-2 text-neutral-500 dark:text-neutral-400">Selected professional certificates and issued dates.</p>
+          </header>
+
+          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {certificates.map((c) => (
+              <article key={c.id} className="bg-white dark:bg-neutral-900 border rounded-lg overflow-hidden shadow-sm">
+                <div className="relative w-full h-56">
+                  <Image src={c.image} alt={`${c.issuer} - ${c.title}`} fill className="object-cover" />
+                </div>
+
+                <div className="p-4">
+                  <h3 className="text-lg font-medium text-neutral-900 dark:text-neutral-100">{c.title}</h3>
+                  <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">{c.issuer}</p>
+                  <p className="text-xs text-neutral-400 mt-2">Issued on {c.issuedOn}</p>
+
+                  <div className="mt-4 flex items-center gap-3">
+                    <Link href={c.verifyUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-3 py-2 text-xs border border-neutral-900 dark:border-neutral-100 text-neutral-900 dark:text-neutral-100 hover:bg-neutral-900 hover:text-neutral-100 dark:hover:bg-neutral-100 dark:hover:text-neutral-900 transition-colors rounded">
+                      Verify
+                    </Link>
+                    <span className="inline-block text-xs text-neutral-500">•</span>
+                    <span className="text-xs text-neutral-500">Digital badge available</span>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </section>
+        </div>
+      </main>
+
+      <Footer />
+    </>
+  );
+}
+import React from "react";
+
+export const metadata = {
+  title: "Certificates",
+  description: "Professional certificates",
+};
+
+export default function CertificatesPage() {
+  return (
+    <main className="min-h-screen flex items-start justify-center py-24">
+      <div className="max-w-4xl w-full px-6">
+        <h1 className="text-3xl font-semibold mb-6">Certificates</h1>
+
+        <div className="w-full rounded overflow-hidden border">
+          <div className="relative" style={{ paddingTop: "56.25%" }}>
+            <iframe
+              src="https://www.hackerrank.com/certificates/iframe/db1cfdf0bbf4"
+              title="HackerRank Certificate"
+              className="absolute top-0 left-0 w-full h-full"
+              frameBorder={0}
+              allowFullScreen
+            />
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}

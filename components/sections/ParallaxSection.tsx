@@ -1,178 +1,128 @@
 "use client";
 
 import React, { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
 
 interface ParallaxSectionProps {
-  title: string;
-  subtitle?: string;
+  heading: string;
+  subheading?: string;
   quote?: string;
 }
 
+// --- COMPONENTS ---
+
+const GrainOverlay = () => (
+  <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden opacity-20">
+    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-repeat brightness-100 contrast-150" />
+  </div>
+);
+
+const FogSlice = ({ 
+  delay, 
+  top, 
+  left, 
+  color = "bg-white", 
+  scrollYProgress 
+}: { 
+  delay: number; 
+  top: string; 
+  left: string; 
+  color?: string; 
+  scrollYProgress: MotionValue<number>; 
+}) => {
+  // Parallax movement for the fog
+  const x = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
+  
+  return (
+    <motion.div
+      style={{ top, left, x }}
+      animate={{ 
+        opacity: [0.1, 0.3, 0.1], 
+        scaleX: [1, 1.5, 1],
+        x: ["-10%", "10%", "-10%"] // Natural drift
+      }}
+      transition={{ 
+        duration: 10, 
+        delay, 
+        repeat: Infinity, 
+        ease: "easeInOut" 
+      }}
+      className={`absolute h-1 w-[40vw] rounded-full blur-[40px] ${color}`}
+    />
+  );
+};
+
 export default function ParallaxSection({
-  title,
-  subtitle,
+  heading,
+  subheading = "PHILOSOPHY",
   quote,
 }: ParallaxSectionProps) {
-  const ref = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   
   const { scrollYProgress } = useScroll({
-    target: ref,
+    target: containerRef,
     offset: ["start end", "end start"],
   });
 
-  // Text animations
-  const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0]);
-  const textY = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [50, 0, 0, -50]);
-  
-  // Rotate the gradient ring based on scroll
-  const rotate = useTransform(scrollYProgress, [0, 1], [0, 180]);
+  // Animations
+  const yText = useTransform(scrollYProgress, [0, 0.5, 1], [100, 0, -100]);
+  const opacityText = useTransform(scrollYProgress, [0, 0.4, 0.6, 1], [0, 1, 1, 0]);
+  const scaleLine = useTransform(scrollYProgress, [0.3, 0.5], [0, 1]);
 
   return (
     <section
-      ref={ref}
-      className="relative h-screen overflow-hidden"
+      ref={containerRef}
+      className="relative h-screen w-full overflow-hidden bg-black text-white"
     >
-      {/* Dark Background - respects theme */}
-      <div className="absolute inset-0 bg-neutral-950 dark:bg-neutral-950">
-        {/* Subtle radial gradient */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-neutral-900 via-neutral-950 to-black" />
+      <GrainOverlay />
+
+      {/* --- Ambient Background Elements --- */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-black via-neutral-950 to-black" />
+        
+        {/* Drifting Fog Slices */}
+        <FogSlice delay={0} top="20%" left="-10%" color="bg-neutral-800" scrollYProgress={scrollYProgress} />
+        <FogSlice delay={2} top="40%" left="60%" color="bg-emerald-900" scrollYProgress={scrollYProgress} />
+        <FogSlice delay={4} top="70%" left="10%" color="bg-neutral-700" scrollYProgress={scrollYProgress} />
+        
+        {/* Vertical Grid Line (Subtle) */}
+        <div className="absolute left-12 top-0 bottom-0 w-px bg-white/5 hidden md:block" />
+        <div className="absolute right-12 top-0 bottom-0 w-px bg-white/5 hidden md:block" />
       </div>
 
-      {/* Floating Glow Orbs - White/Blue theme */}
-      <motion.div
-        className="absolute top-1/3 left-1/4 w-72 h-72 bg-white rounded-full blur-[120px] opacity-[0.08]"
-        animate={{
-          x: [0, 60, 0, -60, 0],
-          y: [0, -60, 60, 0, 0],
-          scale: [1, 1.2, 1, 1.1, 1],
-        }}
-        transition={{
-          duration: 15,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      />
-      <motion.div
-        className="absolute bottom-1/3 right-1/4 w-64 h-64 bg-blue-500 rounded-full blur-[100px] opacity-[0.15]"
-        animate={{
-          x: [0, -50, 0, 50, 0],
-          y: [0, 50, -50, 0, 0],
-          scale: [1, 1.15, 1, 1.2, 1],
-        }}
-        transition={{
-          duration: 12,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      />
-      <motion.div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-400 rounded-full blur-[150px] opacity-[0.08]"
-        animate={{
-          scale: [1, 1.3, 1],
-        }}
-        transition={{
-          duration: 20,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      />
-
-      {/* Rotating gradient ring */}
-      <motion.div
-        className="absolute inset-0 flex items-center justify-center pointer-events-none"
-        style={{ rotate }}
-      >
-        <div className="w-[600px] h-[600px] rounded-full border border-white/5" />
-        <div className="absolute w-[500px] h-[500px] rounded-full border border-blue-500/10" />
-      </motion.div>
-
-      {/* Subtle grid lines */}
-      <div className="absolute inset-0 opacity-[0.03]">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `
-            linear-gradient(to right, white 1px, transparent 1px),
-            linear-gradient(to bottom, white 1px, transparent 1px)
-          `,
-          backgroundSize: '80px 80px',
-        }} />
-      </div>
-
-      {/* Shimmer effect */}
-      <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent"
-        animate={{
-          x: ['-200%', '200%'],
-        }}
-        transition={{
-          duration: 10,
-          repeat: Infinity,
-          ease: "linear",
-        }}
-      />
-
-      {/* Content */}
-      <motion.div
-        className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6 max-w-5xl mx-auto"
-        style={{ opacity, y: textY }}
-      >
-        {subtitle && (
-          <motion.span
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="inline-block text-xs font-light tracking-[0.4em] text-neutral-400 uppercase mb-6"
-          >
-            {subtitle}
-          </motion.span>
-        )}
-
-        <motion.h2
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-          className="text-4xl md:text-6xl lg:text-7xl font-extralight tracking-tight text-white mb-8 leading-tight"
+      {/* --- Content --- */}
+      <div className="relative z-10 flex h-full flex-col items-center justify-center px-6">
+        <motion.div 
+            style={{ y: yText, opacity: opacityText }}
+            className="max-w-4xl text-center"
         >
-          {title}
-        </motion.h2>
+            {/* Subheading */}
+            <span className="mb-6 block font-mono text-sm tracking-widest text-emerald-500 uppercase">
+                // {subheading}
+            </span>
 
-        {quote && (
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-            className="text-lg md:text-xl font-light text-neutral-400 leading-relaxed max-w-2xl mx-auto"
-          >
-            &ldquo;{quote}&rdquo;
-          </motion.p>
-        )}
+            {/* Main Heading */}
+            <h2 className="mb-8 text-5xl md:text-7xl font-bold tracking-tighter text-white leading-[0.9]">
+                {heading}
+            </h2>
 
-        {/* Glowing decorative line */}
-        <motion.div
-          initial={{ scaleX: 0 }}
-          whileInView={{ scaleX: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1, delay: 0.7 }}
-          className="w-24 h-px mx-auto mt-10 relative"
-        >
-          <div className="absolute inset-0 bg-white/60" />
-          <div className="absolute inset-0 bg-blue-400 blur-sm opacity-50" />
+            {/* Decorative Line */}
+            <motion.div 
+                style={{ scaleX: scaleLine }}
+                className="mx-auto mb-10 h-px w-32 bg-gradient-to-r from-transparent via-white to-transparent" 
+            />
+
+            {/* Quote */}
+            {quote && (
+                <p className="mx-auto max-w-2xl font-serif text-xl italic text-neutral-400 leading-relaxed">
+                    "{quote}"
+                </p>
+            )}
         </motion.div>
-      </motion.div>
+      </div>
 
-      {/* Scroll indicator with glow */}
-      <motion.div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
-        animate={{ y: [0, 10, 0] }}
-        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-      >
-        <div className="w-px h-12 bg-gradient-to-b from-white/50 to-transparent relative">
-          <div className="absolute inset-0 bg-blue-400 blur-sm opacity-30" />
-        </div>
-      </motion.div>
+      {/* --- Overlay Gradient Vingette --- */}
+      <div className="pointer-events-none absolute inset-0 z-20 bg-[radial-gradient(circle_at_center,transparent_0%,black_120%)]" />
     </section>
   );
 }

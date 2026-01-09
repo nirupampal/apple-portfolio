@@ -1,259 +1,232 @@
 "use client";
 
-import React, { useState } from "react";
-import { motion, Variants } from "framer-motion";
-import { useTheme } from "@/context/ThemeContext";
+import React, { useRef } from "react";
+import { motion, useScroll, useTransform, useSpring, useInView } from "framer-motion";
 import type { JSX } from "react/jsx-runtime";
 
+// --- DATA ---
 type Skill = {
   name: string;
-  category: string;
-  icon: string; // Simple Icons slug or custom
+  icon: string;
 };
 
-const skills: Skill[] = [
-  // Frontend
-  { name: "HTML5", category: "Frontend", icon: "html5" },
-  { name: "CSS3", category: "Frontend", icon: "css" },
-  { name: "JavaScript", category: "Frontend", icon: "javascript" },
-  { name: "TypeScript", category: "Frontend", icon: "typescript" },
-  { name: "React", category: "Frontend", icon: "react" },
-  { name: "Next.js", category: "Frontend", icon: "nextdotjs" },
-  { name: "Tailwind CSS", category: "Frontend", icon: "tailwindcss" },
-  { name: "React Native", category: "Frontend", icon: "react" },
-  // Backend
-  { name: "Node.js", category: "Backend", icon: "nodedotjs" },
-  { name: "Express.js", category: "Backend", icon: "express" },
-  { name: "Socket.io", category: "Backend", icon: "socketdotio" },
-  { name: "REST APIs", category: "Backend", icon: "openapiinitiative" },
-  { name: "GraphQL", category: "Backend", icon: "graphql" },
-  { name: "Python", category: "Backend", icon: "python" },
-  // Database
-  { name: "MongoDB", category: "Database", icon: "mongodb" },
-  { name: "PostgreSQL", category: "Database", icon: "postgresql" },
-  { name: "MySQL", category: "Database", icon: "mysql" },
-  { name: "Redis", category: "Database", icon: "redis" },
-  { name: "Firebase", category: "Database", icon: "firebase" },
-  // DevOps
-  { name: "Docker", category: "DevOps", icon: "docker" },
-  { name: "Kubernetes", category: "DevOps", icon: "kubernetes" },
-  { name: "AWS", category: "DevOps", icon: "amazonaws" },
-  { name: "CI/CD", category: "DevOps", icon: "githubactions" },
-  { name: "Nginx", category: "DevOps", icon: "nginx" },
-  { name: "Linux", category: "DevOps", icon: "linux" },
-  // Tools
-  { name: "Git", category: "Tools", icon: "git" },
-  { name: "VS Code", category: "Tools", icon: "vscode" },
-  { name: "Figma", category: "Tools", icon: "figma" },
-  { name: "Postman", category: "Tools", icon: "postman" },
+type CategoryData = {
+  id: string;
+  title: string;
+  description: string;
+  skills: Skill[];
+  color: string; // Accent color for the group
+};
+
+const skillData: CategoryData[] = [
+  {
+    id: "frontend",
+    title: "Frontend",
+    description: "Crafting pixel-perfect, responsive user interfaces with a focus on performance and accessibility. I specialize in the React ecosystem.",
+    color: "#61DAFB", // React Blue
+    skills: [
+      { name: "React", icon: "react" },
+      { name: "Next.js", icon: "nextdotjs" },
+      { name: "TypeScript", icon: "typescript" },
+      { name: "Tailwind CSS", icon: "tailwindcss" },
+      { name: "Framer Motion", icon: "framer" },
+      { name: "React Native", icon: "react" },
+    ],
+  },
+  {
+    id: "backend",
+    title: "Backend",
+    description: "Architecting scalable server-side solutions. I build robust APIs and handle real-time communications.",
+    color: "#68A063", // Node Green
+    skills: [
+      { name: "Node.js", icon: "nodedotjs" },
+      { name: "Express", icon: "express" },
+      { name: "Socket.io", icon: "socketdotio" },
+      { name: "GraphQL", icon: "graphql" },
+      { name: "Python", icon: "python" },
+    ],
+  },
+  {
+    id: "database",
+    title: "Database",
+    description: "Designing efficient data schemas. I work with both relational and document-based databases to ensure data integrity.",
+    color: "#336791", // SQL Blue
+    skills: [
+      { name: "PostgreSQL", icon: "postgresql" },
+      { name: "MongoDB", icon: "mongodb" },
+      { name: "Redis", icon: "redis" },
+      { name: "Firebase", icon: "firebase" },
+      { name: "Supabase", icon: "supabase" },
+    ],
+  },
+  {
+    id: "devops",
+    title: "DevOps",
+    description: "Streamlining deployment pipelines. I ensure code gets to production safely and servers remain healthy.",
+    color: "#E34F26", // Git Orange
+    skills: [
+      { name: "Docker", icon: "docker" },
+      { name: "AWS", icon: "amazonaws" },
+      { name: "Git", icon: "git" },
+      { name: "CI/CD", icon: "githubactions" },
+      { name: "Linux", icon: "linux" },
+    ],
+  },
 ];
 
-const categories = ["All", "Frontend", "Backend", "Database", "DevOps", "Tools"];
-
-const containerVariants: Variants = {
-  hidden: {},
-  show: {
-    transition: {
-      staggerChildren: 0.05,
-      delayChildren: 0.2,
-    },
-  },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.1, 0.25, 1] } },
-};
-
-const lineVariants: Variants = {
-  hidden: { scaleX: 0 },
-  show: { scaleX: 1, transition: { duration: 1, ease: [0.25, 0.1, 0.25, 1] } },
-};
-
-// Generate Simple Icons URL with theme-aware color
-function getIconUrl(slug: string, color: string): string {
-  return `https://cdn.simpleicons.org/${slug}/${color}`;
+// --- UTILS ---
+function getIconUrl(slug: string): string {
+  // requesting white icons for dark theme
+  return `https://cdn.simpleicons.org/${slug}/ffffff`;
 }
 
-export default function SkillsSection(): JSX.Element {
-  const [activeCategory, setActiveCategory] = useState("All");
-  const [hoveredSkill, setHoveredSkill] = useState<string | null>(null);
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
+// --- COMPONENTS ---
 
-  const filteredSkills = activeCategory === "All"
-    ? skills
-    : skills.filter(s => s.category === activeCategory);
+const SkillCard = ({ name, icon, color }: { name: string; icon: string; color: string }) => {
+  return (
+    <motion.div
+      variants={{
+        hidden: { opacity: 0, x: -20 },
+        visible: { opacity: 1, x: 0 },
+      }}
+      whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.03)" }}
+      className="flex items-center gap-4 p-4 rounded-xl border border-white/5 bg-neutral-900/40 backdrop-blur-sm transition-colors group cursor-default"
+    >
+      <div className="relative w-10 h-10 flex items-center justify-center bg-neutral-800 rounded-lg group-hover:bg-neutral-700 transition-colors">
+        <img src={getIconUrl(icon)} alt={name} className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" />
+        {/* Glow behind icon */}
+        <div 
+            className="absolute inset-0 rounded-lg blur-md opacity-0 group-hover:opacity-40 transition-opacity duration-300"
+            style={{ backgroundColor: color }}
+        />
+      </div>
+      <span className="text-neutral-300 font-light tracking-wide group-hover:text-white transition-colors">
+        {name}
+      </span>
+    </motion.div>
+  );
+};
 
-  // Group by category for display
-  const grouped = filteredSkills.reduce<Record<string, Skill[]>>((acc, s) => {
-    acc[s.category] = acc[s.category] || [];
-    acc[s.category].push(s);
-    return acc;
-  }, {});
+const CategorySection = ({ data, index }: { data: CategoryData; index: number }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: false, margin: "-10% 0px -10% 0px" });
+  
+  // Parallax effect for the Title
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
+  
+  const yParallax = useTransform(scrollYProgress, [0, 1], [50, -50]);
+  const opacityParallax = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
 
   return (
-    <section
-      id="skills"
-      aria-labelledby="skills-heading"
-      className="w-full bg-neutral-50 dark:bg-neutral-950 py-32 transition-colors duration-500"
+    <section 
+      ref={ref}
+      className="relative min-h-[80vh] flex items-center py-24 border-l border-white/10 ml-4 md:ml-12 pl-8 md:pl-16"
     >
-      <div className="max-w-7xl mx-auto px-6 lg:px-12">
-        {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-          className="mb-20"
-        >
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8">
-            <div>
-              <span className="text-xs font-light tracking-[0.4em] text-neutral-400 dark:text-neutral-500 uppercase mb-4 block">
-                04 — Expertise
-              </span>
-              <h2
-                id="skills-heading"
-                className="text-4xl md:text-6xl font-extralight tracking-tight text-neutral-900 dark:text-neutral-100"
-              >
-                Skills & Technologies
-              </h2>
-            </div>
+      {/* Connector Line Dot */}
+      <span className={`absolute -left-[5px] top-1/2 w-2.5 h-2.5 rounded-full transition-colors duration-500 ${isInView ? "bg-white shadow-[0_0_10px_white]" : "bg-neutral-800"}`} />
 
-            {/* Filter Pills */}
-            <div className="flex flex-wrap gap-2">
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => setActiveCategory(cat)}
-                  className={`px-4 py-2 text-xs font-light tracking-wider uppercase transition-all duration-300 ${
-                    activeCategory === cat
-                      ? "bg-neutral-900 dark:bg-neutral-100 text-neutral-100 dark:text-neutral-900"
-                      : "text-neutral-500 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-800 hover:border-neutral-400 dark:hover:border-neutral-600"
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <motion.div
-            variants={lineVariants}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-            className="h-px bg-neutral-200 dark:bg-neutral-800 mt-12 origin-left"
-          />
-        </motion.div>
-
-        {/* Skills Grid */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true }}
-          className="space-y-16"
-        >
-          {Object.entries(grouped).map(([category, categorySkills]) => (
-            <motion.div key={category} variants={itemVariants}>
-              <div className="flex items-center gap-4 mb-8">
-                <span className="text-xs font-mono text-neutral-300 dark:text-neutral-700">
-                  {String(categories.indexOf(category)).padStart(2, '0')}
-                </span>
-                <h3 className="text-xs font-light tracking-[0.3em] text-neutral-400 dark:text-neutral-500 uppercase">
-                  {category}
-                </h3>
-                <div className="flex-1 h-px bg-neutral-200 dark:bg-neutral-800" />
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {categorySkills.map((skill) => (
-                  <motion.div
-                    key={skill.name}
-                    variants={itemVariants}
-                    onMouseEnter={() => setHoveredSkill(skill.name)}
-                    onMouseLeave={() => setHoveredSkill(null)}
-                    whileHover={{ y: -5, scale: 1.02 }}
-                    transition={{ duration: 0.2 }}
-                    className={`group relative py-6 px-5 border rounded-lg transition-all duration-300 cursor-default overflow-hidden ${
-                      hoveredSkill === skill.name
-                        ? "border-transparent bg-neutral-900 dark:bg-neutral-100 shadow-lg"
-                        : "border-neutral-200 dark:border-neutral-800 hover:border-neutral-400 dark:hover:border-neutral-600 hover:shadow-md"
-                    }`}
-                  >
-                    {/* Gradient glow effect on hover */}
-                    {hoveredSkill === skill.name && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="absolute -inset-1 bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 rounded-lg blur opacity-20"
-                      />
-                    )}
-                    
-                    <div className="relative flex items-center gap-4">
-                      {/* Skill Icon */}
-                      <div className="relative w-8 h-8 shrink-0">
-                        {/* Icon images (use simple <img> for external SVGs) */}
-                        <img
-                          src={getIconUrl(skill.icon, hoveredSkill === skill.name ? (isDark ? "171717" : "ffffff") : (isDark ? "ffffff" : "171717"))}
-                          alt={skill.name}
-                          width={32}
-                          height={32}
-                          className={`absolute inset-0 w-8 h-8 object-contain transition-all duration-300 ${
-                            hoveredSkill === skill.name ? "scale-110" : ""
-                          }`}
-                        />
-                      </div>
-
-                      {/* Skill Name */}
-                      <span
-                        className={`text-sm font-light tracking-wide transition-colors duration-300 ${
-                          hoveredSkill === skill.name
-                            ? "text-neutral-100 dark:text-neutral-900"
-                            : "text-neutral-700 dark:text-neutral-300"
-                        }`}
-                      >
-                        {skill.name}
-                      </span>
-                    </div>
-                    
-                    {/* Shine effect */}
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
-
-        {/* Bottom Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
-          className="mt-24 pt-12 border-t border-neutral-200 dark:border-neutral-800"
-        >
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-            <p className="text-lg font-light text-neutral-500 dark:text-neutral-400 text-center md:text-left">
-              Always learning, always growing. These are the tools I use daily to build production-ready applications.
-            </p>
-            <a
-              href="#contact"
-              className="group inline-flex items-center gap-3 text-sm font-light tracking-widest uppercase text-neutral-900 dark:text-neutral-100 transition-all duration-300"
+      <div className="grid lg:grid-cols-2 gap-16 w-full max-w-6xl">
+        
+        {/* Left: Title & Description */}
+        <div className="relative">
+          <motion.div style={{ y: yParallax, opacity: opacityParallax }} className="sticky top-1/2">
+            <span 
+                className="text-sm font-mono mb-4 block opacity-50" 
+                style={{ color: data.color }}
             >
-              <span>Let's Work Together</span>
-              <span className="w-8 h-px bg-neutral-900 dark:bg-neutral-100 group-hover:w-12 transition-all duration-300" />
-            </a>
-          </div>
+                0{index + 1} / CATEGORY
+            </span>
+            <h2 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tighter">
+              {data.title}
+            </h2>
+            <p className="text-lg text-neutral-400 font-light leading-relaxed max-w-md border-l-2 border-white/5 pl-6">
+              {data.description}
+            </p>
+          </motion.div>
+        </div>
+
+        {/* Right: Skills Grid */}
+        <motion.div
+          initial="hidden"
+          animate={isInView ? "visible" : "hidden"}
+          variants={{
+            visible: { transition: { staggerChildren: 0.08 } },
+            hidden: {},
+          }}
+          className="grid grid-cols-1 sm:grid-cols-2 gap-4 content-center"
+        >
+          {data.skills.map((skill) => (
+            <SkillCard key={skill.name} name={skill.name} icon={skill.icon} color={data.color} />
+          ))}
         </motion.div>
       </div>
     </section>
   );
+};
+
+export default function SkillsParallax(): JSX.Element {
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
+
+  return (
+    <div className="bg-black min-h-screen text-white overflow-hidden selection:bg-white/20">
+      
+      {/* Background Ambience */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-purple-900/20 blur-[120px]" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-blue-900/10 blur-[120px]" />
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
+      </div>
+
+      {/* Progress Bar Top */}
+      <motion.div
+        className="fixed top-0 left-0 right-0 h-1 bg-white origin-left z-50 mix-blend-difference"
+        style={{ scaleX }}
+      />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-20">
+        
+        {/* Header */}
+        <div className="mb-32 pl-4 md:pl-12">
+            <motion.h1 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+                className="text-6xl md:text-9xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-neutral-800"
+            >
+                Tech<br /> Stack.
+            </motion.h1>
+            <motion.p 
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                transition={{ delay: 0.5, duration: 1 }}
+                className="mt-8 text-neutral-500 max-w-xl text-lg"
+            >
+                A curated list of technologies I use to build digital products. 
+                Scroll down to explore my expertise.
+            </motion.p>
+        </div>
+
+        {/* Categories Loop */}
+        <div className="flex flex-col gap-0 pb-32">
+            {skillData.map((category, index) => (
+            <CategorySection key={category.id} data={category} index={index} />
+            ))}
+        </div>
+
+        {/* Footer CTA */}
+        <div className="flex justify-center py-20 border-t border-white/10">
+            <p className="text-neutral-500 font-mono text-sm">END OF LIST</p>
+        </div>
+
+      </div>
+    </div>
+  );
 }
-
-

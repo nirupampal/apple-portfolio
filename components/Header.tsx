@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import ThemeSwitcher from "@/components/ThemeSwitcher";
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
 
+// --- DATA ---
 const navItems = [
   { name: "Home", href: "#home", index: "01" },
   { name: "Works", href: "#works", index: "02" },
@@ -13,247 +13,191 @@ const navItems = [
   { name: "Contact", href: "#contact", index: "05" },
 ];
 
+// --- COMPONENTS ---
+
+const GrainOverlay = () => (
+  <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden opacity-20">
+    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-repeat brightness-100 contrast-150" />
+  </div>
+);
+
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showHeader, setShowHeader] = useState(true);
+  const [isHidden, setIsHidden] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
-  const drawerRef = useRef<HTMLDivElement | null>(null);
-  const lastScrollRef = useRef(0);
+  const { scrollY } = useScroll();
+  const lastYRef = useRef(0);
 
-  // Scroll-hide/show header & track active section
+  // Handle Scroll (Hide/Show & Active Section)
+  useMotionValueEvent(scrollY, "change", (y) => {
+    const diff = y - lastYRef.current;
+    if (Math.abs(diff) > 50) {
+      setIsHidden(diff > 0); // Hide on scroll down
+      lastYRef.current = y;
+    }
+  });
+
   useEffect(() => {
-    const handleScroll = () => {
-      const current = window.scrollY;
-      setShowHeader(current < lastScrollRef.current || current < 10);
-      lastScrollRef.current = current;
-
-      // Track active section
+    const handleScrollSpy = () => {
       const sections = navItems.map((item) => item.href.replace("#", ""));
-      for (const section of sections.reverse()) {
+      for (const section of sections) {
         const el = document.getElementById(section);
-        if (el && el.getBoundingClientRect().top <= 150) {
-          setActiveSection(section);
-          break;
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top >= 0 && rect.top <= 300) {
+            setActiveSection(section);
+            break;
+          }
         }
       }
     };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScrollSpy);
+    return () => window.removeEventListener("scroll", handleScrollSpy);
   }, []);
 
-  // Close drawer when clicking outside
+  // Lock body scroll on menu open
   useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (isMenuOpen && drawerRef.current && !drawerRef.current.contains(e.target as Node)) {
-        setIsMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [isMenuOpen]);
-
-  // Lock body scroll when menu is open
-  useEffect(() => {
-    if (isMenuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
+    document.body.style.overflow = isMenuOpen ? "hidden" : "unset";
   }, [isMenuOpen]);
 
   const scrollToSection = (href: string) => (e: React.MouseEvent) => {
     e.preventDefault();
     const id = href.replace("#", "");
     const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-    setIsMenuOpen(false);
+    if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        setIsMenuOpen(false);
+    }
   };
 
   return (
     <>
-      {/* Top Header Bar */}
       <motion.header
-        initial={{ y: -100 }}
-        animate={{ y: showHeader ? 0 : -100, opacity: showHeader ? 1 : 0 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-        className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-white/30 dark:bg-black/30"
+        variants={{
+            visible: { y: 0 },
+            hidden: { y: "-100%" },
+        }}
+        animate={isHidden ? "hidden" : "visible"}
+        transition={{ duration: 0.35, ease: "easeInOut" }}
+        className="fixed top-0 left-0 right-0 z-50 flex h-20 items-center border-b border-white/5 bg-black/50 backdrop-blur-md"
       >
-        <div className="mx-auto max-w-7xl px-6 lg:px-12">
-          <div className="flex items-center justify-between h-20 border-b border-neutral-200 dark:border-neutral-800">
-            {/* Logo */}
-            <Link href="/" className="group flex items-center gap-3">
-              <div className="w-10 h-10 border border-neutral-900 dark:border-neutral-100 flex items-center justify-center">
-                <span className="text-sm font-light tracking-wider text-neutral-900 dark:text-neutral-100">
-                  NP
-                </span>
-              </div>
-              <div className="hidden sm:block">
-                <span className="text-xs tracking-[0.3em] text-neutral-500 uppercase">
-                  Portfolio
-                </span>
-              </div>
-            </Link>
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6">
+          
+          {/* Logo */}
+          <Link href="/" className="group flex items-center gap-4">
+            <div className="flex h-10 w-10 items-center justify-center border border-white/20 bg-white/5 transition-colors group-hover:border-emerald-500 group-hover:bg-emerald-500/10">
+               <span className="font-mono text-sm font-bold text-white">NP</span>
+            </div>
+            <div className="hidden sm:flex flex-col">
+                <span className="text-xs font-bold text-white tracking-widest uppercase">Nirupam Pal</span>
+                <span className="text-[10px] text-neutral-500 tracking-wider">Fullstack Dev</span>
+            </div>
+          </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-1">
-              {navItems.map((item) => (
-                <button
-                  key={item.name}
-                  onClick={scrollToSection(item.href)}
-                  className={`group relative px-4 py-2 text-xs tracking-[0.2em] uppercase transition-colors duration-300 ${
-                    activeSection === item.href.replace("#", "")
-                      ? "text-neutral-900 dark:text-neutral-100"
-                      : "text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100"
-                  }`}
-                >
-                  <span className="relative z-10">{item.name}</span>
-                  {activeSection === item.href.replace("#", "") && (
-                    <motion.div
-                      layoutId="activeSection"
-                      className="absolute inset-0 border-b border-neutral-900 dark:border-neutral-100"
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    />
-                  )}
-                </button>
-              ))}
-            </nav>
-
-            {/* Right side - Theme & Menu */}
-            <div className="flex items-center gap-4">
-              {/* Desktop Resume Button */}
-              <a
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex items-center gap-8">
+            {navItems.map((item) => {
+                const isActive = activeSection === item.href.replace("#", "");
+                return (
+                    <button
+                        key={item.name}
+                        onClick={scrollToSection(item.href)}
+                        className={`text-xs font-medium tracking-widest uppercase transition-colors hover:text-white ${
+                            isActive ? "text-white" : "text-neutral-500"
+                        }`}
+                    >
+                        <span className="relative">
+                            {item.name}
+                            {isActive && (
+                                <motion.span 
+                                    layoutId="navDot"
+                                    className="absolute -bottom-2 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" 
+                                />
+                            )}
+                        </span>
+                    </button>
+                )
+            })}
+             <a
                 href="https://drive.google.com/file/d/1WdiR6QzRi3tsuMX-d5JHZ3_t3tnH_F-z/view"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hidden lg:inline-flex items-center px-4 py-2 text-xs tracking-[0.2em] uppercase border border-neutral-900 dark:border-neutral-100 text-neutral-900 dark:text-neutral-100 hover:bg-neutral-900 hover:text-neutral-100 dark:hover:bg-neutral-100 dark:hover:text-neutral-900 transition-colors duration-300"
-              >
+                className="ml-4 px-5 py-2 text-xs font-bold text-black bg-white hover:bg-emerald-400 transition-colors uppercase tracking-wider"
+             >
                 Resume
-              </a>
-              
-              <ThemeSwitcher />
+             </a>
+          </nav>
 
-              {/* Mobile Menu Button */}
-              <button
-                onClick={() => setIsMenuOpen(true)}
-                className="lg:hidden w-10 h-10 flex flex-col items-center justify-center gap-1.5"
-                aria-label="Open menu"
-              >
-                <span className="w-5 h-px bg-neutral-900 dark:bg-neutral-100" />
-                <span className="w-5 h-px bg-neutral-900 dark:bg-neutral-100" />
-              </button>
-            </div>
-          </div>
+          {/* Mobile Menu Toggle */}
+          <button
+            onClick={() => setIsMenuOpen(true)}
+            className="group flex h-10 w-10 flex-col items-center justify-center gap-1.5 md:hidden"
+          >
+            <span className="h-px w-6 bg-white transition-all group-hover:w-8 group-hover:bg-emerald-400" />
+            <span className="h-px w-6 bg-white transition-all group-hover:w-4 group-hover:bg-emerald-400" />
+          </button>
         </div>
       </motion.header>
 
-      {/* Mobile Fullscreen Menu */}
+      {/* Mobile Menu Overlay */}
       <AnimatePresence>
         {isMenuOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="fixed inset-0 z-50 bg-neutral-50 dark:bg-neutral-950"
-            />
-
-            {/* Menu Content */}
-            <motion.div
-              ref={drawerRef}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="fixed inset-0 z-50 flex flex-col"
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between h-20 px-6 border-b border-neutral-200 dark:border-neutral-800">
-                <div className="w-10 h-10 border border-neutral-900 dark:border-neutral-100 flex items-center justify-center">
-                  <span className="text-sm font-light tracking-wider text-neutral-900 dark:text-neutral-100">
-                    NP
-                  </span>
-                </div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-[60] flex flex-col bg-neutral-950 text-white"
+          >
+            <GrainOverlay />
+            
+            {/* Mobile Header */}
+            <div className="relative z-30 flex h-20 items-center justify-between border-b border-white/10 px-6">
+                <span className="font-mono text-sm text-neutral-500">MENU</span>
                 <button
-                  onClick={() => setIsMenuOpen(false)}
-                  className="w-10 h-10 flex items-center justify-center"
-                  aria-label="Close menu"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex h-10 w-10 items-center justify-center border border-white/10 bg-white/5 hover:bg-white hover:text-black transition-colors"
                 >
-                  <svg
-                    className="w-5 h-5 text-neutral-900 dark:text-neutral-100"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Navigation Links */}
-              <nav className="flex-1 flex flex-col justify-center px-6">
-                {navItems.map((item, index) => (
-                  <motion.button
-                    key={item.name}
-                    onClick={scrollToSection(item.href)}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="group flex items-center gap-6 py-6 border-b border-neutral-200 dark:border-neutral-800"
-                  >
-                    <span className="text-xs font-mono text-neutral-400">
-                      {item.index}
-                    </span>
-                    <span className="text-3xl font-extralight tracking-tight text-neutral-900 dark:text-neutral-100 group-hover:translate-x-2 transition-transform duration-300">
-                      {item.name}
-                    </span>
-                    <svg
-                      className="w-5 h-5 ml-auto text-neutral-400 group-hover:text-neutral-900 dark:group-hover:text-neutral-100 group-hover:translate-x-1 transition-all duration-300"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1}
-                        d="M17 8l4 4m0 0l-4 4m4-4H3"
-                      />
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
-                  </motion.button>
-                ))}
-              </nav>
+                </button>
+            </div>
 
-              {/* Footer */}
-              <div className="px-6 py-8 border-t border-neutral-200 dark:border-neutral-800">
-                <div className="flex items-center justify-between text-xs text-neutral-500">
-                  <span className="tracking-[0.2em] uppercase">Theme</span>
-                  <ThemeSwitcher />
-                </div>
-                <motion.a
-                  href="https://drive.google.com/file/d/1WdiR6QzRi3tsuMX-d5JHZ3_t3tnH_F-z/view"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.5 }}
-                  className="mt-6 block w-full py-4 text-center text-xs tracking-[0.3em] uppercase border border-neutral-900 dark:border-neutral-100 text-neutral-900 dark:text-neutral-100 hover:bg-neutral-900 hover:text-neutral-100 dark:hover:bg-neutral-100 dark:hover:text-neutral-900 transition-colors duration-300"
+            {/* Links */}
+            <div className="relative z-30 flex flex-1 flex-col justify-center px-6">
+               <nav className="flex flex-col space-y-6">
+                  {navItems.map((item, i) => (
+                    <motion.button
+                        key={item.name}
+                        onClick={scrollToSection(item.href)}
+                        initial={{ opacity: 0, x: -50 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.1 + i * 0.1, duration: 0.5, ease: "easeOut" }}
+                        className="group flex items-center gap-4 text-left"
+                    >
+                        <span className="font-mono text-xs text-neutral-600 group-hover:text-emerald-500 transition-colors">
+                            {item.index}
+                        </span>
+                        <span className="text-5xl font-bold tracking-tighter text-neutral-300 transition-colors group-hover:translate-x-4 group-hover:text-white duration-300">
+                            {item.name}
+                        </span>
+                    </motion.button>
+                  ))}
+               </nav>
+            </div>
+
+            {/* Mobile Footer */}
+            <div className="relative z-30 border-t border-white/10 p-6">
+                <a 
+                    href="https://drive.google.com/file/d/1WdiR6QzRi3tsuMX-d5JHZ3_t3tnH_F-z/view"
+                    className="flex w-full items-center justify-center gap-2 bg-white py-4 text-sm font-bold uppercase tracking-widest text-black hover:bg-emerald-400 transition-colors"
                 >
-                  View Resume
-                </motion.a>
-              </div>
-            </motion.div>
-          </>
+                    Download Resume
+                </a>
+            </div>
+
+          </motion.div>
         )}
       </AnimatePresence>
     </>

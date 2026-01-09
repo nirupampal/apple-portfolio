@@ -7,6 +7,7 @@ import AboutSection from '@/components/sections/AboutSection';
 import ContactSection from '@/components/sections/ContactSection';
 import SkillsSection from '@/components/sections/SkillsSection';
 import ParallaxSection from '@/components/sections/ParallaxSection';
+import CertificatesParallax from '@/components/sections/CertificatesParallax';
 
 export default function Home() {
   return (
@@ -20,21 +21,24 @@ export default function Home() {
         
         {/* Parallax Break - Innovation */}
         <ParallaxSection
-          title="Building the Future"
-          subtitle="Philosophy"
+          heading="Building the Future"
+          subheading="Philosophy"
           quote="Great software is not just about code—it's about solving real problems with elegant solutions."
         />
         
+        {/* Certificates Parallax Section */}
+
         <AboutSection />
         <SkillsSection/>
         
         {/* Parallax Break - Vision */}
         <ParallaxSection
-          title="Crafting Digital Experiences"
-          subtitle="Vision"
+          heading="Crafting Digital Experiences"
+          subheading="Vision"
           quote="Every line of code is an opportunity to create something that matters."
         />
-        
+        <CertificatesParallax />
+
         <ContactSection />
       </main>
 

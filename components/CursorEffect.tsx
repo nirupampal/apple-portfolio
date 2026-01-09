@@ -1,94 +1,75 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { motion, useMotionValue, useSpring } from "framer-motion";
+import React, { useEffect, useState, useRef } from "react";
+import { motion, useMotionValue, useSpring, AnimatePresence } from "framer-motion";
 
 export default function CursorEffect() {
-  const [isHovering, setIsHovering] = useState(false);
-  const [isClicking, setIsClicking] = useState(false);
+  const [cursorState, setCursorState] = useState<"default" | "pointer" | "text">("default");
+  const [cursorLabel, setCursorLabel] = useState("");
   const [isVisible, setIsVisible] = useState(false);
 
   // Mouse position
   const cursorX = useMotionValue(-100);
   const cursorY = useMotionValue(-100);
 
-  // Smooth spring animation for cursor
-  const springConfig = { damping: 25, stiffness: 300 };
-  const cursorXSpring = useSpring(cursorX, springConfig);
-  const cursorYSpring = useSpring(cursorY, springConfig);
-
-  // Outer ring with more lag
-  const ringConfig = { damping: 20, stiffness: 150 };
-  const ringXSpring = useSpring(cursorX, ringConfig);
-  const ringYSpring = useSpring(cursorY, ringConfig);
+  // Physics configuration
+  const springConfig = { damping: 40, stiffness: 400, mass: 0.5 };
+  const smoothX = useSpring(cursorX, springConfig);
+  const smoothY = useSpring(cursorY, springConfig);
 
   useEffect(() => {
     const moveCursor = (e: MouseEvent) => {
       cursorX.set(e.clientX);
       cursorY.set(e.clientY);
-      setIsVisible(true);
+      if (!isVisible) setIsVisible(true);
     };
 
-    const handleMouseDown = () => setIsClicking(true);
-    const handleMouseUp = () => setIsClicking(false);
+    const handleMouseDown = () => document.body.classList.add("cursor-clicking");
+    const handleMouseUp = () => document.body.classList.remove("cursor-clicking");
 
-    const handleMouseEnter = (e: MouseEvent) => {
+    const handleMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (
-        target.tagName === "A" ||
-        target.tagName === "BUTTON" ||
-        target.closest("a") ||
-        target.closest("button") ||
-        target.classList.contains("cursor-pointer") ||
-        target.closest(".cursor-pointer")
-      ) {
-        setIsHovering(true);
+      
+      // Check for interactive elements
+      const isLink = target.closest("a") || target.closest("button") || target.classList.contains("cursor-pointer");
+      const isText = target.tagName === "P" || target.tagName === "SPAN" || target.tagName === "H1" || target.tagName === "H2";
+      
+      // Check for custom cursor labels (e.g. data-cursor-label="VIEW")
+      const customLabel = target.getAttribute("data-cursor-label") || target.closest("[data-cursor-label]")?.getAttribute("data-cursor-label");
+
+      if (customLabel) {
+        setCursorLabel(customLabel);
+        setCursorState("pointer");
+      } else if (isLink) {
+        setCursorLabel("");
+        setCursorState("pointer");
+      } else if (isText) {
+        setCursorLabel("");
+        setCursorState("text");
+      } else {
+        setCursorLabel("");
+        setCursorState("default");
       }
     };
 
-    const handleMouseLeave = () => {
-      setIsHovering(false);
-    };
-
     const handleMouseOut = () => {
-      setIsVisible(false);
+        setIsVisible(false);
     };
 
     window.addEventListener("mousemove", moveCursor);
     window.addEventListener("mousedown", handleMouseDown);
     window.addEventListener("mouseup", handleMouseUp);
-    window.addEventListener("mouseout", handleMouseOut);
-
-    // Add hover detection to all interactive elements
-    document.querySelectorAll("a, button, [role='button'], .cursor-pointer").forEach((el) => {
-      el.addEventListener("mouseenter", handleMouseEnter as EventListener);
-      el.addEventListener("mouseleave", handleMouseLeave);
-    });
-
-    // Use MutationObserver to handle dynamically added elements
-    const observer = new MutationObserver(() => {
-      document.querySelectorAll("a, button, [role='button'], .cursor-pointer").forEach((el) => {
-        el.removeEventListener("mouseenter", handleMouseEnter as EventListener);
-        el.removeEventListener("mouseleave", handleMouseLeave);
-        el.addEventListener("mouseenter", handleMouseEnter as EventListener);
-        el.addEventListener("mouseleave", handleMouseLeave);
-      });
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
+    document.addEventListener("mouseover", handleMouseOver);
+    document.addEventListener("mouseout", handleMouseOut);
 
     return () => {
       window.removeEventListener("mousemove", moveCursor);
       window.removeEventListener("mousedown", handleMouseDown);
       window.removeEventListener("mouseup", handleMouseUp);
-      window.removeEventListener("mouseout", handleMouseOut);
-      observer.disconnect();
-      document.querySelectorAll("a, button, [role='button'], .cursor-pointer").forEach((el) => {
-        el.removeEventListener("mouseenter", handleMouseEnter as EventListener);
-        el.removeEventListener("mouseleave", handleMouseLeave);
-      });
+      document.removeEventListener("mouseover", handleMouseOver);
+      document.removeEventListener("mouseout", handleMouseOut);
     };
-  }, [cursorX, cursorY]);
+  }, [cursorX, cursorY, isVisible]);
 
   // Hide on touch devices
   if (typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches) {
@@ -97,70 +78,83 @@ export default function CursorEffect() {
 
   return (
     <>
-      {/* Main cursor dot */}
-      <motion.div
-        className="fixed top-0 left-0 pointer-events-none z-[9999] mix-blend-difference"
-        style={{
-          x: cursorXSpring,
-          y: cursorYSpring,
-        }}
-      >
-        <motion.div
-          className="relative -translate-x-1/2 -translate-y-1/2 rounded-full bg-white"
-          animate={{
-            width: isHovering ? 60 : isClicking ? 8 : 12,
-            height: isHovering ? 60 : isClicking ? 8 : 12,
-            opacity: isVisible ? 1 : 0,
-          }}
-          transition={{ duration: 0.15, ease: "easeOut" }}
-        />
-      </motion.div>
-
-      {/* Outer ring */}
-      <motion.div
-        className="fixed top-0 left-0 pointer-events-none z-[9998]"
-        style={{
-          x: ringXSpring,
-          y: ringYSpring,
-        }}
-      >
-        <motion.div
-          className="relative -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/50"
-          animate={{
-            width: isHovering ? 80 : isClicking ? 30 : 40,
-            height: isHovering ? 80 : isClicking ? 30 : 40,
-            opacity: isVisible ? (isHovering ? 0.8 : 0.4) : 0,
-            borderWidth: isHovering ? 2 : 1,
-          }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
-        />
-      </motion.div>
-
-      {/* Glow trail */}
-      <motion.div
-        className="fixed top-0 left-0 pointer-events-none z-[9997]"
-        style={{
-          x: ringXSpring,
-          y: ringYSpring,
-        }}
-      >
-        <motion.div
-          className="relative -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-400/30 blur-xl"
-          animate={{
-            width: isHovering ? 100 : 60,
-            height: isHovering ? 100 : 60,
-            opacity: isVisible ? (isHovering ? 0.6 : 0.3) : 0,
-          }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-        />
-      </motion.div>
-
-      {/* Hide default cursor globally */}
+      {/* Global CSS to hide default cursor */}
       <style jsx global>{`
-        * {
+        body, a, button, input, textarea, select {
           cursor: none !important;
         }
       `}</style>
+
+      {/* Main Cursor Container */}
+      <motion.div
+        className="fixed top-0 left-0 pointer-events-none z-[9999] flex items-center justify-center mix-blend-difference"
+        style={{
+          x: smoothX,
+          y: smoothY,
+          opacity: isVisible ? 1 : 0,
+        }}
+      >
+        {/* State: Default (Small Crosshair) */}
+        <motion.div
+            animate={{
+                scale: cursorState === "default" ? 1 : 0,
+                opacity: cursorState === "default" ? 1 : 0,
+            }}
+            className="absolute"
+        >
+            <div className="relative h-4 w-4">
+                <div className="absolute top-1/2 left-0 w-full h-[1px] bg-white" />
+                <div className="absolute left-1/2 top-0 h-full w-[1px] bg-white" />
+            </div>
+        </motion.div>
+
+        {/* State: Pointer/Link (Square Reticle) */}
+        <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{
+                scale: cursorState === "pointer" ? 1 : 0,
+                opacity: cursorState === "pointer" ? 1 : 0,
+                rotate: cursorState === "pointer" ? 0 : 45
+            }}
+            transition={{ duration: 0.3 }}
+            className="absolute w-12 h-12 border border-white"
+        />
+
+        {/* State: Text Selection (I-Beam approximation) */}
+        <motion.div
+            initial={{ height: 0 }}
+            animate={{
+                height: cursorState === "text" ? 24 : 0,
+                opacity: cursorState === "text" ? 1 : 0,
+            }}
+            className="absolute w-[2px] bg-white"
+        />
+
+      </motion.div>
+
+      {/* Floating Label (No mix-blend, sits on top) */}
+      <motion.div
+        className="fixed top-0 left-0 pointer-events-none z-[9999]"
+        style={{
+            x: smoothX,
+            y: smoothY,
+        }}
+      >
+        <AnimatePresence>
+            {cursorLabel && (
+                <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 30 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    className="absolute top-1/2 -translate-y-1/2 whitespace-nowrap"
+                >
+                    <span className="bg-emerald-500 text-black text-[10px] font-bold px-2 py-1 tracking-widest uppercase rounded-sm">
+                        {cursorLabel}
+                    </span>
+                </motion.div>
+            )}
+        </AnimatePresence>
+      </motion.div>
     </>
   );
 }
