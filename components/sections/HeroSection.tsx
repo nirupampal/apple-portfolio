@@ -2,57 +2,93 @@
 
 import Head from "next/head";
 import Link from "next/link";
-import React, { useRef, useState, useEffect } from "react";
-import { motion, useScroll, useTransform, useSpring, useMotionValue, useMotionTemplate } from "framer-motion";
+import React, { useRef } from "react";
+import { 
+  motion, 
+  useScroll, 
+  useTransform, 
+  useSpring, 
+  useMotionValue 
+} from "framer-motion";
 import type { JSX } from "react/jsx-runtime";
 
 // --- COMPONENTS ---
 
-// 1. The Grain/Noise Overlay
+// 1. Optimized Grain (Static is much faster than animated)
 const GrainOverlay = () => (
-  <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden opacity-20">
-    <div className="absolute inset-[-200%] h-[400%] w-[400%] animate-noise bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-repeat opacity-20 contrast-150 brightness-100" />
+  <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden">
+    <div 
+      className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"
+      style={{ backgroundRepeat: 'repeat' }} 
+    />
   </div>
 );
 
-// 2. The Moving Aurora Background
+// 2. Optimized Aurora (GPU Forced)
 const AuroraBackground = () => {
+  const transition = { duration: 25, repeat: Infinity, ease: "linear" as const };
+  
   return (
-    <div className="absolute inset-0 z-0 overflow-hidden bg-neutral-950">
+    <div className="absolute inset-0 z-0 overflow-hidden bg-neutral-950 pointer-events-none">
         {/* Primary Glow */}
         <motion.div 
-            animate={{ 
-                rotate: [0, 360],
-                scale: [1, 1.2, 1],
-                opacity: [0.3, 0.5, 0.3] 
-            }}
-            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-            className="absolute -top-[20%] -left-[10%] h-[80vh] w-[80vh] rounded-full bg-purple-900/30 blur-[120px]" 
+          style={{ willChange: "transform" }} // Inform browser to optimize
+          animate={{ 
+            rotate: [0, 360],
+            scale: [1, 1.1, 1], // Reduced scale range to save rasterization costs
+            opacity: [0.3, 0.5, 0.3] 
+          }}
+          transition={transition}
+          className="absolute -top-[20%] -left-[10%] h-[70vh] w-[70vh] rounded-full bg-purple-900/30 blur-[80px] translate-z-0" 
         />
         {/* Secondary Glow */}
         <motion.div 
-            animate={{ 
-                rotate: [360, 0],
-                scale: [1, 1.5, 1],
-                opacity: [0.2, 0.4, 0.2]
-            }}
-            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-            className="absolute top-[10%] right-[-10%] h-[70vh] w-[70vh] rounded-full bg-blue-900/20 blur-[120px]" 
+          style={{ willChange: "transform" }}
+          animate={{ 
+            rotate: [360, 0],
+            scale: [1, 1.2, 1],
+            opacity: [0.2, 0.4, 0.2]
+          }}
+          transition={{ ...transition, duration: 30 }}
+          className="absolute top-[10%] right-[-10%] h-[60vh] w-[60vh] rounded-full bg-blue-900/20 blur-[80px] translate-z-0" 
         />
         {/* Bottom Glow */}
         <motion.div 
-             animate={{ 
-                x: [-100, 100],
-                opacity: [0.1, 0.3, 0.1]
-            }}
-            transition={{ duration: 10, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" }}
-            className="absolute -bottom-[20%] left-[20%] h-[60vh] w-[60vh] rounded-full bg-emerald-900/10 blur-[100px]" 
+           style={{ willChange: "transform" }}
+           animate={{ 
+            x: ["-20%", "20%"],
+            opacity: [0.1, 0.3, 0.1]
+           }}
+           transition={{ duration: 15, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" }}
+           className="absolute -bottom-[20%] left-[20%] h-[50vh] w-[50vh] rounded-full bg-emerald-900/10 blur-[80px] translate-z-0" 
         />
     </div>
   );
 };
 
-// 3. Magnetic Button Component
+// 3. New Spotlight Component (Uses Transform instead of Background Paint)
+const Spotlight = ({ mouseX, mouseY }: { mouseX: any, mouseY: any }) => {
+  return (
+    <motion.div
+      className="pointer-events-none absolute z-10 -inset-px overflow-hidden rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+      aria-hidden="true"
+    >
+      <motion.div
+        className="absolute h-[600px] w-[600px] rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08),transparent_70%)] blur-2xl"
+        style={{
+          x: mouseX,
+          y: mouseY,
+          // Centering the circle on the mouse
+          translateX: "-50%",
+          translateY: "-50%",
+          willChange: "transform",
+        }}
+      />
+    </motion.div>
+  );
+};
+
+// 4. Magnetic Button (Unchanged, functionally fine)
 const MagneticButton = ({ children, href, primary = false }: { children: React.ReactNode, href: string, primary?: boolean }) => {
     return (
         <Link href={href} className="group relative">
@@ -65,7 +101,6 @@ const MagneticButton = ({ children, href, primary = false }: { children: React.R
             `}>
                 {children}
             </div>
-            {/* Glow effect for primary button */}
             {primary && (
                 <div className="absolute inset-0 -z-10 bg-white/50 blur-lg opacity-0 group-hover:opacity-70 transition-opacity duration-500" />
             )}
@@ -84,13 +119,17 @@ export default function HeroSection({
   
   // Parallax Scroll Effects
   const { scrollY } = useScroll();
-  const y1 = useTransform(scrollY, [0, 500], [0, 200]); // Text moves down slower
-  const opacity = useTransform(scrollY, [0, 300], [1, 0]); // Fades out
-  const blur = useTransform(scrollY, [0, 300], ["0px", "10px"]); // Blurs out
-
-  // Mouse Spotlight Effect
+  const y1 = useTransform(scrollY, [0, 500], [0, 150]); 
+  const opacity = useTransform(scrollY, [0, 300], [1, 0]); 
+  
+  // Mouse Spotlight Effect - Optimized with Spring
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
+
+  // Smooth out the mouse movement to hide jitter/lag
+  const springConfig = { damping: 25, stiffness: 150, mass: 0.5 };
+  const smoothX = useSpring(mouseX, springConfig);
+  const smoothY = useSpring(mouseY, springConfig);
 
   function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
     const { left, top } = currentTarget.getBoundingClientRect();
@@ -141,28 +180,17 @@ export default function HeroSection({
         ref={containerRef}
         id="home"
         onMouseMove={handleMouseMove}
-        className="relative min-h-screen pt-20 w-full flex flex-col items-center justify-center overflow-hidden bg-neutral-950 text-white selection:bg-white/30"
+        className="group relative min-h-screen pt-20 w-full flex flex-col items-center justify-center overflow-hidden bg-neutral-950 text-white selection:bg-white/30"
       >
         <GrainOverlay />
         <AuroraBackground />
-
-        {/* Mouse Spotlight (Subtle lighting on cursor) */}
-        <motion.div
-            className="pointer-events-none absolute -inset-px opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
-            style={{
-                background: useMotionTemplate`
-                    radial-gradient(
-                        600px circle at ${mouseX}px ${mouseY}px,
-                        rgba(255, 255, 255, 0.03),
-                        transparent 40%
-                    )
-                `,
-            }}
-        />
+        
+        {/* Optimized Spotlight */}
+        <Spotlight mouseX={smoothX} mouseY={smoothY} />
 
         {/* Content Container */}
         <motion.div 
-            style={{ y: y1, opacity, filter: useMotionTemplate`blur(${blur})` }}
+            style={{ y: y1, opacity }}
             className="relative z-30 px-6 text-center max-w-7xl mx-auto flex flex-col items-center gap-8"
         >
             {/* Status Pill */}
@@ -170,7 +198,7 @@ export default function HeroSection({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 backdrop-blur-md"
+                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 backdrop-blur-md shadow-lg"
             >
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -193,17 +221,6 @@ export default function HeroSection({
                     <br />
                     <span className="text-neutral-800 outline-text">PAL</span>
                 </motion.h1>
-                
-                {/* Decorative floating elements */}
-                <motion.div 
-                    animate={{ y: [-10, 10, -10] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute -right-8 top-1/2 w-24 h-24 hidden md:block opacity-20"
-                >
-                    <svg viewBox="0 0 100 100" className="fill-white spin-slow">
-                        <path d="M50 0 L100 50 L50 100 L0 50 Z" />
-                    </svg>
-                </motion.div>
             </div>
 
             {/* Subheading */}
@@ -249,10 +266,9 @@ export default function HeroSection({
             </div>
         </motion.div>
 
-        {/* Custom Styles for text outline support */}
         <style jsx global>{`
             .outline-text {
-                -webkit-text-stroke: 2px #333; /* Dark outline */
+                -webkit-text-stroke: 2px #333;
                 color: transparent;
             }
             @media (min-width: 768px) {
@@ -260,28 +276,9 @@ export default function HeroSection({
                     -webkit-text-stroke: 3px #333;
                 }
             }
-            .spin-slow {
-                animation: spin 10s linear infinite;
-            }
-            @keyframes spin {
-                from { transform: rotate(0deg); }
-                to { transform: rotate(360deg); }
-            }
-            @keyframes noise {
-                0% { transform: translate(0,0) }
-                10% { transform: translate(-5%,-5%) }
-                20% { transform: translate(-10%,5%) }
-                30% { transform: translate(5%,-10%) }
-                40% { transform: translate(-5%,15%) }
-                50% { transform: translate(-10%,5%) }
-                60% { transform: translate(15%,0) }
-                70% { transform: translate(0,10%) }
-                80% { transform: translate(-15%,0) }
-                90% { transform: translate(10%,5%) }
-                100% { transform: translate(5%,0) }
-            }
-            .animate-noise {
-                animation: noise 0.2s steps(10) infinite;
+            /* Hardware acceleration helper */
+            .translate-z-0 {
+                transform: translateZ(0);
             }
         `}</style>
       </section>

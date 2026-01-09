@@ -23,7 +23,6 @@ const certificates = [
 export default function CertificatesPage() {
   return (
     <>
-      <Header />
 
       <main className="min-h-screen py-24">
         <div className="max-w-6xl mx-auto px-6">
@@ -58,7 +57,6 @@ export default function CertificatesPage() {
         </div>
       </main>
 
-      <Footer />
     </>
   );
 }
