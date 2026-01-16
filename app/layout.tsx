@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import PageLoader from "@/components/PageLoader";
 import CursorEffect from "@/components/CursorEffect";
 import ScrollProgress from "@/components/ui/ScrollProgress";
+import SmoothScroll from "@/components/ui/SmoothScroll";
 import Head from "next/head";
 
 export const metadata: Metadata = {
@@ -18,10 +19,10 @@ export const metadata: Metadata = {
     title: "Nirupam Pal | Fullstack Developer",
     description: "Lead Fullstack Developer crafting modern digital experiences",
     type: "website",
-    url: "https://inirupampal.com",
+    url: "https://inirupampal.in",
     images: [
       {
-        url: "https://inirupampal.com/apple-og-image.png",
+        url: "https://inirupampal.in/apple-og-image.png",
         width: 1200,
         height: 630,
         alt: "Nirupam Pal Portfolio",
@@ -31,7 +32,7 @@ export const metadata: Metadata = {
   },
 };
 
-const siteUrl = "https://inirupampal.com";
+const siteUrl = "https://inirupampal.in";
 const siteName = "Nirupam Pal Portfolio";
 const siteDescription = metadata.description as string;
 const siteImage = `${siteUrl}/apple-og-image.png`;
@@ -88,10 +89,12 @@ export default function RootLayout({
       </Head>
       <body>
         <ThemeProvider>
-          <ScrollProgress />
-          <CursorEffect />
-          <PageLoader />
-          {children}
+          <SmoothScroll>
+            <ScrollProgress />
+            <CursorEffect />
+            <PageLoader />
+            {children}
+          </SmoothScroll>
         </ThemeProvider>
       </body>
     </html>

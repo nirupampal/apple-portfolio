@@ -3,6 +3,7 @@
 import React, { useRef } from "react";
 import { motion, useScroll, useTransform, useSpring, useInView } from "framer-motion";
 import type { JSX } from "react/jsx-runtime";
+import TextReveal from "@/components/ui/TextReveal";
 
 // --- DATA ---
 type Skill = {
@@ -95,9 +96,9 @@ const SkillCard = ({ name, icon, color }: { name: string; icon: string; color: s
       <div className="relative w-10 h-10 flex items-center justify-center bg-neutral-800 rounded-lg group-hover:bg-neutral-700 transition-colors">
         <img src={getIconUrl(icon)} alt={name} className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" />
         {/* Glow behind icon */}
-        <div 
-            className="absolute inset-0 rounded-lg blur-md opacity-0 group-hover:opacity-40 transition-opacity duration-300"
-            style={{ backgroundColor: color }}
+        <div
+          className="absolute inset-0 rounded-lg blur-md opacity-0 group-hover:opacity-40 transition-opacity duration-300"
+          style={{ backgroundColor: color }}
         />
       </div>
       <span className="text-neutral-300 font-light tracking-wide group-hover:text-white transition-colors">
@@ -110,18 +111,18 @@ const SkillCard = ({ name, icon, color }: { name: string; icon: string; color: s
 const CategorySection = ({ data, index }: { data: CategoryData; index: number }) => {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: false, margin: "-10% 0px -10% 0px" });
-  
+
   // Parallax effect for the Title
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"],
   });
-  
+
   const yParallax = useTransform(scrollYProgress, [0, 1], [50, -50]);
   const opacityParallax = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
 
   return (
-    <section 
+    <section
       ref={ref}
       className="relative min-h-[80vh] flex items-center py-24 border-l border-white/10 ml-4 md:ml-12 pl-8 md:pl-16"
     >
@@ -129,15 +130,15 @@ const CategorySection = ({ data, index }: { data: CategoryData; index: number })
       <span className={`absolute -left-[5px] top-1/2 w-2.5 h-2.5 rounded-full transition-colors duration-500 ${isInView ? "bg-white shadow-[0_0_10px_white]" : "bg-neutral-800"}`} />
 
       <div className="grid lg:grid-cols-2 gap-16 w-full max-w-6xl">
-        
+
         {/* Left: Title & Description */}
         <div className="relative">
           <motion.div style={{ y: yParallax, opacity: opacityParallax }} className="sticky top-1/2">
-            <span 
-                className="text-sm font-mono mb-4 block opacity-50" 
-                style={{ color: data.color }}
+            <span
+              className="text-sm font-mono mb-4 block opacity-50"
+              style={{ color: data.color }}
             >
-                0{index + 1} / CATEGORY
+              0{index + 1} / CATEGORY
             </span>
             <h2 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tighter">
               {data.title}
@@ -177,7 +178,7 @@ export default function SkillsParallax(): JSX.Element {
 
   return (
     <div className="bg-black min-h-screen text-white overflow-hidden selection:bg-white/20">
-      
+
       {/* Background Ambience */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-purple-900/20 blur-[120px]" />
@@ -192,38 +193,40 @@ export default function SkillsParallax(): JSX.Element {
       />
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-20">
-        
+
         {/* Header */}
-        <div className="mb-32 pl-4 md:pl-12">
-            <motion.h1 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
-                className="text-6xl md:text-9xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-neutral-800"
-            >
-                Tech<br /> Stack.
-            </motion.h1>
-            <motion.p 
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                transition={{ delay: 0.5, duration: 1 }}
-                className="mt-8 text-neutral-500 max-w-xl text-lg"
-            >
-                A curated list of technologies I use to build digital products. 
-                Scroll down to explore my expertise.
-            </motion.p>
+        <div className="mb-24 pl-4 md:pl-12">
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-5xl md:text-9xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-neutral-800"
+          >
+            <TextReveal text="Tech" delay={0.2} />
+            <br />
+            <TextReveal text="Stack." delay={0.4} />
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ delay: 0.5, duration: 1 }}
+            className="mt-8 text-neutral-500 max-w-xl text-lg"
+          >
+            A curated list of technologies I use to build digital products.
+            Scroll down to explore my expertise.
+          </motion.p>
         </div>
 
         {/* Categories Loop */}
         <div className="flex flex-col gap-0 pb-32">
-            {skillData.map((category, index) => (
+          {skillData.map((category, index) => (
             <CategorySection key={category.id} data={category} index={index} />
-            ))}
+          ))}
         </div>
 
         {/* Footer CTA */}
         <div className="flex justify-center py-20 border-t border-white/10">
-            <p className="text-neutral-500 font-mono text-sm">END OF LIST</p>
+          <p className="text-neutral-500 font-mono text-sm">END OF LIST</p>
         </div>
 
       </div>

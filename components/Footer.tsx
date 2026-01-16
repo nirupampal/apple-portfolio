@@ -144,9 +144,9 @@ export default function Footer() {
         <div className="relative overflow-hidden py-12 border-b border-white/10">
             <motion.h1 
                 style={{ y }}
-                className="text-[12vw] md:text-[14vw] font-bold leading-none tracking-tighter text-transparent select-none whitespace-nowrap"
+                className="text-[12vw] md:text-[13vw] font-bold leading-none tracking-tighter text-transparent select-none whitespace-nowrap"
             >
-                <span className="outline-text opacity-30">NIRUPAM PAL</span>
+                <span className="text-white opacity-20 bg-black/50 px-2">NIRUPAM PAL</span>
             </motion.h1>
         </div>
 
