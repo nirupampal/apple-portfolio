@@ -1,87 +1,15 @@
 "use client";
 
 import React, { useRef } from "react";
-import { motion, useScroll, useTransform, useSpring, useInView } from "framer-motion";
+import { motion, useInView, useScroll, useSpring, useTransform } from "framer-motion";
 import type { JSX } from "react/jsx-runtime";
+
+import { defaultPortfolioContent, type SkillCategory, type SkillsContent } from "@/lib/portfolio-content";
 import TextReveal from "@/components/ui/TextReveal";
 
-// --- DATA ---
-type Skill = {
-  name: string;
-  icon: string;
-};
-
-type CategoryData = {
-  id: string;
-  title: string;
-  description: string;
-  skills: Skill[];
-  color: string; // Accent color for the group
-};
-
-const skillData: CategoryData[] = [
-  {
-    id: "frontend",
-    title: "Frontend",
-    description: "Crafting pixel-perfect, responsive user interfaces with a focus on performance and accessibility. I specialize in the React ecosystem.",
-    color: "#61DAFB", // React Blue
-    skills: [
-      { name: "React", icon: "react" },
-      { name: "Next.js", icon: "nextdotjs" },
-      { name: "TypeScript", icon: "typescript" },
-      { name: "Tailwind CSS", icon: "tailwindcss" },
-      { name: "Framer Motion", icon: "framer" },
-      { name: "React Native", icon: "react" },
-    ],
-  },
-  {
-    id: "backend",
-    title: "Backend",
-    description: "Architecting scalable server-side solutions. I build robust APIs and handle real-time communications.",
-    color: "#68A063", // Node Green
-    skills: [
-      { name: "Node.js", icon: "nodedotjs" },
-      { name: "Express", icon: "express" },
-      { name: "Socket.io", icon: "socketdotio" },
-      { name: "GraphQL", icon: "graphql" },
-      { name: "Python", icon: "python" },
-    ],
-  },
-  {
-    id: "database",
-    title: "Database",
-    description: "Designing efficient data schemas. I work with both relational and document-based databases to ensure data integrity.",
-    color: "#336791", // SQL Blue
-    skills: [
-      { name: "PostgreSQL", icon: "postgresql" },
-      { name: "MongoDB", icon: "mongodb" },
-      { name: "Redis", icon: "redis" },
-      { name: "Firebase", icon: "firebase" },
-      { name: "Supabase", icon: "supabase" },
-    ],
-  },
-  {
-    id: "devops",
-    title: "DevOps",
-    description: "Streamlining deployment pipelines. I ensure code gets to production safely and servers remain healthy.",
-    color: "#E34F26", // Git Orange
-    skills: [
-      { name: "Docker", icon: "docker" },
-      { name: "AWS", icon: "amazonaws" },
-      { name: "Git", icon: "git" },
-      { name: "CI/CD", icon: "githubactions" },
-      { name: "Linux", icon: "linux" },
-    ],
-  },
-];
-
-// --- UTILS ---
 function getIconUrl(slug: string): string {
-  // requesting white icons for dark theme
   return `https://cdn.simpleicons.org/${slug}/ffffff`;
 }
-
-// --- COMPONENTS ---
 
 const SkillCard = ({ name, icon, color }: { name: string; icon: string; color: string }) => {
   return (
@@ -91,65 +19,47 @@ const SkillCard = ({ name, icon, color }: { name: string; icon: string; color: s
         visible: { opacity: 1, x: 0 },
       }}
       whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.03)" }}
-      className="flex items-center gap-4 p-4 rounded-xl border border-white/5 bg-neutral-900/40 backdrop-blur-sm transition-colors group cursor-default"
+      className="group flex cursor-default items-center gap-4 rounded-xl border border-white/5 bg-neutral-900/40 p-4 backdrop-blur-sm transition-colors"
     >
-      <div className="relative w-10 h-10 flex items-center justify-center bg-neutral-800 rounded-lg group-hover:bg-neutral-700 transition-colors">
-        <img src={getIconUrl(icon)} alt={name} className="w-5 h-5 opacity-70 group-hover:opacity-100 transition-opacity" />
-        {/* Glow behind icon */}
-        <div
-          className="absolute inset-0 rounded-lg blur-md opacity-0 group-hover:opacity-40 transition-opacity duration-300"
-          style={{ backgroundColor: color }}
-        />
+      <div className="relative flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-800 transition-colors group-hover:bg-neutral-700">
+        {/* Simple Icons serves tiny SVGs; using img avoids remote image config for every icon slug. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={getIconUrl(icon)} alt={name} className="h-5 w-5 opacity-70 transition-opacity group-hover:opacity-100" />
+        <div className="absolute inset-0 rounded-lg opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-40" style={{ backgroundColor: color }} />
       </div>
-      <span className="text-neutral-300 font-light tracking-wide group-hover:text-white transition-colors">
+      <span className="font-light tracking-wide text-neutral-300 transition-colors group-hover:text-white">
         {name}
       </span>
     </motion.div>
   );
 };
 
-const CategorySection = ({ data, index }: { data: CategoryData; index: number }) => {
+const CategorySection = ({ data, index }: { data: SkillCategory; index: number }) => {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: false, margin: "-10% 0px -10% 0px" });
-
-  // Parallax effect for the Title
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"],
-  });
-
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const yParallax = useTransform(scrollYProgress, [0, 1], [50, -50]);
   const opacityParallax = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
 
   return (
-    <section
-      ref={ref}
-      className="relative min-h-[80vh] flex items-center py-24 border-l border-white/10 ml-4 md:ml-12 pl-8 md:pl-16"
-    >
-      {/* Connector Line Dot */}
-      <span className={`absolute -left-[5px] top-1/2 w-2.5 h-2.5 rounded-full transition-colors duration-500 ${isInView ? "bg-white shadow-[0_0_10px_white]" : "bg-neutral-800"}`} />
+    <section ref={ref} className="relative ml-4 flex min-h-[80vh] items-center border-l border-white/10 py-24 pl-8 md:ml-12 md:pl-16">
+      <span className={`absolute -left-[5px] top-1/2 h-2.5 w-2.5 rounded-full transition-colors duration-500 ${isInView ? "bg-white shadow-[0_0_10px_white]" : "bg-neutral-800"}`} />
 
-      <div className="grid lg:grid-cols-2 gap-16 w-full max-w-6xl">
-
-        {/* Left: Title & Description */}
+      <div className="grid w-full max-w-6xl gap-16 lg:grid-cols-2">
         <div className="relative">
           <motion.div style={{ y: yParallax, opacity: opacityParallax }} className="sticky top-1/2">
-            <span
-              className="text-sm font-mono mb-4 block opacity-50"
-              style={{ color: data.color }}
-            >
+            <span className="mb-4 block font-mono text-sm opacity-50" style={{ color: data.color }}>
               0{index + 1} / CATEGORY
             </span>
-            <h2 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tighter">
+            <h2 className="mb-6 text-5xl font-semibold text-white md:text-7xl">
               {data.title}
             </h2>
-            <p className="text-lg text-neutral-400 font-light leading-relaxed max-w-md border-l-2 border-white/5 pl-6">
+            <p className="max-w-md border-l-2 border-white/5 pl-6 text-lg font-light leading-relaxed text-neutral-400">
               {data.description}
             </p>
           </motion.div>
         </div>
 
-        {/* Right: Skills Grid */}
         <motion.div
           initial="hidden"
           animate={isInView ? "visible" : "hidden"}
@@ -157,10 +67,10 @@ const CategorySection = ({ data, index }: { data: CategoryData; index: number })
             visible: { transition: { staggerChildren: 0.08 } },
             hidden: {},
           }}
-          className="grid grid-cols-1 sm:grid-cols-2 gap-4 content-center"
+          className="grid content-center grid-cols-1 gap-4 sm:grid-cols-2"
         >
           {data.skills.map((skill) => (
-            <SkillCard key={skill.name} name={skill.name} icon={skill.icon} color={data.color} />
+            <SkillCard key={`${data.id}-${skill.name}`} name={skill.name} icon={skill.icon} color={data.color} />
           ))}
         </motion.div>
       </div>
@@ -168,67 +78,58 @@ const CategorySection = ({ data, index }: { data: CategoryData; index: number })
   );
 };
 
-export default function SkillsParallax(): JSX.Element {
+export default function SkillsParallax({
+  content = defaultPortfolioContent.skills,
+}: {
+  content?: SkillsContent;
+}): JSX.Element {
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 30,
-    restDelta: 0.001
+    restDelta: 0.001,
   });
 
   return (
-    <div className="bg-black min-h-screen text-white overflow-hidden selection:bg-white/20">
-
-      {/* Background Ambience */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-purple-900/20 blur-[120px]" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-blue-900/10 blur-[120px]" />
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
+    <div id="skills" className="min-h-screen overflow-hidden bg-black text-white selection:bg-white/20">
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:72px_72px] opacity-20" />
+        <div className="noise-fill absolute inset-0 opacity-20 brightness-100 contrast-150" />
       </div>
 
-      {/* Progress Bar Top */}
-      <motion.div
-        className="fixed top-0 left-0 right-0 h-1 bg-white origin-left z-50 mix-blend-difference"
-        style={{ scaleX }}
-      />
+      <motion.div className="fixed left-0 right-0 top-0 z-50 h-1 origin-left bg-white mix-blend-difference" style={{ scaleX }} />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-20">
-
-        {/* Header */}
+      <div className="relative z-10 mx-auto max-w-7xl px-6 py-20">
         <div className="mb-24 pl-4 md:pl-12">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-5xl md:text-9xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-neutral-800"
+            className="bg-gradient-to-b from-white to-neutral-800 bg-clip-text text-5xl font-semibold text-transparent md:text-9xl"
           >
-            <TextReveal text="Tech" delay={0.2} />
+            <TextReveal text={content.titlePrimary} delay={0.2} />
             <br />
-            <TextReveal text="Stack." delay={0.4} />
+            <TextReveal text={content.titleSecondary} delay={0.4} />
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ delay: 0.5, duration: 1 }}
-            className="mt-8 text-neutral-500 max-w-xl text-lg"
+            className="mt-8 max-w-xl text-lg text-neutral-500"
           >
-            A curated list of technologies I use to build digital products.
-            Scroll down to explore my expertise.
+            {content.description}
           </motion.p>
         </div>
 
-        {/* Categories Loop */}
         <div className="flex flex-col gap-0 pb-32">
-          {skillData.map((category, index) => (
+          {content.categories.map((category, index) => (
             <CategorySection key={category.id} data={category} index={index} />
           ))}
         </div>
 
-        {/* Footer CTA */}
-        <div className="flex justify-center py-20 border-t border-white/10">
-          <p className="text-neutral-500 font-mono text-sm">END OF LIST</p>
+        <div className="flex justify-center border-t border-white/10 py-20">
+          <p className="font-mono text-sm text-neutral-500">{content.endLabel}</p>
         </div>
-
       </div>
     </div>
   );

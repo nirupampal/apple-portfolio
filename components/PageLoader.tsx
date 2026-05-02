@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { motion, AnimatePresence, useMotionValue, useTransform, animate } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useTransform, animate, type MotionValue } from "framer-motion";
 
 // --- CONSTANTS ---
 const LOG_MESSAGES = [
@@ -20,12 +20,12 @@ const LOG_MESSAGES = [
 // Static grain overlay (memoized or static)
 const GrainOverlay = () => (
   <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden opacity-20">
-    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-repeat brightness-100 contrast-150" />
+    <div className="noise-fill absolute inset-0 brightness-100 contrast-150" />
   </div>
 );
 
 // Optimized Counter Component (Updates DOM directly, no re-renders)
-const Counter = ({ value }: { value: any }) => {
+const Counter = ({ value }: { value: MotionValue<number> }) => {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -41,7 +41,7 @@ const Counter = ({ value }: { value: any }) => {
   return (
     <div 
       ref={ref} 
-      className="text-[15vw] md:text-[12vw] leading-[0.8] font-bold tracking-tighter text-white tabular-nums"
+      className="text-7xl font-bold leading-none text-white tabular-nums sm:text-8xl md:text-9xl"
     >
       0
     </div>
@@ -128,7 +128,7 @@ export default function PageLoader() {
           <div className="relative z-10 flex justify-between items-end">
              {/* Name Reveal */}
              <div className="hidden md:block">
-                <h1 className="text-xl font-bold tracking-tighter text-white">
+                <h1 className="text-xl font-bold text-white">
                     NIRUPAM PAL
                 </h1>
                 <p className="text-xs text-neutral-500 font-mono mt-1">

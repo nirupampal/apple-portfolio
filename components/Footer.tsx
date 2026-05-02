@@ -7,6 +7,7 @@ import Link from "next/link";
 // --- DATA ---
 const navLinks = [
   { name: "Home", href: "#home" },
+  { name: "Terminal", href: "#terminal" },
   { name: "Works", href: "#works" },
   { name: "About", href: "#about" },
   { name: "Skills", href: "#skills" },
@@ -24,7 +25,7 @@ const socialLinks = [
 
 const GrainOverlay = () => (
   <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden opacity-20">
-    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-repeat brightness-100 contrast-150" />
+    <div className="noise-fill absolute inset-0 brightness-100 contrast-150" />
   </div>
 );
 
@@ -144,7 +145,7 @@ export default function Footer() {
         <div className="relative overflow-hidden py-12 border-b border-white/10">
             <motion.h1 
                 style={{ y }}
-                className="text-[12vw] md:text-[13vw] font-bold leading-none tracking-tighter text-transparent select-none whitespace-nowrap"
+                className="text-6xl font-bold leading-none text-transparent select-none whitespace-nowrap sm:text-8xl md:text-9xl lg:text-[9rem]"
             >
                 <span className="text-white opacity-20 bg-black/50 px-2">NIRUPAM PAL</span>
             </motion.h1>

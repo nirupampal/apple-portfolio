@@ -3,83 +3,42 @@
 import Head from "next/head";
 import Link from "next/link";
 import React, { useRef } from "react";
-import {
-  motion,
-  useScroll,
-  useTransform,
-  useSpring,
-  useMotionValue
-} from "framer-motion";
+import { motion, useMotionValue, useScroll, useSpring, useTransform } from "framer-motion";
 import type { JSX } from "react/jsx-runtime";
+
+import { defaultPortfolioContent, type HeroContent } from "@/lib/portfolio-content";
 import TextReveal from "@/components/ui/TextReveal";
 
-// --- COMPONENTS ---
-
-// 1. Optimized Grain (Static is much faster than animated)
 const GrainOverlay = () => (
   <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden">
     <div
-      className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"
-      style={{ backgroundRepeat: 'repeat' }}
+      className="noise-fill absolute inset-0 opacity-20 brightness-100 contrast-150"
+      style={{ backgroundRepeat: "repeat" }}
     />
   </div>
 );
 
-// 2. Optimized Aurora (GPU Forced)
-const AuroraBackground = () => {
-  const transition = { duration: 25, repeat: Infinity, ease: "linear" as const };
-
+const HeroBackdrop = () => {
   return (
-    <div className="absolute inset-0 z-0 overflow-hidden bg-neutral-950 pointer-events-none">
-      {/* Primary Glow */}
-      <motion.div
-        style={{ willChange: "transform" }} // Inform browser to optimize
-        animate={{
-          rotate: [0, 360],
-          scale: [1, 1.1, 1], // Reduced scale range to save rasterization costs
-          opacity: [0.3, 0.5, 0.3]
-        }}
-        transition={transition}
-        className="absolute -top-[20%] -left-[10%] h-[50vw] w-[50vw] md:h-[70vh] md:w-[70vh] rounded-full bg-purple-900/30 blur-[60px] md:blur-[80px] translate-z-0"
-      />
-      {/* Secondary Glow */}
-      <motion.div
-        style={{ willChange: "transform" }}
-        animate={{
-          rotate: [360, 0],
-          scale: [1, 1.2, 1],
-          opacity: [0.2, 0.4, 0.2]
-        }}
-        transition={{ ...transition, duration: 30 }}
-        className="absolute top-[10%] right-[-10%] h-[40vw] w-[40vw] md:h-[60vh] md:w-[60vh] rounded-full bg-blue-900/20 blur-[60px] md:blur-[80px] translate-z-0"
-      />
-      {/* Bottom Glow */}
-      <motion.div
-        style={{ willChange: "transform" }}
-        animate={{
-          x: ["-20%", "20%"],
-          opacity: [0.1, 0.3, 0.1]
-        }}
-        transition={{ duration: 15, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" }}
-        className="absolute -bottom-[20%] left-[20%] h-[40vw] w-[40vw] md:h-[50vh] md:w-[50vh] rounded-full bg-emerald-900/10 blur-[60px] md:blur-[80px] translate-z-0"
-      />
+    <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden bg-neutral-950">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.16),transparent_42%),linear-gradient(180deg,#050505_0%,#111_48%,#050505_100%)]" />
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.045)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.045)_1px,transparent_1px)] bg-[size:84px_84px] opacity-30" />
     </div>
   );
 };
 
-// 3. New Spotlight Component (Uses Transform instead of Background Paint)
-const Spotlight = ({ mouseX, mouseY }: { mouseX: any, mouseY: any }) => {
+const Spotlight = ({ mouseX, mouseY }: { mouseX: unknown; mouseY: unknown }) => {
   return (
     <motion.div
-      className="pointer-events-none absolute z-10 -inset-px overflow-hidden rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+      className="pointer-events-none absolute -inset-px z-10 overflow-hidden rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
       aria-hidden="true"
     >
       <motion.div
         className="absolute h-[600px] w-[600px] rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08),transparent_70%)] blur-2xl"
         style={{
-          x: mouseX,
-          y: mouseY,
-          // Centering the circle on the mouse
+          x: mouseX as never,
+          y: mouseY as never,
           translateX: "-50%",
           translateY: "-50%",
           willChange: "transform",
@@ -89,45 +48,48 @@ const Spotlight = ({ mouseX, mouseY }: { mouseX: any, mouseY: any }) => {
   );
 };
 
-// 4. Magnetic Button (Unchanged, functionally fine)
-const MagneticButton = ({ children, href, primary = false }: { children: React.ReactNode, href: string, primary?: boolean }) => {
+const MagneticButton = ({
+  children,
+  href,
+  primary = false,
+}: {
+  children: React.ReactNode;
+  href: string;
+  primary?: boolean;
+}) => {
   return (
     <Link href={href} className="group relative">
-      <div className={`
-                relative z-10 flex items-center justify-center px-8 py-4 
-                text-sm font-medium tracking-widest uppercase transition-all duration-300
-                ${primary
-          ? "text-neutral-950 bg-white hover:bg-neutral-200"
-          : "text-white border border-white/20 hover:border-white/50 hover:bg-white/5"}
-            `}>
+      <div
+        className={`relative z-10 flex items-center justify-center px-8 py-4 text-sm font-medium uppercase tracking-widest transition-all duration-300 ${
+          primary
+            ? "bg-white text-neutral-950 hover:bg-neutral-200"
+            : "border border-white/20 text-white hover:border-white/50 hover:bg-white/5"
+        }`}
+      >
         {children}
       </div>
-      {primary && (
-        <div className="absolute inset-0 -z-10 bg-white/50 blur-lg opacity-0 group-hover:opacity-70 transition-opacity duration-500" />
-      )}
+      {primary ? (
+        <div className="absolute inset-0 -z-10 bg-white/50 opacity-0 blur-lg transition-opacity duration-500 group-hover:opacity-70" />
+      ) : null}
     </Link>
   );
-}
+};
 
 export default function HeroSection({
+  content = defaultPortfolioContent.hero,
   siteUrl = "https://inirupampal.in",
   ogImage = "/og-hero.png",
 }: {
+  content?: HeroContent;
   siteUrl?: string;
   ogImage?: string;
 }): JSX.Element {
   const containerRef = useRef<HTMLElement>(null);
-
-  // Parallax Scroll Effects
   const { scrollY } = useScroll();
   const y1 = useTransform(scrollY, [0, 500], [0, 150]);
   const opacity = useTransform(scrollY, [0, 300], [1, 0]);
-
-  // Mouse Spotlight Effect - Optimized with Spring
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
-
-  // Smooth out the mouse movement to hide jitter/lag
   const springConfig = { damping: 25, stiffness: 150, mass: 0.5 };
   const smoothX = useSpring(mouseX, springConfig);
   const smoothY = useSpring(mouseY, springConfig);
@@ -138,7 +100,6 @@ export default function HeroSection({
     mouseY.set(clientY - top);
   }
 
-  // SEO Data
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -148,11 +109,11 @@ export default function HeroSection({
         url: siteUrl,
         sameAs: ["https://github.com/nirupampal", "https://www.linkedin.com/in/nirupam-pal-0916a721b/"],
         jobTitle: "Fullstack Developer",
-        description: "Fullstack Developer specializing in modern UI and scalable Node/Next backends.",
+        description: content.description,
       },
       {
         "@type": "WebSite",
-        name: "Nirupam Pal — Portfolio",
+        name: "Nirupam Pal - Portfolio",
         url: siteUrl,
         potentialAction: {
           "@type": "SearchAction",
@@ -166,11 +127,11 @@ export default function HeroSection({
   return (
     <>
       <Head>
-        <title>Nirupam Pal — Fullstack Developer | Modern UI & Scalable Backend</title>
-        <meta name="description" content="Nirupam Pal is a Fullstack Developer specializing in modern user interfaces and scalable backend solutions using Next.js and Node.js." />
+        <title>Nirupam Pal - Fullstack Developer | Modern UI & Scalable Backend</title>
+        <meta name="description" content={content.description} />
         <meta name="robots" content="index, follow" />
-        <meta property="og:title" content="Nirupam Pal — Fullstack Developer" />
-        <meta property="og:description" content="Building modern UIs and scalable backends." />
+        <meta property="og:title" content="Nirupam Pal - Fullstack Developer" />
+        <meta property="og:description" content={content.description} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={`${siteUrl}#home`} />
         <meta property="og:image" content={ogImage} />
@@ -181,79 +142,84 @@ export default function HeroSection({
         ref={containerRef}
         id="home"
         onMouseMove={handleMouseMove}
-        className="group relative min-h-screen pt-20 w-full flex flex-col items-center justify-center overflow-hidden bg-neutral-950 text-white selection:bg-white/30"
+        className="group relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-neutral-950 pt-20 text-white selection:bg-white/30"
       >
         <GrainOverlay />
-        <AuroraBackground />
-
-        {/* Optimized Spotlight */}
+        <HeroBackdrop />
         <Spotlight mouseX={smoothX} mouseY={smoothY} />
 
-        {/* Content Container */}
         <motion.div
           style={{ y: y1, opacity }}
-          className="relative z-30 px-6 text-center max-w-7xl mx-auto flex flex-col items-center gap-8"
+          className="relative z-30 mx-auto flex max-w-7xl flex-col items-center gap-8 px-6 text-center"
         >
-          {/* Status Pill */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 backdrop-blur-md shadow-lg"
+            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 shadow-lg backdrop-blur-md"
           >
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
             </span>
-            <span className="text-xs font-mono text-neutral-300 tracking-wider uppercase">
-              Available for new projects
+            <span className="font-mono text-xs uppercase tracking-wider text-neutral-300">
+              {content.availabilityText}
             </span>
           </motion.div>
 
-          {/* Main Title */}
           <div className="relative">
-            <div className="text-[13vw] md:text-[12vw] leading-[0.8] font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-neutral-500">
-              <TextReveal text="NIRUPAM" delay={0.2} />
+            <div className="bg-gradient-to-b from-white via-white to-neutral-500 bg-clip-text text-7xl font-semibold leading-none text-transparent sm:text-8xl md:text-9xl lg:text-[10rem]">
+              <TextReveal text={content.firstName} delay={0.2} />
               <br />
-              <span className="text-neutral-800 outline-text">
-                <TextReveal text="PAL" delay={0.5} />
+              <span className="outline-text text-neutral-800">
+                <TextReveal text={content.lastName} delay={0.5} />
               </span>
             </div>
           </div>
 
-          {/* Subheading */}
-          <div className="text-lg md:text-2xl font-light text-neutral-400 max-w-2xl leading-relaxed">
-            <TextReveal
-              text="Engineering digital excellence. I build scalable backend architecture and fluid interfaces that define the modern web."
-              wordLevel
-              delay={0.8}
-            />
+          <div className="max-w-2xl text-lg font-light leading-relaxed text-neutral-400 md:text-2xl">
+            <TextReveal text={content.role} wordLevel delay={0.8} />
           </div>
 
-          {/* CTA Actions */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="flex flex-col sm:flex-row gap-6 mt-8"
+            className="mt-8 flex flex-col gap-6 sm:flex-row"
           >
-            <MagneticButton href="#works" primary>
-              View Selected Works
+            <MagneticButton href={content.primaryCtaHref} primary>
+              {content.primaryCtaLabel}
             </MagneticButton>
-            <MagneticButton href="https://drive.google.com/file/d/1WdiR6QzRi3tsuMX-d5JHZ3_t3tnH_F-z/view">
-              Download CV
+            <MagneticButton href={content.secondaryCtaHref}>
+              {content.secondaryCtaLabel}
             </MagneticButton>
           </motion.div>
 
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.85 }}
+            className="mt-4 grid w-full max-w-3xl grid-cols-1 overflow-hidden rounded-[8px] border border-white/10 bg-white/[0.035] text-left backdrop-blur-md sm:grid-cols-3"
+          >
+            {[
+              ["Frontend", "High-polish interfaces"],
+              ["Backend", "Scalable product systems"],
+              ["CMS", "Firebase-powered updates"],
+            ].map(([label, value]) => (
+              <div key={label} className="border-b border-white/10 p-4 sm:border-b-0 sm:border-r last:border-b-0 sm:last:border-r-0">
+                <p className="font-mono text-[10px] uppercase text-neutral-500">{label}</p>
+                <p className="mt-1 text-sm text-neutral-200">{value}</p>
+              </div>
+            ))}
+          </motion.div>
         </motion.div>
 
-        {/* Scroll Indicator */}
         <motion.div
           style={{ opacity }}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 z-30"
+          className="absolute bottom-10 left-1/2 z-30 flex -translate-x-1/2 flex-col items-center gap-3"
         >
           <span className="text-[10px] uppercase tracking-[0.3em] text-neutral-500">Scroll</span>
-          <div className="h-12 w-[1px] bg-gradient-to-b from-neutral-800 to-transparent overflow-hidden">
+          <div className="h-12 w-[1px] overflow-hidden bg-gradient-to-b from-neutral-800 to-transparent">
             <motion.div
               animate={{ y: ["-100%", "100%"] }}
               transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
@@ -263,19 +229,18 @@ export default function HeroSection({
         </motion.div>
 
         <style jsx global>{`
+          .outline-text {
+            -webkit-text-stroke: 2px #333;
+            color: transparent;
+          }
+          @media (min-width: 768px) {
             .outline-text {
-                -webkit-text-stroke: 2px #333;
-                color: transparent;
+              -webkit-text-stroke: 3px #333;
             }
-            @media (min-width: 768px) {
-                .outline-text {
-                    -webkit-text-stroke: 3px #333;
-                }
-            }
-            /* Hardware acceleration helper */
-            .translate-z-0 {
-                transform: translateZ(0);
-            }
+          }
+          .translate-z-0 {
+            transform: translateZ(0);
+          }
         `}</style>
       </section>
     </>

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useTransform, useSpring, MotionValue } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import Image from "next/image";
 import { useRef } from "react";
 
@@ -9,6 +9,10 @@ interface ParallaxImageProps {
     alt: string;
     className?: string;
     aspectRatio?: string; // e.g., "16/9"
+}
+
+function isRemoteImage(src: string) {
+    return src.startsWith("http://") || src.startsWith("https://");
 }
 
 export default function ParallaxImage({
@@ -41,12 +45,24 @@ export default function ParallaxImage({
                 style={{ y: smoothY, scale }}
                 className="absolute inset-0 h-[130%] w-full -top-[15%]"
             >
-                <Image
-                    src={src}
-                    alt={alt}
-                    fill
-                    className="object-cover"
-                />
+                {isRemoteImage(src) ? (
+                    // Admin-managed project images can use full URLs from any trusted image host.
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                        src={src}
+                        alt={alt}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-full w-full object-cover"
+                    />
+                ) : (
+                    <Image
+                        src={src}
+                        alt={alt}
+                        fill
+                        className="object-cover"
+                    />
+                )}
             </motion.div>
         </div>
     );

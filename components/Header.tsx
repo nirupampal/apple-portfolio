@@ -7,21 +7,26 @@ import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-
 // --- DATA ---
 const navItems = [
   { name: "Home", href: "#home", index: "01" },
-  { name: "Works", href: "#works", index: "02" },
-  { name: "About", href: "#about", index: "03" },
-  { name: "Skills", href: "#skills", index: "04" },
-  { name: "Contact", href: "#contact", index: "05" },
+  { name: "Terminal", href: "#terminal", index: "02" },
+  { name: "Works", href: "#works", index: "03" },
+  { name: "About", href: "#about", index: "04" },
+  { name: "Skills", href: "#skills", index: "05" },
+  { name: "Contact", href: "#contact", index: "06" },
 ];
 
 // --- COMPONENTS ---
 
 const GrainOverlay = () => (
   <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden opacity-20">
-    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-repeat brightness-100 contrast-150" />
+    <div className="noise-fill absolute inset-0 brightness-100 contrast-150" />
   </div>
 );
 
-export default function Header() {
+export default function Header({
+  resumeUrl = "https://drive.google.com/file/d/1WdiR6QzRi3tsuMX-d5JHZ3_t3tnH_F-z/view",
+}: {
+  resumeUrl?: string;
+}) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
@@ -119,7 +124,7 @@ export default function Header() {
                 )
             })}
              <a
-                href="https://drive.google.com/file/d/1WdiR6QzRi3tsuMX-d5JHZ3_t3tnH_F-z/view"
+                href={resumeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="ml-4 px-5 py-2 text-xs font-bold text-black bg-white hover:bg-emerald-400 transition-colors uppercase tracking-wider"
@@ -179,7 +184,7 @@ export default function Header() {
                         <span className="font-mono text-xs text-neutral-600 group-hover:text-emerald-500 transition-colors">
                             {item.index}
                         </span>
-                        <span className="text-5xl font-bold tracking-tighter text-neutral-300 transition-colors group-hover:translate-x-4 group-hover:text-white duration-300">
+                        <span className="text-5xl font-bold text-neutral-300 transition-colors duration-300 group-hover:translate-x-4 group-hover:text-white">
                             {item.name}
                         </span>
                     </motion.button>
@@ -190,7 +195,7 @@ export default function Header() {
             {/* Mobile Footer */}
             <div className="relative z-30 border-t border-white/10 p-6">
                 <a 
-                    href="https://drive.google.com/file/d/1WdiR6QzRi3tsuMX-d5JHZ3_t3tnH_F-z/view"
+                    href={resumeUrl}
                     className="flex w-full items-center justify-center gap-2 bg-white py-4 text-sm font-bold uppercase tracking-widest text-black hover:bg-emerald-400 transition-colors"
                 >
                     Download Resume

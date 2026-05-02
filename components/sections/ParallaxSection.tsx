@@ -13,7 +13,7 @@ interface ParallaxSectionProps {
 
 const GrainOverlay = () => (
   <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden opacity-20">
-    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-repeat brightness-100 contrast-150" />
+    <div className="noise-fill absolute inset-0 brightness-100 contrast-150" />
   </div>
 );
 
@@ -47,7 +47,7 @@ const FogSlice = ({
         repeat: Infinity, 
         ease: "easeInOut" 
       }}
-      className={`absolute h-1 w-[40vw] rounded-full blur-[40px] ${color}`}
+      className={`absolute h-px w-[40vw] opacity-40 ${color}`}
     />
   );
 };
@@ -97,12 +97,12 @@ export default function ParallaxSection({
             className="max-w-4xl text-center"
         >
             {/* Subheading */}
-            <span className="mb-6 block font-mono text-sm tracking-widest text-emerald-500 uppercase">
-                // {subheading}
+            <span className="mb-6 block font-mono text-sm uppercase text-emerald-500">
+                / {subheading}
             </span>
 
             {/* Main Heading */}
-            <h2 className="mb-8 text-5xl md:text-7xl font-bold tracking-tighter text-white leading-[0.9]">
+            <h2 className="mb-8 text-5xl font-semibold leading-none text-white md:text-7xl">
                 {heading}
             </h2>
 
@@ -114,8 +114,8 @@ export default function ParallaxSection({
 
             {/* Quote */}
             {quote && (
-                <p className="mx-auto max-w-2xl font-serif text-xl italic text-neutral-400 leading-relaxed">
-                    "{quote}"
+                <p className="mx-auto max-w-2xl font-serif text-xl italic leading-relaxed text-neutral-400">
+                    &quot;{quote}&quot;
                 </p>
             )}
         </motion.div>
