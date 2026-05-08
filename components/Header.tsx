@@ -23,7 +23,7 @@ const GrainOverlay = () => (
 );
 
 export default function Header({
-  resumeUrl = "https://drive.google.com/file/d/1WdiR6QzRi3tsuMX-d5JHZ3_t3tnH_F-z/view",
+  resumeUrl = "https://drive.google.com/file/d/13EHQ-q1BjtCPmOIrv29jXx4zbsTGw0i6/view",
 }: {
   resumeUrl?: string;
 }) {

@@ -194,18 +194,18 @@ export const defaultPortfolioContent: PortfolioContent = {
     imageAlt: "Nirupam Pal",
     paragraphs: [
       "I build production-ready web applications with a relentless focus on performance and scalability.",
-      "Currently leading engineering efforts at Microace Software, I bridge the gap between complex backend logic and fluid user interfaces. My philosophy is simple: code should be as clean as the design it powers.",
+      "Since April 2025, I have been working at Microace Software as a Fullstack Developer, where I build and lead projects across billing, mobile ordering, hotel management, and real-time chat with video calling.",
       "When I'm not pushing code, I'm likely exploring cloud-native technologies, optimizing CI/CD pipelines, or contributing to the developer community in India.",
     ],
     experiences: [
       {
         id: "01",
-        title: "Lead Fullstack Developer",
+        title: "Fullstack Developer",
         company: "Microace Software",
-        date: "2024 - Present",
+        date: "Apr 2025 - Present",
         description:
-          "Architecting scalable web platforms and leading the engineering team. Improved release cadence by 40% and implemented comprehensive observability.",
-        tags: ["Leadership", "Architecture", "DevOps"],
+          "Built and led fullstack projects including a POS billing system, mobile ordering app, hotel management system, and a real-time chat application with video calls and other features.",
+        tags: ["Fullstack", "Leadership", "Real-time Apps"],
       },
       {
         id: "02",
