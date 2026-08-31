@@ -8,25 +8,36 @@ import {
   type User,
 } from "firebase/auth";
 import {
+  Award,
+  BookOpenText,
+  Check,
   ChevronDown,
   ChevronRight,
   Code2,
-  Cpu,
-  Globe,
-  Layout,
+  ExternalLink,
+  FolderKanban,
+  ImageIcon,
+  LayoutDashboard,
+  LoaderCircle,
   LogIn,
   LogOut,
   Mail,
   Plus,
   RotateCcw,
   Save,
-  Terminal,
+  TerminalSquare,
   Trash2,
-  User2,
+  UploadCloud,
+  UserRound,
+  X,
 } from "lucide-react";
 
+import { Spotlight } from "@/components/ui/spotlight-new";
 import { ADMIN_EMAIL, auth } from "@/firebase";
 import {
+  developerTerminalPreset,
+  type AchievementItem,
+  type BlogPost,
   type ContactLink,
   type ExperienceItem,
   type PortfolioContent,
@@ -38,1064 +49,812 @@ import {
   type TerminalMetric,
 } from "@/lib/portfolio-content";
 import { savePortfolioContent } from "@/lib/portfolio-store";
+import { uploadPortfolioImage } from "@/lib/upload-media";
 import { usePortfolioContent } from "@/lib/use-portfolio-content";
 
-/* ─── Design Tokens ──────────────────────────────────────────────────────── */
+type SectionId =
+  | "hero"
+  | "about"
+  | "works"
+  | "skills"
+  | "terminal"
+  | "achievements"
+  | "blog"
+  | "contact";
 
-const ACCENT = "#00ffa3";
-const ACCENT_DIM = "#00ffa320";
+const NAV_ITEMS: { id: SectionId; label: string; icon: React.ElementType }[] = [
+  { id: "hero", label: "Hero", icon: LayoutDashboard },
+  { id: "about", label: "About", icon: UserRound },
+  { id: "works", label: "Projects", icon: FolderKanban },
+  { id: "skills", label: "Skills", icon: Code2 },
+  { id: "terminal", label: "Console", icon: TerminalSquare },
+  { id: "achievements", label: "Achievements", icon: Award },
+  { id: "blog", label: "Blog", icon: BookOpenText },
+  { id: "contact", label: "Contact", icon: Mail },
+];
 
-/* ─── Utilities ──────────────────────────────────────────────────────────── */
+const inputClass =
+  "w-full rounded-xl border border-white/[0.08] bg-black/25 px-4 py-3 text-sm text-white outline-none transition placeholder:text-neutral-700 focus:border-cyan-300/50 focus:ring-2 focus:ring-cyan-300/10";
 
-function replaceAt<T>(items: T[], index: number, nextItem: T) {
-  return items.map((item, i) => (i === index ? nextItem : item));
+function replaceAt<T>(items: T[], index: number, value: T) {
+  return items.map((item, current) => (current === index ? value : item));
 }
 
 function removeAt<T>(items: T[], index: number) {
-  return items.filter((_, i) => i !== index);
+  return items.filter((_, current) => current !== index);
 }
 
-/* ─── Empty factory helpers ──────────────────────────────────────────────── */
+function makeId(prefix: string) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+}
+
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
 
 const emptyExperience = (): ExperienceItem => ({
-  id: Date.now().toString(),
-  title: "New Role",
+  id: makeId("experience"),
+  title: "New role",
   company: "Company",
-  date: "2026 – Present",
-  description: "Describe the work and measurable impact.",
-  tags: ["React", "Next.js"],
+  date: "2026 — Present",
+  description: "Describe the role, responsibility, and measurable impact.",
+  tags: ["Fullstack"],
 });
 
 const emptyStat = (): StatItem => ({ value: 1, suffix: "+", label: "Metric" });
 
 const emptyProject = (): ProjectItem => ({
-  title: "New Project",
-  description: "Describe what it does and why it matters.",
-  image:
-    "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80",
+  title: "New project",
+  description: "Explain the product, problem, and result.",
+  image: "/dashboard.png",
   link: "#",
   type: "Fullstack",
-  year: "2026",
+  year: new Date().getFullYear().toString(),
   tech: ["Next.js", "Firebase"],
 });
 
-const emptySkill = (): SkillItem => ({ name: "New Skill", icon: "code" });
+const emptySkill = (): SkillItem => ({ name: "New skill", icon: "code" });
 
-const emptySkillCategory = (): SkillCategory => ({
-  id: `category-${Date.now()}`,
-  title: "New Category",
-  description: "Describe this skill group.",
-  color: "#ffffff",
+const emptyCategory = (): SkillCategory => ({
+  id: makeId("category"),
+  title: "New category",
+  description: "Describe this capability group.",
+  color: "#67e8f9",
   skills: [emptySkill()],
 });
 
-const emptyContactLink = (): ContactLink => ({
-  id: Date.now().toString().slice(-4),
-  label: "New Link",
+const emptyCommand = (): TerminalCommand => ({
+  command: "npm run next",
+  title: "New workflow",
+  output: ["First result", "Second result"],
+});
+
+const emptyMetric = (): TerminalMetric => ({ value: "1+", label: "metric" });
+
+const emptyAchievement = (): AchievementItem => ({
+  id: makeId("achievement"),
+  title: "New achievement",
+  issuer: "Issuer",
+  issuedOn: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
+  description: "Explain what this achievement represents.",
+  image: "/hacker-rank-software-engineer.png",
+  verifyUrl: "#",
+});
+
+const emptyPost = (): BlogPost => {
+  const id = makeId("post");
+  return {
+    id,
+    slug: id,
+    title: "New article",
+    excerpt: "A concise summary that invites readers into the article.",
+    coverImage: "/TechStack.png",
+    publishedAt: new Date().toISOString().slice(0, 10),
+    readTime: "5 min read",
+    tags: ["Engineering"],
+    content: "Start writing here.\n\n## A section heading\n\nAdd the article content in clear paragraphs.",
+    published: false,
+  };
+};
+
+const emptyLink = (): ContactLink => ({
+  id: makeId("link"),
+  label: "New link",
   value: "Display value",
   href: "#",
 });
 
-const emptyTerminalCommand = (): TerminalCommand => ({
-  command: "npm run next",
-  title: "New command",
-  output: ["Add a strong proof point", "Add another result"],
-});
-
-const emptyTerminalMetric = (): TerminalMetric => ({
-  value: "1+",
-  label: "new metric",
-});
-
-/* ─── Nav Sections ───────────────────────────────────────────────────────── */
-
-const NAV_SECTIONS = [
-  { id: "hero", label: "Hero", Icon: Layout },
-  { id: "terminal-feature", label: "Terminal", Icon: Terminal },
-  { id: "about", label: "About", Icon: User2 },
-  { id: "works", label: "Projects", Icon: Code2 },
-  { id: "skills", label: "Skills", Icon: Cpu },
-  { id: "contact", label: "Contact", Icon: Mail },
-];
-
-/* ─── Base field className ───────────────────────────────────────────────── */
-
-const fieldCls =
-  "w-full rounded-md border border-white/10 bg-[#0d0d0d] px-3 py-2.5 text-sm text-white font-mono " +
-  "outline-none transition-all placeholder:text-zinc-700 " +
-  "focus:border-[#00ffa3] focus:ring-1 focus:ring-[#00ffa3]/30";
-
-/* ─── Primitive Fields ───────────────────────────────────────────────────── */
-
-function TextField({
+function Field({
   label,
   value,
   onChange,
-  multiline = false,
   placeholder,
+  type = "text",
+  multiline = false,
+  rows = 4,
   hint,
 }: {
   label: string;
   value: string;
-  onChange: (v: string) => void;
-  multiline?: boolean;
+  onChange: (value: string) => void;
   placeholder?: string;
+  type?: string;
+  multiline?: boolean;
+  rows?: number;
   hint?: string;
 }) {
   return (
-    <label className="block space-y-1.5">
-      <span className="block text-[10px] font-semibold tracking-widest uppercase text-zinc-500">
-        {label}
-      </span>
+    <label className="block space-y-2">
+      <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-neutral-500">{label}</span>
       {multiline ? (
-        <textarea
-          value={value}
-          rows={3}
-          placeholder={placeholder}
-          onChange={(e) => onChange(e.target.value)}
-          className={fieldCls + " resize-y leading-relaxed"}
-        />
+        <textarea value={value} onChange={(event) => onChange(event.target.value)} rows={rows} placeholder={placeholder} className={`${inputClass} resize-y leading-6`} />
       ) : (
-        <input
-          value={value}
-          placeholder={placeholder}
-          onChange={(e) => onChange(e.target.value)}
-          className={fieldCls}
-        />
+        <input type={type} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} className={inputClass} />
       )}
-      {hint && (
-        <span className="block text-[11px] leading-5 text-zinc-600">{hint}</span>
-      )}
+      {hint ? <span className="block text-[11px] leading-5 text-neutral-600">{hint}</span> : null}
     </label>
   );
 }
 
-function NumberField({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  onChange: (v: number) => void;
-}) {
-  return (
-    <label className="block space-y-1.5">
-      <span className="block text-[10px] font-semibold tracking-widest uppercase text-zinc-500">
-        {label}
-      </span>
-      <input
-        type="number"
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className={fieldCls}
-      />
-    </label>
-  );
+function NumberField({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) {
+  return <Field label={label} value={String(value)} type="number" onChange={(value) => onChange(Number(value))} />;
 }
 
 function ListField({
   label,
   value,
   onChange,
-  placeholder,
 }: {
   label: string;
   value: string[];
-  onChange: (v: string[]) => void;
-  placeholder?: string;
+  onChange: (value: string[]) => void;
 }) {
-  return (
-    <TextField
-      label={label}
-      value={value.join(", ")}
-      placeholder={placeholder ?? "item1, item2, item3"}
-      hint="Comma-separated values"
-      onChange={(v) =>
-        onChange(
-          v
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean)
-        )
-      }
-    />
-  );
-}
+  const [pending, setPending] = useState("");
 
-/* ─── Layout Primitives ──────────────────────────────────────────────────── */
+  function addItems(rawValue: string) {
+    const candidates = rawValue
+      .split(/[,\n]/)
+      .map((item) => item.trim())
+      .filter(Boolean);
 
-function Grid2({ children }: { children: ReactNode }) {
-  return (
-    <div className="grid gap-4 lg:grid-cols-2">{children}</div>
-  );
-}
+    if (!candidates.length) return;
 
-function SectionDivider({ label }: { label: string }) {
-  return (
-    <div className="flex items-center gap-3 pt-2">
-      <span className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
-        {label}
-      </span>
-      <div className="h-px flex-1 bg-white/5" />
-    </div>
-  );
-}
+    const existing = new Set(value.map((item) => item.toLocaleLowerCase()));
+    const additions = candidates.filter((item) => {
+      const normalized = item.toLocaleLowerCase();
+      if (existing.has(normalized)) return false;
+      existing.add(normalized);
+      return true;
+    });
 
-/* ─── Section Panel ──────────────────────────────────────────────────────── */
+    if (additions.length) onChange([...value, ...additions]);
+    setPending("");
+  }
 
-function SectionPanel({
-  id,
-  title,
-  description,
-  icon: Icon,
-  children,
-  badge,
-}: {
-  id: string;
-  title: string;
-  description?: string;
-  icon: React.ElementType;
-  children: ReactNode;
-  badge?: string;
-}) {
-  const [open, setOpen] = useState(true);
+  function removeItem(index: number) {
+    onChange(removeAt(value, index));
+  }
 
   return (
-    <section
-      id={id}
-      className="scroll-mt-6 overflow-hidden rounded-xl border border-white/[0.07] bg-[#0a0a0a]"
-    >
-      {/* Header */}
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center gap-3 border-b border-white/[0.07] px-6 py-4 text-left transition-colors hover:bg-white/[0.02]"
-      >
-        <span
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
-          style={{ background: ACCENT_DIM, color: ACCENT }}
-        >
-          <Icon className="h-4 w-4" />
-        </span>
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <h2 className="text-sm font-semibold text-white">{title}</h2>
-            {badge && (
-              <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-mono text-zinc-500">
-                {badge}
-              </span>
-            )}
-          </div>
-          {description && (
-            <p className="mt-0.5 text-xs text-zinc-600">{description}</p>
-          )}
-        </div>
-        {open ? (
-          <ChevronDown className="h-4 w-4 shrink-0 text-zinc-600" />
-        ) : (
-          <ChevronRight className="h-4 w-4 shrink-0 text-zinc-600" />
-        )}
-      </button>
-
-      {/* Body */}
-      {open && (
-        <div className="space-y-6 p-6">{children}</div>
-      )}
-    </section>
-  );
-}
-
-/* ─── Editable Card ──────────────────────────────────────────────────────── */
-
-function EditableCard({
-  title,
-  subtitle,
-  onRemove,
-  children,
-}: {
-  title: string;
-  subtitle?: string;
-  onRemove: () => void;
-  children: ReactNode;
-}) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <div className="overflow-hidden rounded-lg border border-white/[0.07] bg-[#0d0d0d]">
-      <div className="flex items-center gap-3 px-4 py-3">
-        <button
-          type="button"
-          onClick={() => setOpen((o) => !o)}
-          className="flex min-w-0 flex-1 items-center gap-2 text-left"
-        >
-          {open ? (
-            <ChevronDown className="h-3.5 w-3.5 shrink-0 text-zinc-600" />
-          ) : (
-            <ChevronRight className="h-3.5 w-3.5 shrink-0 text-zinc-600" />
-          )}
-          <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-white">{title}</p>
-            {subtitle && (
-              <p className="truncate text-xs text-zinc-600">{subtitle}</p>
-            )}
-          </div>
-        </button>
-        <button
-          type="button"
-          onClick={onRemove}
-          aria-label={`Remove ${title}`}
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-transparent text-zinc-600 transition hover:border-red-900 hover:text-red-400"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </button>
+    <label className="block space-y-2">
+      <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-neutral-500">{label}</span>
+      <div className="flex min-h-14 flex-wrap items-center gap-2 rounded-xl border border-white/[0.08] bg-black/25 px-3 py-2.5 transition focus-within:border-cyan-300/50 focus-within:ring-2 focus-within:ring-cyan-300/10">
+        {value.map((item, index) => (
+          <span key={`${item}-${index}`} className="inline-flex items-center gap-1.5 rounded-full border border-cyan-300/15 bg-cyan-300/[0.08] py-1.5 pl-3 pr-2 text-xs text-cyan-100">
+            {item}
+            <button
+              type="button"
+              onClick={() => removeItem(index)}
+              aria-label={`Remove ${item}`}
+              className="flex h-4 w-4 items-center justify-center rounded-full text-cyan-200/50 transition hover:bg-white/10 hover:text-white"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </span>
+        ))}
+        <input
+          value={pending}
+          onChange={(event) => setPending(event.target.value)}
+          onKeyDown={(event) => {
+            if ((event.key === "Enter" || event.key === ",") && !event.nativeEvent.isComposing) {
+              event.preventDefault();
+              addItems(pending);
+            } else if (event.key === "Backspace" && !pending && value.length) {
+              removeItem(value.length - 1);
+            }
+          }}
+          onPaste={(event) => {
+            const pasted = event.clipboardData.getData("text");
+            if (pasted.includes(",") || pasted.includes("\n")) {
+              event.preventDefault();
+              addItems(pasted);
+            }
+          }}
+          onBlur={() => addItems(pending)}
+          placeholder={value.length ? "Add another…" : "Type an item and press Enter"}
+          className="min-w-44 flex-1 bg-transparent px-1 py-1.5 text-sm text-white outline-none placeholder:text-neutral-700"
+        />
       </div>
-      {open && (
-        <div className="border-t border-white/[0.05] p-4 space-y-4">
-          {children}
-        </div>
-      )}
-    </div>
+      <span className="block text-[11px] leading-5 text-neutral-600">Press Enter or comma to create a capsule. Backspace removes the last one.</span>
+    </label>
   );
 }
 
-/* ─── Add Button ─────────────────────────────────────────────────────────── */
-
-function AddButton({ label, onClick }: { label: string; onClick: () => void }) {
+function Toggle({ label, value, onChange }: { label: string; value: boolean; onChange: (value: boolean) => void }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/[0.02] px-3 py-1.5 text-xs font-medium text-zinc-400 transition hover:border-[#00ffa3]/40 hover:text-[#00ffa3]"
-    >
-      <Plus className="h-3.5 w-3.5" />
-      {label}
+    <button type="button" onClick={() => onChange(!value)} className="flex w-full items-center justify-between rounded-xl border border-white/[0.08] bg-black/20 px-4 py-3 text-left">
+      <span className="text-sm text-neutral-300">{label}</span>
+      <span className={`relative h-6 w-11 rounded-full transition ${value ? "bg-cyan-300" : "bg-neutral-800"}`}>
+        <span className={`absolute top-1 h-4 w-4 rounded-full bg-black transition ${value ? "left-6" : "left-1"}`} />
+      </span>
     </button>
   );
 }
 
-/* ─── Sub-section row (title + Add button) ───────────────────────────────── */
-
-function SubHeader({
+function ImageField({
   label,
-  count,
-  onAdd,
-  addLabel,
+  value,
+  onChange,
+  folder,
 }: {
   label: string;
-  count?: number;
-  onAdd: () => void;
-  addLabel: string;
+  value: string;
+  onChange: (value: string) => void;
+  folder: string;
 }) {
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleFile(file?: File) {
+    if (!file) return;
+    setUploading(true);
+    setProgress(0);
+    setError(null);
+    try {
+      const url = await uploadPortfolioImage(file, folder, setProgress);
+      onChange(url);
+    } catch (nextError) {
+      setError(nextError instanceof Error ? nextError.message : "Upload failed.");
+    } finally {
+      setUploading(false);
+    }
+  }
+
   return (
-    <div className="flex items-center justify-between gap-3">
-      <div className="flex items-center gap-2">
-        <span className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
-          {label}
-        </span>
-        {count !== undefined && (
-          <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-mono text-zinc-600">
-            {count}
-          </span>
-        )}
+    <div className="space-y-3">
+      <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-neutral-500">{label}</span>
+      <div className="grid gap-3 sm:grid-cols-[140px_1fr]">
+        <div className="relative h-32 overflow-hidden rounded-xl border border-white/[0.08] bg-black/30">
+          {value ? (
+            // Images are admin-managed and can come from Firebase Storage.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={value} alt="Preview" className="h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full items-center justify-center text-neutral-700"><ImageIcon className="h-6 w-6" /></div>
+          )}
+          {uploading ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 text-xs text-white">
+              <LoaderCircle className="mb-2 h-5 w-5 animate-spin" />{progress}%
+            </div>
+          ) : null}
+        </div>
+        <div className="space-y-3">
+          <input value={value} onChange={(event) => onChange(event.target.value)} placeholder="/image.png or https://..." className={inputClass} />
+          <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 px-4 py-3 text-xs text-neutral-400 transition hover:border-cyan-300/40 hover:text-cyan-200">
+            <UploadCloud className="h-4 w-4" />
+            {uploading ? "Uploading…" : "Choose image"}
+            <input
+              type="file"
+              accept="image/*"
+              disabled={uploading}
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                event.target.value = "";
+                void handleFile(file);
+              }}
+              className="hidden"
+            />
+          </label>
+          {error ? <p className="text-xs text-red-400">{error}</p> : null}
+        </div>
       </div>
+    </div>
+  );
+}
+
+function SectionIntro({ icon: Icon, eyebrow, title, copy }: { icon: React.ElementType; eyebrow: string; title: string; copy: string }) {
+  return (
+    <div className="mb-8 flex items-start gap-4 border-b border-white/[0.07] pb-8">
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-cyan-300/15 bg-cyan-300/[0.07] text-cyan-200"><Icon className="h-5 w-5" /></span>
+      <div>
+        <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-cyan-300/70">{eyebrow}</p>
+        <h1 className="mt-2 text-2xl font-medium tracking-[-0.035em] text-white md:text-3xl">{title}</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">{copy}</p>
+      </div>
+    </div>
+  );
+}
+
+function Grid({ children }: { children: ReactNode }) {
+  return <div className="grid gap-5 md:grid-cols-2">{children}</div>;
+}
+
+function EditorCard({ title, subtitle, onRemove, children }: { title: string; subtitle?: string; onRemove: () => void; children: ReactNode }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-black/20">
+      <div className="flex items-center gap-3 px-5 py-4">
+        <button type="button" onClick={() => setOpen((value) => !value)} className="flex min-w-0 flex-1 items-center gap-3 text-left">
+          {open ? <ChevronDown className="h-4 w-4 text-neutral-600" /> : <ChevronRight className="h-4 w-4 text-neutral-600" />}
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium text-white">{title}</p>
+            {subtitle ? <p className="mt-1 truncate text-xs text-neutral-600">{subtitle}</p> : null}
+          </div>
+        </button>
+        <button type="button" onClick={onRemove} aria-label={`Remove ${title}`} className="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-600 transition hover:bg-red-500/10 hover:text-red-400"><Trash2 className="h-4 w-4" /></button>
+      </div>
+      {open ? <div className="space-y-5 border-t border-white/[0.06] p-5">{children}</div> : null}
+    </div>
+  );
+}
+
+function AddButton({ label, onClick }: { label: string; onClick: () => void }) {
+  return <button type="button" onClick={onClick} className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-xs text-neutral-300 transition hover:border-cyan-300/35 hover:text-cyan-200"><Plus className="h-4 w-4" />{label}</button>;
+}
+
+function CollectionHeader({ title, count, addLabel, onAdd }: { title: string; count: number; addLabel: string; onAdd: () => void }) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-4 pt-4">
+      <div className="flex items-center gap-3"><h2 className="text-sm font-medium text-white">{title}</h2><span className="rounded-full bg-white/[0.05] px-2 py-0.5 font-mono text-[9px] text-neutral-500">{count}</span></div>
       <AddButton label={addLabel} onClick={onAdd} />
     </div>
   );
 }
 
-/* ─── Admin Editor ───────────────────────────────────────────────────────── */
+function StringListEditor({ items, onChange, label }: { items: string[]; onChange: (items: string[]) => void; label: string }) {
+  return (
+    <div className="space-y-3">
+      <CollectionHeader title={label} count={items.length} addLabel="Add paragraph" onAdd={() => onChange([...items, "New paragraph"])} />
+      {items.map((item, index) => (
+        <div key={index} className="flex items-start gap-2">
+          <textarea value={item} rows={3} onChange={(event) => onChange(replaceAt(items, index, event.target.value))} className={`${inputClass} resize-y leading-6`} />
+          <button type="button" onClick={() => onChange(removeAt(items, index))} className="mt-2 p-2 text-neutral-600 hover:text-red-400"><Trash2 className="h-4 w-4" /></button>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 function AdminEditor({ initialContent }: { initialContent: PortfolioContent }) {
+  const [active, setActive] = useState<SectionId>("hero");
+  const [draft, setDraft] = useState(initialContent);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [draft, setDraft] = useState<PortfolioContent>(initialContent);
 
-  const isDirty = useMemo(
-    () => JSON.stringify(draft) !== JSON.stringify(initialContent),
-    [draft, initialContent]
-  );
+  const dirty = useMemo(() => JSON.stringify(draft) !== JSON.stringify(initialContent), [draft, initialContent]);
 
-  async function handleSave() {
+  function patch<K extends keyof PortfolioContent>(section: K, values: Partial<PortfolioContent[K]>) {
+    setDraft((current) => ({ ...current, [section]: { ...current[section], ...values } }));
+  }
+
+  async function save() {
     setSaveState("saving");
     setSaveError(null);
     try {
       await savePortfolioContent(draft);
       setSaveState("saved");
-      setTimeout(() => setSaveState("idle"), 3000);
-    } catch (err) {
+      window.setTimeout(() => setSaveState("idle"), 2500);
+    } catch (error) {
       setSaveState("error");
-      setSaveError(err instanceof Error ? err.message : "Could not save content.");
+      setSaveError(error instanceof Error ? error.message : "Could not save changes.");
     }
   }
 
-  function resetDraft() {
-    setDraft(initialContent);
-    setSaveState("idle");
-    setSaveError(null);
-  }
-
-  /* ── Patch helpers ──────────────────────────────────────────────────── */
-
-  const patchHero = (patch: Partial<typeof draft.hero>) =>
-    setDraft((c) => ({ ...c, hero: { ...c.hero, ...patch } }));
-
-  const patchTerminal = (patch: Partial<typeof draft.terminal>) =>
-    setDraft((c) => ({ ...c, terminal: { ...c.terminal, ...patch } }));
-
-  const patchAbout = (patch: Partial<typeof draft.about>) =>
-    setDraft((c) => ({ ...c, about: { ...c.about, ...patch } }));
-
-  const patchWorks = (patch: Partial<typeof draft.works>) =>
-    setDraft((c) => ({ ...c, works: { ...c.works, ...patch } }));
-
-  const patchSkills = (patch: Partial<typeof draft.skills>) =>
-    setDraft((c) => ({ ...c, skills: { ...c.skills, ...patch } }));
-
-  const patchContact = (patch: Partial<typeof draft.contact>) =>
-    setDraft((c) => ({ ...c, contact: { ...c.contact, ...patch } }));
-
   return (
-    <div className="flex min-h-screen bg-[#080808]">
-      {/* ── Sidebar ──────────────────────────────────────────────────── */}
-      <aside className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col border-r border-white/[0.06] bg-[#070707] lg:flex">
-        {/* Logo */}
-        <div className="border-b border-white/[0.06] px-5 py-5">
-          <div className="flex items-center gap-2.5">
-            <span
-              className="flex h-7 w-7 items-center justify-center rounded-md text-xs font-bold"
-              style={{ background: ACCENT_DIM, color: ACCENT }}
-            >
-              ◈
-            </span>
-            <div>
-              <p className="text-xs font-bold tracking-widest uppercase text-white">
-                Admin
-              </p>
-              <p className="text-[10px] text-zinc-600 font-mono">portfolio.cms</p>
-            </div>
-          </div>
+    <div className="dark min-h-screen bg-[#050608] text-white">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-white/[0.07] bg-[#07080a] lg:flex lg:flex-col">
+        <div className="flex h-20 items-center gap-3 border-b border-white/[0.07] px-6">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-300/20 bg-cyan-300/[0.07] font-mono text-xs text-cyan-200">NP</span>
+          <div><p className="text-sm font-medium">Content studio</p><p className="mt-0.5 font-mono text-[9px] uppercase tracking-[0.16em] text-neutral-600">portfolio admin</p></div>
         </div>
-
-        {/* Nav */}
-        <nav className="flex-1 space-y-0.5 overflow-y-auto p-3">
-          {NAV_SECTIONS.map(({ id, label, Icon }) => (
-            <a
-              key={id}
-              href={`#${id}`}
-              className="flex items-center gap-2.5 rounded-md px-3 py-2 text-sm text-zinc-500 transition-all hover:bg-white/[0.04] hover:text-white"
-            >
-              <Icon className="h-3.5 w-3.5 shrink-0" />
-              {label}
-            </a>
-          ))}
+        <nav className="flex-1 space-y-1 overflow-y-auto p-3">
+          {NAV_ITEMS.map((item) => {
+            const Icon = item.icon;
+            return (
+              <button key={item.id} type="button" onClick={() => setActive(item.id)} className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm transition ${active === item.id ? "bg-white/[0.07] text-white" : "text-neutral-500 hover:bg-white/[0.035] hover:text-neutral-200"}`}>
+                <Icon className={`h-4 w-4 ${active === item.id ? "text-cyan-200" : ""}`} />{item.label}
+              </button>
+            );
+          })}
         </nav>
-
-        {/* Stats */}
-        <div className="border-t border-white/[0.06] p-4 space-y-2">
-          {[
-            { label: "Projects", value: draft.works.projects.length },
-            { label: "Experiences", value: draft.about.experiences.length },
-            { label: "Skill Groups", value: draft.skills.categories.length },
-          ].map(({ label, value }) => (
-            <div key={label} className="flex items-center justify-between">
-              <span className="text-[11px] text-zinc-600">{label}</span>
-              <span className="font-mono text-[11px]" style={{ color: ACCENT }}>
-                {value}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        {/* Sign out */}
-        <div className="border-t border-white/[0.06] p-3">
-          <button
-            type="button"
-            onClick={() => signOut(auth)}
-            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-xs text-zinc-600 transition hover:bg-red-950/40 hover:text-red-400"
-          >
-            <LogOut className="h-3.5 w-3.5" />
-            Sign Out
-          </button>
+        <div className="space-y-2 border-t border-white/[0.07] p-4">
+          <a href="/" target="_blank" className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-neutral-500 transition hover:bg-white/[0.04] hover:text-white"><ExternalLink className="h-4 w-4" />Open portfolio</a>
+          <button type="button" onClick={() => void signOut(auth)} className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm text-neutral-500 transition hover:bg-red-500/[0.07] hover:text-red-300"><LogOut className="h-4 w-4" />Sign out</button>
         </div>
       </aside>
 
-      {/* ── Main ─────────────────────────────────────────────────────── */}
-      <main className="flex-1 overflow-auto">
-        {/* Top bar */}
-        <div className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-white/[0.06] bg-[#080808]/90 px-6 py-3 backdrop-blur-xl">
-          <div>
-            <h1 className="text-sm font-semibold text-white">Portfolio Editor</h1>
-            <p className="text-[11px] text-zinc-600 font-mono">
-              siteContent/portfolio
-            </p>
-          </div>
-
+      <header className="sticky top-0 z-30 border-b border-white/[0.07] bg-[#050608]/85 backdrop-blur-2xl lg:ml-64">
+        <div className="flex min-h-20 items-center justify-between gap-4 px-4 md:px-8">
+          <div><p className="text-sm font-medium capitalize">{active}</p><p className="mt-1 font-mono text-[9px] uppercase tracking-[0.16em] text-neutral-600">{dirty ? "Unsaved changes" : "Everything saved"}</p></div>
           <div className="flex items-center gap-2">
-            {saveState === "saved" && (
-              <span
-                className="text-[11px] font-mono"
-                style={{ color: ACCENT }}
-              >
-                ✓ Saved
-              </span>
-            )}
-            {saveError && (
-              <span className="text-[11px] font-mono text-red-400">
-                {saveError}
-              </span>
-            )}
-
-            {isDirty && (
-              <button
-                type="button"
-                onClick={resetDraft}
-                className="inline-flex items-center gap-1.5 rounded-md border border-white/10 px-3 py-1.5 text-xs text-zinc-400 transition hover:border-white/20 hover:text-white"
-              >
-                <RotateCcw className="h-3 w-3" />
-                Reset
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={saveState === "saving"}
-              className="inline-flex items-center gap-1.5 rounded-md px-4 py-1.5 text-xs font-semibold transition disabled:opacity-50"
-              style={{ background: ACCENT, color: "#000" }}
-            >
-              <Save className="h-3 w-3" />
-              {saveState === "saving" ? "Saving…" : "Save Changes"}
-            </button>
-
-            {/* Mobile sign out */}
-            <button
-              type="button"
-              onClick={() => signOut(auth)}
-              className="inline-flex items-center gap-1.5 rounded-md border border-white/10 px-3 py-1.5 text-xs text-zinc-400 transition hover:border-red-900 hover:text-red-400 lg:hidden"
-            >
-              <LogOut className="h-3 w-3" />
+            <button type="button" onClick={() => setDraft(initialContent)} disabled={!dirty || saveState === "saving"} className="flex h-10 items-center gap-2 rounded-xl border border-white/10 px-3 text-xs text-neutral-400 transition hover:text-white disabled:opacity-30"><RotateCcw className="h-3.5 w-3.5" /><span className="hidden sm:inline">Reset</span></button>
+            <button type="button" onClick={() => void save()} disabled={!dirty || saveState === "saving"} className="flex h-10 min-w-28 items-center justify-center gap-2 rounded-xl bg-white px-4 text-xs font-medium text-black transition hover:bg-cyan-200 disabled:opacity-40">
+              {saveState === "saving" ? <LoaderCircle className="h-4 w-4 animate-spin" /> : saveState === "saved" ? <Check className="h-4 w-4" /> : <Save className="h-4 w-4" />}
+              {saveState === "saving" ? "Saving" : saveState === "saved" ? "Saved" : "Save changes"}
             </button>
           </div>
         </div>
+        <nav className="flex gap-1 overflow-x-auto border-t border-white/[0.05] px-3 py-2 lg:hidden">
+          {NAV_ITEMS.map((item) => <button key={item.id} type="button" onClick={() => setActive(item.id)} className={`shrink-0 rounded-lg px-3 py-2 text-xs ${active === item.id ? "bg-white/10 text-white" : "text-neutral-600"}`}>{item.label}</button>)}
+        </nav>
+      </header>
 
-        {/* Sections */}
-        <div className="mx-auto max-w-4xl space-y-4 p-6">
+      <main className="lg:ml-64">
+        <div className="mx-auto max-w-5xl px-4 py-8 md:px-8 md:py-12">
+          {saveError ? <div className="mb-6 rounded-xl border border-red-500/20 bg-red-500/[0.07] px-4 py-3 text-sm text-red-300">{saveError}</div> : null}
 
-          {/* ── HERO ──────────────────────────────────────────────────── */}
-          <SectionPanel
-            id="hero"
-            title="Hero"
-            icon={Layout}
-            description="Name, role, availability, and CTAs."
-          >
-            <Grid2>
-              <TextField label="First Name" value={draft.hero.firstName} onChange={(v) => patchHero({ firstName: v })} />
-              <TextField label="Last Name" value={draft.hero.lastName} onChange={(v) => patchHero({ lastName: v })} />
-              <TextField label="Role Line" value={draft.hero.role} onChange={(v) => patchHero({ role: v })} multiline />
-              <TextField label="Description" value={draft.hero.description} onChange={(v) => patchHero({ description: v })} multiline />
-              <TextField label="Availability Text" value={draft.hero.availabilityText} onChange={(v) => patchHero({ availabilityText: v })} />
-            </Grid2>
+          {active === "hero" ? (
+            <section>
+              <SectionIntro icon={LayoutDashboard} eyebrow="Homepage" title="Hero and identity" copy="Control the first impression, profile image, headline, positioning, and calls to action." />
+              <div className="space-y-6">
+                <ImageField label="Hero photo" value={draft.hero.imageSrc} onChange={(imageSrc) => patch("hero", { imageSrc })} folder="hero" />
+                <Grid>
+                  <Field label="Image alt text" value={draft.hero.imageAlt} onChange={(imageAlt) => patch("hero", { imageAlt })} />
+                  <Field label="Availability" value={draft.hero.availabilityText} onChange={(availabilityText) => patch("hero", { availabilityText })} />
+                  <Field label="First name" value={draft.hero.firstName} onChange={(firstName) => patch("hero", { firstName })} />
+                  <Field label="Last name" value={draft.hero.lastName} onChange={(lastName) => patch("hero", { lastName })} />
+                  <Field label="Headline line one" value={draft.hero.headlinePrimary} onChange={(headlinePrimary) => patch("hero", { headlinePrimary })} />
+                  <Field label="Headline line two" value={draft.hero.headlineSecondary} onChange={(headlineSecondary) => patch("hero", { headlineSecondary })} />
+                  <Field label="Profession label" value={draft.hero.professionLabel} onChange={(professionLabel) => patch("hero", { professionLabel })} />
+                  <Field label="Country label" value={draft.hero.countryLabel} onChange={(countryLabel) => patch("hero", { countryLabel })} />
+                  <Field label="Primary button" value={draft.hero.primaryCtaLabel} onChange={(primaryCtaLabel) => patch("hero", { primaryCtaLabel })} />
+                  <Field label="Primary button link" value={draft.hero.primaryCtaHref} onChange={(primaryCtaHref) => patch("hero", { primaryCtaHref })} />
+                  <Field label="Secondary button" value={draft.hero.secondaryCtaLabel} onChange={(secondaryCtaLabel) => patch("hero", { secondaryCtaLabel })} />
+                  <Field label="Secondary button link" value={draft.hero.secondaryCtaHref} onChange={(secondaryCtaHref) => patch("hero", { secondaryCtaHref })} />
+                </Grid>
+                <Field label="Hero positioning" value={draft.hero.role} onChange={(role) => patch("hero", { role })} multiline />
+                <Field label="SEO description" value={draft.hero.description} onChange={(description) => patch("hero", { description })} multiline />
+              </div>
+            </section>
+          ) : null}
 
-            <SectionDivider label="CTAs" />
-            <Grid2>
-              <TextField label="Primary Label" value={draft.hero.primaryCtaLabel} onChange={(v) => patchHero({ primaryCtaLabel: v })} />
-              <TextField label="Primary Link" value={draft.hero.primaryCtaHref} onChange={(v) => patchHero({ primaryCtaHref: v })} />
-              <TextField label="Secondary Label" value={draft.hero.secondaryCtaLabel} onChange={(v) => patchHero({ secondaryCtaLabel: v })} />
-              <TextField label="Secondary Link" value={draft.hero.secondaryCtaHref} onChange={(v) => patchHero({ secondaryCtaHref: v })} />
-            </Grid2>
-          </SectionPanel>
-
-          {/* ── TERMINAL ──────────────────────────────────────────────── */}
-          <SectionPanel
-            id="terminal-feature"
-            title="Terminal"
-            icon={Terminal}
-            description="Interactive terminal block — commands and metrics."
-            badge={`${draft.terminal.commands.length} cmds`}
-          >
-            <Grid2>
-              <TextField label="Eyebrow" value={draft.terminal.eyebrow} onChange={(v) => patchTerminal({ eyebrow: v })} />
-              <TextField label="Prompt" value={draft.terminal.prompt} onChange={(v) => patchTerminal({ prompt: v })} />
-              <TextField label="Title" value={draft.terminal.title} onChange={(v) => patchTerminal({ title: v })} />
-              <TextField label="Description" value={draft.terminal.description} onChange={(v) => patchTerminal({ description: v })} multiline />
-            </Grid2>
-
-            <SubHeader
-              label="Commands"
-              count={draft.terminal.commands.length}
-              addLabel="Add Command"
-              onAdd={() =>
-                patchTerminal({
-                  commands: [...draft.terminal.commands, emptyTerminalCommand()],
-                })
-              }
-            />
-            <div className="grid gap-3 lg:grid-cols-2">
-              {draft.terminal.commands.map((cmd, i) => (
-                <EditableCard
-                  key={i}
-                  title={cmd.title}
-                  subtitle={`> ${cmd.command}`}
-                  onRemove={() =>
-                    patchTerminal({ commands: removeAt(draft.terminal.commands, i) })
-                  }
-                >
-                  <TextField label="Command" value={cmd.command} onChange={(v) => patchTerminal({ commands: replaceAt(draft.terminal.commands, i, { ...cmd, command: v }) })} />
-                  <TextField label="Title" value={cmd.title} onChange={(v) => patchTerminal({ commands: replaceAt(draft.terminal.commands, i, { ...cmd, title: v }) })} />
-                  <TextField label="Output Lines (one per line)" value={cmd.output.join("\n")} onChange={(v) => patchTerminal({ commands: replaceAt(draft.terminal.commands, i, { ...cmd, output: v.split("\n").filter(Boolean) }) })} multiline />
-                </EditableCard>
-              ))}
-            </div>
-
-            <SubHeader
-              label="Metrics"
-              count={draft.terminal.metrics.length}
-              addLabel="Add Metric"
-              onAdd={() =>
-                patchTerminal({
-                  metrics: [...draft.terminal.metrics, emptyTerminalMetric()],
-                })
-              }
-            />
-            <div className="grid gap-3 md:grid-cols-3">
-              {draft.terminal.metrics.map((m, i) => (
-                <EditableCard
-                  key={i}
-                  title={m.label}
-                  subtitle={m.value}
-                  onRemove={() =>
-                    patchTerminal({ metrics: removeAt(draft.terminal.metrics, i) })
-                  }
-                >
-                  <TextField label="Value" value={m.value} onChange={(v) => patchTerminal({ metrics: replaceAt(draft.terminal.metrics, i, { ...m, value: v }) })} />
-                  <TextField label="Label" value={m.label} onChange={(v) => patchTerminal({ metrics: replaceAt(draft.terminal.metrics, i, { ...m, label: v }) })} />
-                </EditableCard>
-              ))}
-            </div>
-          </SectionPanel>
-
-          {/* ── ABOUT ─────────────────────────────────────────────────── */}
-          <SectionPanel
-            id="about"
-            title="About"
-            icon={User2}
-            description="Bio, career history, resume link, and stats."
-            badge={`${draft.about.experiences.length} roles`}
-          >
-            <Grid2>
-              <TextField label="Section Label" value={draft.about.sectionLabel} onChange={(v) => patchAbout({ sectionLabel: v })} />
-              <TextField label="Resume URL" value={draft.about.resumeUrl} onChange={(v) => patchAbout({ resumeUrl: v })} />
-              <TextField label="Primary Title" value={draft.about.titlePrimary} onChange={(v) => patchAbout({ titlePrimary: v })} />
-              <TextField label="Secondary Title" value={draft.about.titleSecondary} onChange={(v) => patchAbout({ titleSecondary: v })} />
-              <TextField label="Image Source" value={draft.about.imageSrc} onChange={(v) => patchAbout({ imageSrc: v })} />
-              <TextField label="Image Alt" value={draft.about.imageAlt} onChange={(v) => patchAbout({ imageAlt: v })} />
-              <TextField label="CTA Label" value={draft.about.ctaLabel} onChange={(v) => patchAbout({ ctaLabel: v })} />
-              <TextField label="CTA Link" value={draft.about.ctaHref} onChange={(v) => patchAbout({ ctaHref: v })} />
-              <TextField label="CTA Intro Text" value={draft.about.ctaText} onChange={(v) => patchAbout({ ctaText: v })} />
-            </Grid2>
-            <TextField
-              label="Paragraphs (separate with blank line)"
-              value={draft.about.paragraphs.join("\n\n")}
-              onChange={(v) => patchAbout({ paragraphs: v.split("\n\n").filter(Boolean) })}
-              multiline
-            />
-
-            <SubHeader
-              label="Stats"
-              count={draft.about.stats.length}
-              addLabel="Add Stat"
-              onAdd={() => patchAbout({ stats: [...draft.about.stats, emptyStat()] })}
-            />
-            <div className="grid gap-3 md:grid-cols-3">
-              {draft.about.stats.map((stat, i) => (
-                <EditableCard
-                  key={i}
-                  title={stat.label}
-                  subtitle={`${stat.value}${stat.suffix}`}
-                  onRemove={() => patchAbout({ stats: removeAt(draft.about.stats, i) })}
-                >
-                  <NumberField label="Value" value={stat.value} onChange={(v) => patchAbout({ stats: replaceAt(draft.about.stats, i, { ...stat, value: v }) })} />
-                  <TextField label="Suffix" value={stat.suffix} onChange={(v) => patchAbout({ stats: replaceAt(draft.about.stats, i, { ...stat, suffix: v }) })} />
-                  <TextField label="Label" value={stat.label} onChange={(v) => patchAbout({ stats: replaceAt(draft.about.stats, i, { ...stat, label: v }) })} />
-                </EditableCard>
-              ))}
-            </div>
-
-            <SubHeader
-              label="Experience"
-              count={draft.about.experiences.length}
-              addLabel="Add Role"
-              onAdd={() =>
-                patchAbout({ experiences: [...draft.about.experiences, emptyExperience()] })
-              }
-            />
-            <div className="grid gap-3 lg:grid-cols-2">
-              {draft.about.experiences.map((exp, i) => (
-                <EditableCard
-                  key={`${exp.id}-${i}`}
-                  title={exp.title}
-                  subtitle={`${exp.company} · ${exp.date}`}
-                  onRemove={() =>
-                    patchAbout({ experiences: removeAt(draft.about.experiences, i) })
-                  }
-                >
-                  <TextField label="Title" value={exp.title} onChange={(v) => patchAbout({ experiences: replaceAt(draft.about.experiences, i, { ...exp, title: v }) })} />
-                  <TextField label="Company" value={exp.company} onChange={(v) => patchAbout({ experiences: replaceAt(draft.about.experiences, i, { ...exp, company: v }) })} />
-                  <TextField label="Date Range" value={exp.date} onChange={(v) => patchAbout({ experiences: replaceAt(draft.about.experiences, i, { ...exp, date: v }) })} />
-                  <TextField label="Description" value={exp.description} onChange={(v) => patchAbout({ experiences: replaceAt(draft.about.experiences, i, { ...exp, description: v }) })} multiline />
-                  <ListField label="Tags" value={exp.tags} onChange={(v) => patchAbout({ experiences: replaceAt(draft.about.experiences, i, { ...exp, tags: v }) })} />
-                </EditableCard>
-              ))}
-            </div>
-          </SectionPanel>
-
-          {/* ── WORKS ─────────────────────────────────────────────────── */}
-          <SectionPanel
-            id="works"
-            title="Projects"
-            icon={Code2}
-            description="Portfolio cards with images, links, and tech stack."
-            badge={`${draft.works.projects.length} projects`}
-          >
-            <Grid2>
-              <TextField label="Section Label" value={draft.works.sectionLabel} onChange={(v) => patchWorks({ sectionLabel: v })} />
-              <TextField label="GitHub URL" value={draft.works.githubUrl} onChange={(v) => patchWorks({ githubUrl: v })} />
-              <TextField label="Primary Title" value={draft.works.titlePrimary} onChange={(v) => patchWorks({ titlePrimary: v })} />
-              <TextField label="Secondary Title" value={draft.works.titleSecondary} onChange={(v) => patchWorks({ titleSecondary: v })} />
-              <TextField label="GitHub Label" value={draft.works.githubLabel} onChange={(v) => patchWorks({ githubLabel: v })} />
-            </Grid2>
-
-            <SubHeader
-              label="Projects"
-              count={draft.works.projects.length}
-              addLabel="Add Project"
-              onAdd={() =>
-                patchWorks({ projects: [...draft.works.projects, emptyProject()] })
-              }
-            />
-            <div className="grid gap-3 lg:grid-cols-2">
-              {draft.works.projects.map((proj, i) => (
-                <EditableCard
-                  key={i}
-                  title={proj.title}
-                  subtitle={`${proj.type} · ${proj.year}`}
-                  onRemove={() =>
-                    patchWorks({ projects: removeAt(draft.works.projects, i) })
-                  }
-                >
-                  <TextField label="Title" value={proj.title} onChange={(v) => patchWorks({ projects: replaceAt(draft.works.projects, i, { ...proj, title: v }) })} />
-                  <TextField label="Description" value={proj.description} onChange={(v) => patchWorks({ projects: replaceAt(draft.works.projects, i, { ...proj, description: v }) })} multiline />
-                  <TextField
-                    label="Image URL"
-                    value={proj.image}
-                    placeholder="https://images.example.com/project.jpg"
-                    hint="Full URL or a local path like /project.png"
-                    onChange={(v) => patchWorks({ projects: replaceAt(draft.works.projects, i, { ...proj, image: v }) })}
-                  />
-                  <TextField label="Project Link" value={proj.link} onChange={(v) => patchWorks({ projects: replaceAt(draft.works.projects, i, { ...proj, link: v }) })} />
-                  <Grid2>
-                    <TextField label="Type" value={proj.type} onChange={(v) => patchWorks({ projects: replaceAt(draft.works.projects, i, { ...proj, type: v }) })} />
-                    <TextField label="Year" value={proj.year} onChange={(v) => patchWorks({ projects: replaceAt(draft.works.projects, i, { ...proj, year: v }) })} />
-                  </Grid2>
-                  <ListField label="Tech Stack" value={proj.tech} onChange={(v) => patchWorks({ projects: replaceAt(draft.works.projects, i, { ...proj, tech: v }) })} />
-                </EditableCard>
-              ))}
-            </div>
-          </SectionPanel>
-
-          {/* ── SKILLS ────────────────────────────────────────────────── */}
-          <SectionPanel
-            id="skills"
-            title="Skills"
-            icon={Cpu}
-            description="Grouped categories with Simple Icons slugs."
-            badge={`${draft.skills.categories.length} groups`}
-          >
-            <Grid2>
-              <TextField label="Primary Title" value={draft.skills.titlePrimary} onChange={(v) => patchSkills({ titlePrimary: v })} />
-              <TextField label="Secondary Title" value={draft.skills.titleSecondary} onChange={(v) => patchSkills({ titleSecondary: v })} />
-              <TextField label="Description" value={draft.skills.description} onChange={(v) => patchSkills({ description: v })} multiline />
-              <TextField label="End Label" value={draft.skills.endLabel} onChange={(v) => patchSkills({ endLabel: v })} />
-            </Grid2>
-
-            <SubHeader
-              label="Categories"
-              count={draft.skills.categories.length}
-              addLabel="Add Category"
-              onAdd={() =>
-                patchSkills({
-                  categories: [...draft.skills.categories, emptySkillCategory()],
-                })
-              }
-            />
-            <div className="space-y-3">
-              {draft.skills.categories.map((cat, ci) => (
-                <EditableCard
-                  key={`${cat.id}-${ci}`}
-                  title={cat.title}
-                  subtitle={`${cat.skills.length} skills`}
-                  onRemove={() =>
-                    patchSkills({ categories: removeAt(draft.skills.categories, ci) })
-                  }
-                >
-                  <Grid2>
-                    <TextField label="Category ID" value={cat.id} onChange={(v) => patchSkills({ categories: replaceAt(draft.skills.categories, ci, { ...cat, id: v }) })} />
-                    <TextField label="Title" value={cat.title} onChange={(v) => patchSkills({ categories: replaceAt(draft.skills.categories, ci, { ...cat, title: v }) })} />
-                    <TextField label="Color (hex)" value={cat.color} onChange={(v) => patchSkills({ categories: replaceAt(draft.skills.categories, ci, { ...cat, color: v }) })} />
-                    <TextField label="Description" value={cat.description} onChange={(v) => patchSkills({ categories: replaceAt(draft.skills.categories, ci, { ...cat, description: v }) })} multiline />
-                  </Grid2>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-semibold tracking-widest uppercase text-zinc-600">
-                        Skills ({cat.skills.length})
-                      </span>
-                      <AddButton
-                        label="Add Skill"
-                        onClick={() =>
-                          patchSkills({
-                            categories: replaceAt(draft.skills.categories, ci, {
-                              ...cat,
-                              skills: [...cat.skills, emptySkill()],
-                            }),
-                          })
-                        }
-                      />
+          {active === "about" ? (
+            <section>
+              <SectionIntro icon={UserRound} eyebrow="Profile" title="About and experience" copy="Edit the profile image, biography, proof points, work history, and resume link." />
+              <div className="space-y-7">
+                <ImageField label="About photo" value={draft.about.imageSrc} onChange={(imageSrc) => patch("about", { imageSrc })} folder="about" />
+                <Grid>
+                  <Field label="Image alt text" value={draft.about.imageAlt} onChange={(imageAlt) => patch("about", { imageAlt })} />
+                  <Field label="Section label" value={draft.about.sectionLabel} onChange={(sectionLabel) => patch("about", { sectionLabel })} />
+                  <Field label="Title line one" value={draft.about.titlePrimary} onChange={(titlePrimary) => patch("about", { titlePrimary })} />
+                  <Field label="Title line two" value={draft.about.titleSecondary} onChange={(titleSecondary) => patch("about", { titleSecondary })} />
+                  <Field label="Resume URL" value={draft.about.resumeUrl} onChange={(resumeUrl) => patch("about", { resumeUrl })} />
+                  <Field label="CTA text" value={draft.about.ctaText} onChange={(ctaText) => patch("about", { ctaText })} />
+                  <Field label="CTA label" value={draft.about.ctaLabel} onChange={(ctaLabel) => patch("about", { ctaLabel })} />
+                  <Field label="CTA link" value={draft.about.ctaHref} onChange={(ctaHref) => patch("about", { ctaHref })} />
+                </Grid>
+                <StringListEditor label="Biography paragraphs" items={draft.about.paragraphs} onChange={(paragraphs) => patch("about", { paragraphs })} />
+                <CollectionHeader title="Stats" count={draft.about.stats.length} addLabel="Add stat" onAdd={() => patch("about", { stats: [...draft.about.stats, emptyStat()] })} />
+                <div className="grid gap-3 md:grid-cols-3">
+                  {draft.about.stats.map((stat, index) => (
+                    <div key={`${stat.label}-${index}`} className="space-y-3 rounded-2xl border border-white/[0.08] bg-black/20 p-4">
+                      <div className="flex justify-end"><button type="button" onClick={() => patch("about", { stats: removeAt(draft.about.stats, index) })} className="text-neutral-600 hover:text-red-400"><Trash2 className="h-4 w-4" /></button></div>
+                      <NumberField label="Value" value={stat.value} onChange={(value) => patch("about", { stats: replaceAt(draft.about.stats, index, { ...stat, value }) })} />
+                      <Field label="Suffix" value={stat.suffix} onChange={(suffix) => patch("about", { stats: replaceAt(draft.about.stats, index, { ...stat, suffix }) })} />
+                      <Field label="Label" value={stat.label} onChange={(label) => patch("about", { stats: replaceAt(draft.about.stats, index, { ...stat, label }) })} />
                     </div>
-                    <div className="grid gap-2 md:grid-cols-2">
-                      {cat.skills.map((skill, si) => (
-                        <div
-                          key={si}
-                          className="space-y-2 rounded-md border border-white/[0.06] bg-[#0a0a0a] p-3"
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="truncate text-xs font-medium text-white">
-                              {skill.name}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                patchSkills({
-                                  categories: replaceAt(draft.skills.categories, ci, {
-                                    ...cat,
-                                    skills: removeAt(cat.skills, si),
-                                  }),
-                                })
-                              }
-                              aria-label={`Remove ${skill.name}`}
-                              className="flex h-6 w-6 items-center justify-center rounded text-zinc-700 transition hover:text-red-400"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </button>
+                  ))}
+                </div>
+                <CollectionHeader title="Experience" count={draft.about.experiences.length} addLabel="Add experience" onAdd={() => patch("about", { experiences: [...draft.about.experiences, emptyExperience()] })} />
+                <div className="space-y-3">
+                  {draft.about.experiences.map((item, index) => (
+                    <EditorCard key={`experience-${index}`} title={item.title} subtitle={`${item.company} · ${item.date}`} onRemove={() => patch("about", { experiences: removeAt(draft.about.experiences, index) })}>
+                      <Grid>
+                        <Field label="ID" value={item.id} onChange={(id) => patch("about", { experiences: replaceAt(draft.about.experiences, index, { ...item, id }) })} />
+                        <Field label="Role" value={item.title} onChange={(title) => patch("about", { experiences: replaceAt(draft.about.experiences, index, { ...item, title }) })} />
+                        <Field label="Company" value={item.company} onChange={(company) => patch("about", { experiences: replaceAt(draft.about.experiences, index, { ...item, company }) })} />
+                        <Field label="Date" value={item.date} onChange={(date) => patch("about", { experiences: replaceAt(draft.about.experiences, index, { ...item, date }) })} />
+                      </Grid>
+                      <Field label="Description" value={item.description} onChange={(description) => patch("about", { experiences: replaceAt(draft.about.experiences, index, { ...item, description }) })} multiline />
+                      <ListField label="Tags" value={item.tags} onChange={(tags) => patch("about", { experiences: replaceAt(draft.about.experiences, index, { ...item, tags }) })} />
+                    </EditorCard>
+                  ))}
+                </div>
+              </div>
+            </section>
+          ) : null}
+
+          {active === "works" ? (
+            <section>
+              <SectionIntro icon={FolderKanban} eyebrow="Portfolio" title="Projects" copy="Add, remove, and update featured projects, screenshots, links, and technology labels." />
+              <div className="space-y-7">
+                <Grid>
+                  <Field label="Section label" value={draft.works.sectionLabel} onChange={(sectionLabel) => patch("works", { sectionLabel })} />
+                  <Field label="Title line one" value={draft.works.titlePrimary} onChange={(titlePrimary) => patch("works", { titlePrimary })} />
+                  <Field label="Title line two" value={draft.works.titleSecondary} onChange={(titleSecondary) => patch("works", { titleSecondary })} />
+                  <Field label="GitHub label" value={draft.works.githubLabel} onChange={(githubLabel) => patch("works", { githubLabel })} />
+                  <Field label="GitHub URL" value={draft.works.githubUrl} onChange={(githubUrl) => patch("works", { githubUrl })} />
+                </Grid>
+                <CollectionHeader title="Projects" count={draft.works.projects.length} addLabel="Add project" onAdd={() => patch("works", { projects: [...draft.works.projects, emptyProject()] })} />
+                <div className="space-y-3">
+                  {draft.works.projects.map((project, index) => (
+                    <EditorCard key={`project-${index}`} title={project.title} subtitle={`${project.type} · ${project.year}`} onRemove={() => patch("works", { projects: removeAt(draft.works.projects, index) })}>
+                      <ImageField label="Project image" value={project.image} onChange={(image) => patch("works", { projects: replaceAt(draft.works.projects, index, { ...project, image }) })} folder={`projects/${slugify(project.title)}`} />
+                      <Grid>
+                        <Field label="Title" value={project.title} onChange={(title) => patch("works", { projects: replaceAt(draft.works.projects, index, { ...project, title }) })} />
+                        <Field label="Type" value={project.type} onChange={(type) => patch("works", { projects: replaceAt(draft.works.projects, index, { ...project, type }) })} />
+                        <Field label="Year" value={project.year} onChange={(year) => patch("works", { projects: replaceAt(draft.works.projects, index, { ...project, year }) })} />
+                        <Field label="Project URL" value={project.link} onChange={(link) => patch("works", { projects: replaceAt(draft.works.projects, index, { ...project, link }) })} />
+                      </Grid>
+                      <Field label="Description" value={project.description} onChange={(description) => patch("works", { projects: replaceAt(draft.works.projects, index, { ...project, description }) })} multiline />
+                      <ListField label="Technology" value={project.tech} onChange={(tech) => patch("works", { projects: replaceAt(draft.works.projects, index, { ...project, tech }) })} />
+                    </EditorCard>
+                  ))}
+                </div>
+              </div>
+            </section>
+          ) : null}
+
+          {active === "skills" ? (
+            <section>
+              <SectionIntro icon={Code2} eyebrow="Capabilities" title="Skills and categories" copy="Control the stack copy, capability groups, colors, and individual skills." />
+              <div className="space-y-7">
+                <Grid>
+                  <Field label="Title line one" value={draft.skills.titlePrimary} onChange={(titlePrimary) => patch("skills", { titlePrimary })} />
+                  <Field label="Title line two" value={draft.skills.titleSecondary} onChange={(titleSecondary) => patch("skills", { titleSecondary })} />
+                  <Field label="End label" value={draft.skills.endLabel} onChange={(endLabel) => patch("skills", { endLabel })} />
+                </Grid>
+                <Field label="Description" value={draft.skills.description} onChange={(description) => patch("skills", { description })} multiline />
+                <CollectionHeader title="Categories" count={draft.skills.categories.length} addLabel="Add category" onAdd={() => patch("skills", { categories: [...draft.skills.categories, emptyCategory()] })} />
+                <div className="space-y-3">
+                  {draft.skills.categories.map((category, categoryIndex) => (
+                    <EditorCard key={`category-${categoryIndex}`} title={category.title} subtitle={`${category.skills.length} skills`} onRemove={() => patch("skills", { categories: removeAt(draft.skills.categories, categoryIndex) })}>
+                      <Grid>
+                        <Field label="ID" value={category.id} onChange={(id) => patch("skills", { categories: replaceAt(draft.skills.categories, categoryIndex, { ...category, id }) })} />
+                        <Field label="Title" value={category.title} onChange={(title) => patch("skills", { categories: replaceAt(draft.skills.categories, categoryIndex, { ...category, title }) })} />
+                        <Field label="Accent color" value={category.color} type="color" onChange={(color) => patch("skills", { categories: replaceAt(draft.skills.categories, categoryIndex, { ...category, color }) })} />
+                      </Grid>
+                      <Field label="Description" value={category.description} onChange={(description) => patch("skills", { categories: replaceAt(draft.skills.categories, categoryIndex, { ...category, description }) })} multiline />
+                      <CollectionHeader title="Skills" count={category.skills.length} addLabel="Add skill" onAdd={() => patch("skills", { categories: replaceAt(draft.skills.categories, categoryIndex, { ...category, skills: [...category.skills, emptySkill()] }) })} />
+                      <div className="grid gap-3 md:grid-cols-2">
+                        {category.skills.map((skill, skillIndex) => (
+                          <div key={`${skill.name}-${skillIndex}`} className="relative space-y-3 rounded-xl border border-white/[0.07] p-4">
+                            <button type="button" onClick={() => patch("skills", { categories: replaceAt(draft.skills.categories, categoryIndex, { ...category, skills: removeAt(category.skills, skillIndex) }) })} className="absolute right-3 top-3 text-neutral-700 hover:text-red-400"><Trash2 className="h-3.5 w-3.5" /></button>
+                            <Field label="Name" value={skill.name} onChange={(name) => patch("skills", { categories: replaceAt(draft.skills.categories, categoryIndex, { ...category, skills: replaceAt(category.skills, skillIndex, { ...skill, name }) }) })} />
+                            <Field label="Icon slug" value={skill.icon} onChange={(icon) => patch("skills", { categories: replaceAt(draft.skills.categories, categoryIndex, { ...category, skills: replaceAt(category.skills, skillIndex, { ...skill, icon }) }) })} />
                           </div>
-                          <TextField
-                            label="Name"
-                            value={skill.name}
-                            onChange={(v) =>
-                              patchSkills({
-                                categories: replaceAt(draft.skills.categories, ci, {
-                                  ...cat,
-                                  skills: replaceAt(cat.skills, si, { ...skill, name: v }),
-                                }),
-                              })
-                            }
-                          />
-                          <TextField
-                            label="Simple Icons Slug"
-                            value={skill.icon}
-                            placeholder="react"
-                            onChange={(v) =>
-                              patchSkills({
-                                categories: replaceAt(draft.skills.categories, ci, {
-                                  ...cat,
-                                  skills: replaceAt(cat.skills, si, { ...skill, icon: v }),
-                                }),
-                              })
-                            }
-                          />
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    </EditorCard>
+                  ))}
+                </div>
+              </div>
+            </section>
+          ) : null}
+
+          {active === "terminal" ? (
+            <section>
+              <SectionIntro icon={TerminalSquare} eyebrow="Process" title="Console section" copy="Edit the interactive command panel, workflow results, prompt, and metrics." />
+              <div className="space-y-7">
+                <div className="flex flex-col gap-4 rounded-2xl border border-cyan-300/15 bg-cyan-300/[0.05] p-5 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-cyan-100">Production workflow preset</p>
+                    <p className="mt-1 text-xs leading-5 text-neutral-500">Load realistic TypeScript, Docker, Prisma, and Kubernetes commands.</p>
                   </div>
-                </EditableCard>
-              ))}
-            </div>
-          </SectionPanel>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      patch("terminal", {
+                        ...developerTerminalPreset,
+                        commands: developerTerminalPreset.commands.map((command) => ({ ...command, output: [...command.output] })),
+                        metrics: developerTerminalPreset.metrics.map((metric) => ({ ...metric })),
+                      })
+                    }
+                    className="shrink-0 rounded-xl border border-cyan-300/20 bg-cyan-300/10 px-4 py-2.5 text-xs font-medium text-cyan-100 transition hover:bg-cyan-300/20"
+                  >
+                    Load developer preset
+                  </button>
+                </div>
+                <Grid>
+                  <Field label="Eyebrow" value={draft.terminal.eyebrow} onChange={(eyebrow) => patch("terminal", { eyebrow })} />
+                  <Field label="Title" value={draft.terminal.title} onChange={(title) => patch("terminal", { title })} />
+                  <Field label="Prompt" value={draft.terminal.prompt} onChange={(prompt) => patch("terminal", { prompt })} />
+                </Grid>
+                <Field label="Description" value={draft.terminal.description} onChange={(description) => patch("terminal", { description })} multiline />
+                <CollectionHeader title="Metrics" count={draft.terminal.metrics.length} addLabel="Add metric" onAdd={() => patch("terminal", { metrics: [...draft.terminal.metrics, emptyMetric()] })} />
+                <div className="grid gap-3 md:grid-cols-3">
+                  {draft.terminal.metrics.map((metric, index) => (
+                    <div key={`${metric.label}-${index}`} className="relative space-y-3 rounded-xl border border-white/[0.07] p-4">
+                      <button type="button" onClick={() => patch("terminal", { metrics: removeAt(draft.terminal.metrics, index) })} className="absolute right-3 top-3 text-neutral-700 hover:text-red-400"><Trash2 className="h-3.5 w-3.5" /></button>
+                      <Field label="Value" value={metric.value} onChange={(value) => patch("terminal", { metrics: replaceAt(draft.terminal.metrics, index, { ...metric, value }) })} />
+                      <Field label="Label" value={metric.label} onChange={(label) => patch("terminal", { metrics: replaceAt(draft.terminal.metrics, index, { ...metric, label }) })} />
+                    </div>
+                  ))}
+                </div>
+                <CollectionHeader title="Commands" count={draft.terminal.commands.length} addLabel="Add command" onAdd={() => patch("terminal", { commands: [...draft.terminal.commands, emptyCommand()] })} />
+                <div className="space-y-3">
+                  {draft.terminal.commands.map((command, index) => (
+                    <EditorCard key={`command-${index}`} title={command.command} subtitle={command.title} onRemove={() => patch("terminal", { commands: removeAt(draft.terminal.commands, index) })}>
+                      <Grid>
+                        <Field label="Command" value={command.command} onChange={(value) => patch("terminal", { commands: replaceAt(draft.terminal.commands, index, { ...command, command: value }) })} />
+                        <Field label="Title" value={command.title} onChange={(title) => patch("terminal", { commands: replaceAt(draft.terminal.commands, index, { ...command, title }) })} />
+                      </Grid>
+                      <ListField label="Output lines" value={command.output} onChange={(output) => patch("terminal", { commands: replaceAt(draft.terminal.commands, index, { ...command, output }) })} />
+                    </EditorCard>
+                  ))}
+                </div>
+              </div>
+            </section>
+          ) : null}
 
-          {/* ── CONTACT ───────────────────────────────────────────────── */}
-          <SectionPanel
-            id="contact"
-            title="Contact"
-            icon={Mail}
-            description="CTA copy, social links, and footer details."
-            badge={`${draft.contact.links.length} links`}
-          >
-            <Grid2>
-              <TextField label="Section Label" value={draft.contact.sectionLabel} onChange={(v) => patchContact({ sectionLabel: v })} />
-              <TextField label="Location Label" value={draft.contact.locationLabel} onChange={(v) => patchContact({ locationLabel: v })} />
-              <TextField label="Primary Title" value={draft.contact.titlePrimary} onChange={(v) => patchContact({ titlePrimary: v })} />
-              <TextField label="Secondary Title" value={draft.contact.titleSecondary} onChange={(v) => patchContact({ titleSecondary: v })} />
-              <TextField label="Copyright Name" value={draft.contact.copyrightName} onChange={(v) => patchContact({ copyrightName: v })} />
-              <TextField label="Rights Label" value={draft.contact.rightsLabel} onChange={(v) => patchContact({ rightsLabel: v })} />
-              <TextField label="Back To Top Label" value={draft.contact.backToTopLabel} onChange={(v) => patchContact({ backToTopLabel: v })} />
-              <TextField label="Availability Text" value={draft.contact.availabilityText} onChange={(v) => patchContact({ availabilityText: v })} multiline />
-            </Grid2>
+          {active === "achievements" ? (
+            <section>
+              <SectionIntro icon={Award} eyebrow="Recognition" title="Achievements and certificates" copy="Upload new credentials, add milestones, and control verification links." />
+              <div className="space-y-7">
+                <Grid>
+                  <Field label="Section label" value={draft.achievements.sectionLabel} onChange={(sectionLabel) => patch("achievements", { sectionLabel })} />
+                  <Field label="Title" value={draft.achievements.title} onChange={(title) => patch("achievements", { title })} />
+                </Grid>
+                <Field label="Description" value={draft.achievements.description} onChange={(description) => patch("achievements", { description })} multiline />
+                <CollectionHeader title="Achievements" count={draft.achievements.items.length} addLabel="Add achievement" onAdd={() => patch("achievements", { items: [...draft.achievements.items, emptyAchievement()] })} />
+                <div className="space-y-3">
+                  {draft.achievements.items.map((item, index) => (
+                    <EditorCard key={`achievement-${index}`} title={item.title} subtitle={`${item.issuer} · ${item.issuedOn}`} onRemove={() => patch("achievements", { items: removeAt(draft.achievements.items, index) })}>
+                      <ImageField label="Certificate or achievement image" value={item.image} onChange={(image) => patch("achievements", { items: replaceAt(draft.achievements.items, index, { ...item, image }) })} folder={`achievements/${slugify(item.title)}`} />
+                      <Grid>
+                        <Field label="ID" value={item.id} onChange={(id) => patch("achievements", { items: replaceAt(draft.achievements.items, index, { ...item, id }) })} />
+                        <Field label="Title" value={item.title} onChange={(title) => patch("achievements", { items: replaceAt(draft.achievements.items, index, { ...item, title }) })} />
+                        <Field label="Issuer" value={item.issuer} onChange={(issuer) => patch("achievements", { items: replaceAt(draft.achievements.items, index, { ...item, issuer }) })} />
+                        <Field label="Issued on" value={item.issuedOn} onChange={(issuedOn) => patch("achievements", { items: replaceAt(draft.achievements.items, index, { ...item, issuedOn }) })} />
+                        <Field label="Verification URL" value={item.verifyUrl} onChange={(verifyUrl) => patch("achievements", { items: replaceAt(draft.achievements.items, index, { ...item, verifyUrl }) })} />
+                      </Grid>
+                      <Field label="Description" value={item.description} onChange={(description) => patch("achievements", { items: replaceAt(draft.achievements.items, index, { ...item, description }) })} multiline />
+                    </EditorCard>
+                  ))}
+                </div>
+              </div>
+            </section>
+          ) : null}
 
-            <SubHeader
-              label="Links"
-              count={draft.contact.links.length}
-              addLabel="Add Link"
-              onAdd={() =>
-                patchContact({ links: [...draft.contact.links, emptyContactLink()] })
-              }
-            />
-            <div className="grid gap-3 lg:grid-cols-2">
-              {draft.contact.links.map((link, i) => (
-                <EditableCard
-                  key={`${link.id}-${i}`}
-                  title={link.label}
-                  subtitle={link.value}
-                  onRemove={() =>
-                    patchContact({ links: removeAt(draft.contact.links, i) })
-                  }
-                >
-                  <TextField label="ID" value={link.id} onChange={(v) => patchContact({ links: replaceAt(draft.contact.links, i, { ...link, id: v }) })} />
-                  <TextField label="Label" value={link.label} onChange={(v) => patchContact({ links: replaceAt(draft.contact.links, i, { ...link, label: v }) })} />
-                  <TextField label="Display Value" value={link.value} onChange={(v) => patchContact({ links: replaceAt(draft.contact.links, i, { ...link, value: v }) })} />
-                  <TextField label="URL" value={link.href} onChange={(v) => patchContact({ links: replaceAt(draft.contact.links, i, { ...link, href: v }) })} />
-                </EditableCard>
-              ))}
-            </div>
-          </SectionPanel>
+          {active === "blog" ? (
+            <section>
+              <SectionIntro icon={BookOpenText} eyebrow="Publishing" title="Blog and articles" copy="Draft, publish, and update articles. Unpublished posts remain visible only in this portal." />
+              <div className="space-y-7">
+                <Grid>
+                  <Field label="Eyebrow" value={draft.blog.eyebrow} onChange={(eyebrow) => patch("blog", { eyebrow })} />
+                  <Field label="Blog title" value={draft.blog.title} onChange={(title) => patch("blog", { title })} />
+                </Grid>
+                <Field label="Blog description" value={draft.blog.description} onChange={(description) => patch("blog", { description })} multiline />
+                <CollectionHeader title="Articles" count={draft.blog.posts.length} addLabel="New article" onAdd={() => patch("blog", { posts: [emptyPost(), ...draft.blog.posts] })} />
+                <div className="space-y-3">
+                  {draft.blog.posts.map((post, index) => (
+                    <EditorCard key={`post-${index}`} title={post.title} subtitle={`${post.published ? "Published" : "Draft"} · ${post.publishedAt}`} onRemove={() => patch("blog", { posts: removeAt(draft.blog.posts, index) })}>
+                      <ImageField label="Cover image" value={post.coverImage} onChange={(coverImage) => patch("blog", { posts: replaceAt(draft.blog.posts, index, { ...post, coverImage }) })} folder={`blog/${post.slug}`} />
+                      <Toggle label="Published" value={post.published} onChange={(published) => patch("blog", { posts: replaceAt(draft.blog.posts, index, { ...post, published }) })} />
+                      <Grid>
+                        <Field label="Post ID" value={post.id} onChange={(id) => patch("blog", { posts: replaceAt(draft.blog.posts, index, { ...post, id }) })} />
+                        <Field label="Title" value={post.title} onChange={(title) => patch("blog", { posts: replaceAt(draft.blog.posts, index, { ...post, title, slug: post.slug || slugify(title) }) })} />
+                        <Field label="URL slug" value={post.slug} onChange={(slug) => patch("blog", { posts: replaceAt(draft.blog.posts, index, { ...post, slug: slugify(slug) }) })} hint={`Public URL: /blog/${post.slug}`} />
+                        <Field label="Published date" value={post.publishedAt} type="date" onChange={(publishedAt) => patch("blog", { posts: replaceAt(draft.blog.posts, index, { ...post, publishedAt }) })} />
+                        <Field label="Read time" value={post.readTime} onChange={(readTime) => patch("blog", { posts: replaceAt(draft.blog.posts, index, { ...post, readTime }) })} />
+                      </Grid>
+                      <Field label="Excerpt" value={post.excerpt} onChange={(excerpt) => patch("blog", { posts: replaceAt(draft.blog.posts, index, { ...post, excerpt }) })} multiline />
+                      <ListField label="Tags" value={post.tags} onChange={(tags) => patch("blog", { posts: replaceAt(draft.blog.posts, index, { ...post, tags }) })} />
+                      <Field label="Article content" value={post.content} onChange={(content) => patch("blog", { posts: replaceAt(draft.blog.posts, index, { ...post, content }) })} multiline rows={18} hint="Use blank lines for paragraphs, ## for section headings, and - for bullet lists." />
+                      {post.slug ? <a href={`/blog/${post.slug}`} target="_blank" className="inline-flex items-center gap-2 text-xs text-cyan-200"><ExternalLink className="h-3.5 w-3.5" />Preview article</a> : null}
+                    </EditorCard>
+                  ))}
+                </div>
+              </div>
+            </section>
+          ) : null}
 
-          {/* Bottom spacer */}
-          <div className="h-16" />
+          {active === "contact" ? (
+            <section>
+              <SectionIntro icon={Mail} eyebrow="Footer" title="Contact and social links" copy="Control the final call to action, availability, location, social links, and copyright." />
+              <div className="space-y-7">
+                <Grid>
+                  <Field label="Section label" value={draft.contact.sectionLabel} onChange={(sectionLabel) => patch("contact", { sectionLabel })} />
+                  <Field label="Location" value={draft.contact.locationLabel} onChange={(locationLabel) => patch("contact", { locationLabel })} />
+                  <Field label="Title line one" value={draft.contact.titlePrimary} onChange={(titlePrimary) => patch("contact", { titlePrimary })} />
+                  <Field label="Title line two" value={draft.contact.titleSecondary} onChange={(titleSecondary) => patch("contact", { titleSecondary })} />
+                  <Field label="Copyright name" value={draft.contact.copyrightName} onChange={(copyrightName) => patch("contact", { copyrightName })} />
+                  <Field label="Rights label" value={draft.contact.rightsLabel} onChange={(rightsLabel) => patch("contact", { rightsLabel })} />
+                  <Field label="Back to top label" value={draft.contact.backToTopLabel} onChange={(backToTopLabel) => patch("contact", { backToTopLabel })} />
+                </Grid>
+                <Field label="Availability message" value={draft.contact.availabilityText} onChange={(availabilityText) => patch("contact", { availabilityText })} multiline />
+                <CollectionHeader title="Contact links" count={draft.contact.links.length} addLabel="Add link" onAdd={() => patch("contact", { links: [...draft.contact.links, emptyLink()] })} />
+                <div className="space-y-3">
+                  {draft.contact.links.map((link, index) => (
+                    <EditorCard key={`contact-${index}`} title={link.label} subtitle={link.value} onRemove={() => patch("contact", { links: removeAt(draft.contact.links, index) })}>
+                      <Grid>
+                        <Field label="ID" value={link.id} onChange={(id) => patch("contact", { links: replaceAt(draft.contact.links, index, { ...link, id }) })} />
+                        <Field label="Label" value={link.label} onChange={(label) => patch("contact", { links: replaceAt(draft.contact.links, index, { ...link, label }) })} />
+                        <Field label="Display value" value={link.value} onChange={(value) => patch("contact", { links: replaceAt(draft.contact.links, index, { ...link, value }) })} />
+                        <Field label="URL" value={link.href} onChange={(href) => patch("contact", { links: replaceAt(draft.contact.links, index, { ...link, href }) })} />
+                      </Grid>
+                    </EditorCard>
+                  ))}
+                </div>
+              </div>
+            </section>
+          ) : null}
         </div>
       </main>
     </div>
   );
 }
 
-/* ─── Login Screen ───────────────────────────────────────────────────────── */
-
 function LoginScreen() {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function handleLogin(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setError(null);
+  async function login(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     setLoading(true);
+    setError(null);
     try {
-      const cred = await signInWithEmailAndPassword(auth, ADMIN_EMAIL, password);
-      if (cred.user.email !== ADMIN_EMAIL) {
+      const credential = await signInWithEmailAndPassword(auth, email.trim(), password);
+      if (credential.user.email !== ADMIN_EMAIL) {
         await signOut(auth);
-        setError("Access denied for this account.");
+        setError("This account does not have admin access.");
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed.");
+    } catch (nextError) {
+      setError(nextError instanceof Error ? nextError.message : "Login failed.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#080808] px-4">
-      {/* Ambient glow */}
-      <div
-        className="pointer-events-none fixed inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse 60% 40% at 50% 0%, #00ffa308 0%, transparent 70%)",
-        }}
+    <main className="dark relative flex min-h-screen items-center justify-center overflow-hidden bg-[#050608] px-5 text-white">
+      <Spotlight
+        gradientFirst="radial-gradient(68% 69% at 55% 31%, rgba(139,92,246,.2) 0, rgba(34,211,238,.05) 52%, transparent 82%)"
+        gradientSecond="radial-gradient(50% 50% at 50% 50%, rgba(34,211,238,.12) 0, transparent 80%)"
+        translateY={-380}
       />
-
-      <div className="relative w-full max-w-sm">
-        {/* Card */}
-        <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0a0a0a] shadow-2xl shadow-black/50">
-          {/* Top stripe */}
-          <div className="h-0.5 w-full" style={{ background: ACCENT }} />
-
-          <div className="p-8">
-            {/* Brand */}
-            <div className="mb-8 flex items-center gap-3">
-              <span
-                className="flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold"
-                style={{ background: ACCENT_DIM, color: ACCENT }}
-              >
-                ◈
-              </span>
-              <div>
-                <p className="text-xs font-bold tracking-widest uppercase text-white">
-                  Admin Portal
-                </p>
-                <p className="text-[10px] font-mono text-zinc-600">
-                  portfolio.cms
-                </p>
-              </div>
-            </div>
-
-            <h1 className="mb-1 text-2xl font-bold text-white">Welcome back</h1>
-            <p className="mb-8 text-sm text-zinc-600">
-              Restricted to the configured admin account.
-            </p>
-
-            <form onSubmit={handleLogin} className="space-y-4">
-              {/* Email (read-only display) */}
-              <div className="space-y-1.5">
-                <span className="block text-[10px] font-semibold tracking-widest uppercase text-zinc-600">
-                  Email
-                </span>
-                <div className="rounded-md border border-white/[0.06] bg-[#0d0d0d] px-3 py-2.5 font-mono text-sm text-zinc-500">
-                  {ADMIN_EMAIL}
-                </div>
-              </div>
-
-              {/* Password */}
-              <div className="space-y-1.5">
-                <span className="block text-[10px] font-semibold tracking-widest uppercase text-zinc-600">
-                  Password
-                </span>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className={fieldCls}
-                  autoFocus
-                />
-              </div>
-
-              {error && (
-                <p className="rounded-md border border-red-900/50 bg-red-950/30 px-3 py-2 text-xs font-mono text-red-400">
-                  {error}
-                </p>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading || !password}
-                className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold transition-all disabled:opacity-50"
-                style={{ background: ACCENT, color: "#000" }}
-              >
-                <LogIn className="h-4 w-4" />
-                {loading ? "Signing in…" : "Sign In"}
-              </button>
-            </form>
-          </div>
+      <div className="aceternity-grid absolute inset-0 opacity-30" />
+      <div className="relative z-40 w-full max-w-md overflow-hidden rounded-[2rem] border border-white/10 bg-black/45 p-7 shadow-[0_35px_120px_rgba(0,0,0,0.55)] backdrop-blur-2xl md:p-9">
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-300/20 bg-cyan-300/[0.07] font-mono text-xs text-cyan-200">NP</span>
+          <div><p className="text-sm font-medium">Content studio</p><p className="mt-1 font-mono text-[9px] uppercase tracking-[0.18em] text-neutral-600">Secure admin portal</p></div>
         </div>
-
-        <p className="mt-4 text-center text-[11px] text-zinc-700">
-          Use the password configured in Firebase Authentication.
-        </p>
+        <h1 className="mt-10 text-3xl font-medium tracking-[-0.04em]">Welcome back.</h1>
+        <p className="mt-3 text-sm leading-6 text-neutral-500">Sign in to manage every part of the portfolio.</p>
+        <form onSubmit={login} className="mt-8 space-y-4">
+          <input
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="Email address"
+            autoComplete="email"
+            autoFocus
+            className={inputClass}
+          />
+          <input
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            placeholder="Password"
+            autoComplete="current-password"
+            className={inputClass}
+          />
+          {error ? <p className="rounded-xl border border-red-500/20 bg-red-500/[0.07] px-4 py-3 text-xs text-red-300">{error}</p> : null}
+          <button type="submit" disabled={loading || !email.trim() || !password} className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-white text-sm font-medium text-black transition hover:bg-cyan-200 disabled:opacity-40">
+            {loading ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <LogIn className="h-4 w-4" />}{loading ? "Signing in" : "Sign in"}
+          </button>
+        </form>
       </div>
     </main>
   );
 }
-
-/* ─── Page ───────────────────────────────────────────────────────────────── */
 
 export default function AdminPage() {
   const { content, isLoading, error } = usePortfolioContent();
@@ -1104,7 +863,7 @@ export default function AdminPage() {
   const editorKey = useMemo(() => JSON.stringify(content), [content]);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (nextUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (nextUser) => {
       if (nextUser?.email && nextUser.email !== ADMIN_EMAIL) {
         await signOut(auth);
         setUser(null);
@@ -1113,51 +872,23 @@ export default function AdminPage() {
       }
       setAuthLoading(false);
     });
-    return () => unsub();
+    return unsubscribe;
   }, []);
 
-  if (authLoading) {
+  if (authLoading || (user && isLoading)) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#080808]">
-        <div className="flex items-center gap-2">
-          <span
-            className="h-1.5 w-1.5 animate-ping rounded-full"
-            style={{ background: ACCENT }}
-          />
-          <p className="font-mono text-xs uppercase tracking-widest text-zinc-600">
-            Checking session…
-          </p>
-        </div>
+      <main className="flex min-h-screen items-center justify-center bg-[#050608] text-white">
+        <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-600"><LoaderCircle className="h-4 w-4 animate-spin text-cyan-200" />Loading studio</div>
       </main>
     );
   }
 
-  if (!user?.email || user.email !== ADMIN_EMAIL) {
-    return <LoginScreen />;
-  }
+  if (!user?.email || user.email !== ADMIN_EMAIL) return <LoginScreen />;
 
   return (
     <>
-      {error && (
-        <div className="sticky top-0 z-50 bg-red-950/80 px-4 py-2 text-xs font-mono text-red-400">
-          {error}
-        </div>
-      )}
-      {isLoading ? (
-        <main className="flex min-h-screen items-center justify-center bg-[#080808]">
-          <div className="flex items-center gap-2">
-            <span
-              className="h-1.5 w-1.5 animate-ping rounded-full"
-              style={{ background: ACCENT }}
-            />
-            <p className="font-mono text-xs uppercase tracking-widest text-zinc-600">
-              Loading content…
-            </p>
-          </div>
-        </main>
-      ) : (
-        <AdminEditor key={editorKey} initialContent={content} />
-      )}
+      {error ? <div className="fixed inset-x-0 top-0 z-[100] bg-red-950 px-4 py-2 text-center text-xs text-red-300">{error}</div> : null}
+      <AdminEditor key={editorKey} initialContent={content} />
     </>
   );
 }

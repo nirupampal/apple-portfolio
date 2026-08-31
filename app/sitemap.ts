@@ -8,6 +8,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
             changeFrequency: 'monthly',
             priority: 1,
         },
-        // Add other routes if/when they are created as separate pages
+        {
+            url: 'https://inirupampal.in/blog',
+            lastModified: new Date(),
+            changeFrequency: 'weekly',
+            priority: 0.8,
+        },
     ];
 }

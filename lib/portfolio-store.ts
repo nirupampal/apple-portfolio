@@ -1,17 +1,29 @@
 import { doc, onSnapshot, serverTimestamp, setDoc } from "firebase/firestore";
 
 import { db, PORTFOLIO_COLLECTION, PORTFOLIO_DOCUMENT } from "@/firebase";
-import { defaultPortfolioContent, type PortfolioContent } from "@/lib/portfolio-content";
+import {
+  defaultPortfolioContent,
+  developerTerminalPreset,
+  type PortfolioContent,
+} from "@/lib/portfolio-content";
 
 const portfolioRef = doc(db, PORTFOLIO_COLLECTION, PORTFOLIO_DOCUMENT);
 
 function mergePortfolioContent(data: Partial<PortfolioContent>): PortfolioContent {
+  const containsLegacyDemoCommand = data.terminal?.commands?.some(
+    (item) => item.command === "git log --impact",
+  );
+
   return {
     hero: { ...defaultPortfolioContent.hero, ...data.hero },
-    terminal: { ...defaultPortfolioContent.terminal, ...data.terminal },
+    terminal: containsLegacyDemoCommand
+      ? developerTerminalPreset
+      : { ...defaultPortfolioContent.terminal, ...data.terminal },
     about: { ...defaultPortfolioContent.about, ...data.about },
     works: { ...defaultPortfolioContent.works, ...data.works },
     skills: { ...defaultPortfolioContent.skills, ...data.skills },
+    achievements: { ...defaultPortfolioContent.achievements, ...data.achievements },
+    blog: { ...defaultPortfolioContent.blog, ...data.blog },
     contact: { ...defaultPortfolioContent.contact, ...data.contact },
   };
 }

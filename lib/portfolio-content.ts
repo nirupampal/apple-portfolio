@@ -2,6 +2,12 @@ export type HeroContent = {
   availabilityText: string;
   firstName: string;
   lastName: string;
+  imageSrc: string;
+  imageAlt: string;
+  headlinePrimary: string;
+  headlineSecondary: string;
+  professionLabel: string;
+  countryLabel: string;
   role: string;
   description: string;
   primaryCtaLabel: string;
@@ -119,13 +125,107 @@ export type TerminalContent = {
   metrics: TerminalMetric[];
 };
 
+export type AchievementItem = {
+  id: string;
+  title: string;
+  issuer: string;
+  issuedOn: string;
+  description: string;
+  image: string;
+  verifyUrl: string;
+};
+
+export type AchievementsContent = {
+  sectionLabel: string;
+  title: string;
+  description: string;
+  items: AchievementItem[];
+};
+
+export type BlogPost = {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  coverImage: string;
+  publishedAt: string;
+  readTime: string;
+  tags: string[];
+  content: string;
+  published: boolean;
+};
+
+export type BlogContent = {
+  eyebrow: string;
+  title: string;
+  description: string;
+  posts: BlogPost[];
+};
+
 export type PortfolioContent = {
   hero: HeroContent;
   terminal: TerminalContent;
   about: AboutContent;
   works: WorksContent;
   skills: SkillsContent;
+  achievements: AchievementsContent;
+  blog: BlogContent;
   contact: ContactContent;
+};
+
+export const developerTerminalPreset: TerminalContent = {
+  eyebrow: "ENGINEERING / RELEASE CONSOLE",
+  title: "From commit to production",
+  description:
+    "Real commands from a modern delivery workflow: validate the codebase, start infrastructure, migrate data, and verify a safe production rollout.",
+  prompt: "nirupam@devbox",
+  commands: [
+    {
+      command: "pnpm exec tsc --noEmit && pnpm lint",
+      title: "Quality gate passed",
+      output: [
+        "TypeScript: 0 type errors",
+        "ESLint: 0 warnings",
+        "Import boundaries verified",
+        "Commit is safe to merge",
+      ],
+    },
+    {
+      command: "docker compose up -d --build",
+      title: "Local stack is healthy",
+      output: [
+        "API image built from cache",
+        "PostgreSQL accepting connections",
+        "Redis healthcheck passed",
+        "Services available on the dev network",
+      ],
+    },
+    {
+      command: "pnpm prisma migrate deploy",
+      title: "Database schema synchronized",
+      output: [
+        "Migration history validated",
+        "Pending migrations applied atomically",
+        "Generated client matches the schema",
+        "No destructive changes detected",
+      ],
+    },
+    {
+      command: "kubectl rollout status deployment/api",
+      title: "Production rollout verified",
+      output: [
+        "New replica set is available",
+        "Readiness and liveness probes passed",
+        "Zero unavailable replicas",
+        "Deployment successfully rolled out",
+      ],
+    },
+  ],
+  metrics: [
+    { value: "0", label: "type and lint errors" },
+    { value: "4/4", label: "healthy local services" },
+    { value: "100%", label: "available replicas" },
+  ],
 };
 
 export const defaultPortfolioContent: PortfolioContent = {
@@ -133,6 +233,12 @@ export const defaultPortfolioContent: PortfolioContent = {
     availabilityText: "Available for new projects",
     firstName: "NIRUPAM",
     lastName: "PAL",
+    imageSrc: "/nirupam.png",
+    imageAlt: "Nirupam Pal",
+    headlinePrimary: "Ideas into",
+    headlineSecondary: "interfaces.",
+    professionLabel: "Fullstack developer",
+    countryLabel: "India",
     role: "Engineering digital excellence. I build scalable backend architecture and fluid interfaces that define the modern web.",
     description:
       "Fullstack developer focused on modern interfaces, strong backend architecture, and production-ready delivery.",
@@ -141,56 +247,13 @@ export const defaultPortfolioContent: PortfolioContent = {
     secondaryCtaLabel: "Download CV",
     secondaryCtaHref: "https://drive.google.com/file/d/1WdiR6QzRi3tsuMX-d5JHZ3_t3tnH_F-z/view",
   },
-  terminal: {
-    eyebrow: "LIVE / DEV CONSOLE",
-    title: "How I ship work",
-    description:
-      "A compact view of the way I think: fast feedback loops, measured decisions, and production habits from the first commit.",
-    prompt: "nirupam@portfolio",
-    commands: [
-      {
-        command: "npm run build",
-        title: "Production ready",
-        output: [
-          "Compiled Next.js routes",
-          "Checked responsive sections",
-          "Optimized images and motion",
-          "Ready for deployment",
-        ],
-      },
-      {
-        command: "firebase deploy",
-        title: "Dynamic content",
-        output: [
-          "Connected Firestore content",
-          "Protected admin write access",
-          "Public reads enabled",
-          "Portfolio updates without code changes",
-        ],
-      },
-      {
-        command: "git log --impact",
-        title: "Engineering style",
-        output: [
-          "Readable architecture",
-          "Careful UX details",
-          "Performance-first interactions",
-          "Calm handoff documentation",
-        ],
-      },
-    ],
-    metrics: [
-      { value: "20+", label: "projects delivered" },
-      { value: "3+", label: "years building" },
-      { value: "100%", label: "ownership mindset" },
-    ],
-  },
+  terminal: developerTerminalPreset,
   about: {
     sectionLabel: "01 / ABOUT ME",
     titlePrimary: "Engineer.",
     titleSecondary: "Problem Solver.",
     resumeUrl: "https://drive.google.com/file/d/1WdiR6QzRi3tsuMX-d5JHZ3_t3tnH_F-z/view",
-    imageSrc: "/nirupam.jpeg",
+    imageSrc: "/nirupam.png",
     imageAlt: "Nirupam Pal",
     paragraphs: [
       "I build production-ready web applications with a relentless focus on performance and scalability.",
@@ -346,6 +409,46 @@ export const defaultPortfolioContent: PortfolioContent = {
           { name: "CI/CD", icon: "githubactions" },
           { name: "Linux", icon: "linux" },
         ],
+      },
+    ],
+  },
+  achievements: {
+    sectionLabel: "05 / ACHIEVEMENTS",
+    title: "Proof behind the practice.",
+    description:
+      "Selected certifications, milestones, and recognitions from the work behind the screen.",
+    items: [
+      {
+        id: "hackerrank-software-engineer-2026",
+        title: "Software Engineer",
+        issuer: "HackerRank",
+        issuedOn: "09 Jan 2026",
+        description:
+          "Verified software engineering skills across problem solving, SQL, and REST API development.",
+        image: "/hacker-rank-software-engineer.png",
+        verifyUrl: "https://www.hackerrank.com/certificates/iframe/db1cfdf0bbf4",
+      },
+    ],
+  },
+  blog: {
+    eyebrow: "Notes from the build",
+    title: "Ideas, decisions, and lessons from shipping software.",
+    description:
+      "Practical notes on fullstack engineering, product craft, performance, and the systems behind modern web experiences.",
+    posts: [
+      {
+        id: "building-products-that-last",
+        slug: "building-products-that-last",
+        title: "Building products that last beyond the first release",
+        excerpt:
+          "A practical framework for balancing delivery speed, maintainability, and the user experience.",
+        coverImage: "/TechStack.png",
+        publishedAt: "2026-08-24",
+        readTime: "6 min read",
+        tags: ["Engineering", "Product", "Architecture"],
+        published: true,
+        content:
+          "Great software is rarely the result of one clever decision. It comes from hundreds of small choices that keep the product understandable, adaptable, and useful.\n\n## Start with the job to be done\n\nBefore choosing a framework or drawing a schema, get precise about the user problem. The best technical solution is the one that removes friction without creating unnecessary operational weight.\n\n## Build for change, not prediction\n\nArchitecture should make the next reasonable change inexpensive. Clear boundaries, readable naming, and observable behavior usually create more value than premature abstraction.\n\n## Make quality part of delivery\n\nPerformance, accessibility, and failure states are not polish. They are part of the feature. Treating them that way from the first commit produces calmer releases and more trustworthy products.",
       },
     ],
   },
