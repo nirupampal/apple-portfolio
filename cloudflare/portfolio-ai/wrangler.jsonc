@@ -1,0 +1,29 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "nirupam-portfolio-ai",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-31",
+  "workers_dev": true,
+  "preview_urls": false,
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    "ALLOWED_ORIGINS": "https://inirupampal.in,https://www.inirupampal.in,https://my-portfolio-21c3c.web.app,https://my-portfolio-21c3c.firebaseapp.com,http://localhost:3000,http://127.0.0.1:3000",
+    "FIREBASE_PROJECT_ID": "my-portfolio-21c3c",
+    "GEMINI_MODEL": "gemini-3.5-flash-lite"
+  },
+  "secrets": {
+    "required": ["GEMINI_API_KEY"]
+  },
+  "ratelimits": [
+    {
+      "name": "AI_RATE_LIMITER",
+      "namespace_id": "1001",
+      "simple": {
+        "limit": 8,
+        "period": 60
+      }
+    }
+  ]
+}

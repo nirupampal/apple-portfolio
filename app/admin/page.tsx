@@ -11,17 +11,21 @@ import {
   Award,
   BookOpenText,
   Check,
+  CheckCheck,
   ChevronDown,
   ChevronRight,
+  Clock3,
   Code2,
   ExternalLink,
   FolderKanban,
   ImageIcon,
+  Inbox,
   LayoutDashboard,
   LoaderCircle,
   LogIn,
   LogOut,
   Mail,
+  MessageSquare,
   Plus,
   RotateCcw,
   Save,
@@ -34,6 +38,12 @@ import {
 
 import { Spotlight } from "@/components/ui/spotlight-new";
 import { ADMIN_EMAIL, auth } from "@/firebase";
+import {
+  deleteContactMessage,
+  setContactMessageStatus,
+  subscribeToContactMessages,
+  type ContactMessage,
+} from "@/lib/contact-messages";
 import {
   developerTerminalPreset,
   type AchievementItem,
@@ -60,6 +70,7 @@ type SectionId =
   | "terminal"
   | "achievements"
   | "blog"
+  | "inbox"
   | "contact";
 
 const NAV_ITEMS: { id: SectionId; label: string; icon: React.ElementType }[] = [
@@ -70,6 +81,7 @@ const NAV_ITEMS: { id: SectionId; label: string; icon: React.ElementType }[] = [
   { id: "terminal", label: "Console", icon: TerminalSquare },
   { id: "achievements", label: "Achievements", icon: Award },
   { id: "blog", label: "Blog", icon: BookOpenText },
+  { id: "inbox", label: "Inbox", icon: Inbox },
   { id: "contact", label: "Contact", icon: Mail },
 ];
 
@@ -430,6 +442,156 @@ function StringListEditor({ items, onChange, label }: { items: string[]; onChang
   );
 }
 
+function formatMessageDate(value: Date | null) {
+  if (!value) return "Just now";
+  return new Intl.DateTimeFormat("en-IN", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(value);
+}
+
+function InboxManager() {
+  const [messages, setMessages] = useState<ContactMessage[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [working, setWorking] = useState(false);
+
+  useEffect(() => {
+    return subscribeToContactMessages(
+      (nextMessages) => {
+        setMessages(nextMessages);
+        setSelectedId((current) =>
+          current && nextMessages.some((message) => message.id === current)
+            ? current
+            : (nextMessages[0]?.id ?? null),
+        );
+        setLoading(false);
+      },
+      (nextError) => {
+        setError(nextError.message);
+        setLoading(false);
+      },
+    );
+  }, []);
+
+  const selected = messages.find((message) => message.id === selectedId) ?? null;
+  const unreadCount = messages.filter((message) => message.status === "unread").length;
+
+  function selectMessage(message: ContactMessage) {
+    setSelectedId(message.id);
+    if (message.status === "unread") {
+      void setContactMessageStatus(message.id, "read").catch((nextError: unknown) => {
+        setError(nextError instanceof Error ? nextError.message : "Could not update the message.");
+      });
+    }
+  }
+
+  async function toggleReadStatus() {
+    if (!selected) return;
+    setWorking(true);
+    setError(null);
+    try {
+      await setContactMessageStatus(selected.id, selected.status === "read" ? "unread" : "read");
+    } catch (nextError) {
+      setError(nextError instanceof Error ? nextError.message : "Could not update the message.");
+    } finally {
+      setWorking(false);
+    }
+  }
+
+  async function removeSelected() {
+    if (!selected || !window.confirm(`Delete the message from ${selected.name}?`)) return;
+    setWorking(true);
+    setError(null);
+    try {
+      await deleteContactMessage(selected.id);
+    } catch (nextError) {
+      setError(nextError instanceof Error ? nextError.message : "Could not delete the message.");
+    } finally {
+      setWorking(false);
+    }
+  }
+
+  return (
+    <section>
+      <SectionIntro
+        icon={Inbox}
+        eyebrow={`${unreadCount} unread · ${messages.length} total`}
+        title="Contact inbox"
+        copy="Messages submitted through the portfolio appear here in real time. Only your authenticated admin account can read them."
+      />
+
+      {error ? <div className="mb-5 rounded-xl border border-red-500/20 bg-red-500/[0.07] px-4 py-3 text-xs text-red-300">{error}</div> : null}
+
+      {loading ? (
+        <div className="flex min-h-72 items-center justify-center gap-3 rounded-[1.75rem] border border-white/[0.08] bg-black/20 font-mono text-[9px] uppercase tracking-[0.18em] text-neutral-600">
+          <LoaderCircle className="h-4 w-4 animate-spin text-cyan-200" /> Loading messages
+        </div>
+      ) : messages.length === 0 ? (
+        <div className="flex min-h-72 flex-col items-center justify-center rounded-[1.75rem] border border-dashed border-white/10 bg-black/20 px-6 text-center">
+          <MessageSquare className="h-8 w-8 text-neutral-700" />
+          <h2 className="mt-5 text-lg font-medium text-white">Your inbox is clear</h2>
+          <p className="mt-2 max-w-sm text-sm leading-6 text-neutral-600">New portfolio enquiries will appear here automatically.</p>
+        </div>
+      ) : (
+        <div className="grid overflow-hidden rounded-[1.75rem] border border-white/[0.08] bg-black/20 lg:grid-cols-[0.82fr_1.18fr]">
+          <div className="max-h-[680px] overflow-y-auto border-b border-white/[0.07] p-2 lg:border-b-0 lg:border-r">
+            {messages.map((message) => (
+              <button
+                key={message.id}
+                type="button"
+                onClick={() => selectMessage(message)}
+                className={`relative w-full rounded-2xl p-4 text-left transition ${selectedId === message.id ? "bg-white/[0.07]" : "hover:bg-white/[0.035]"}`}
+              >
+                {message.status === "unread" ? <span className="absolute right-4 top-4 h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_12px_rgba(103,232,249,0.8)]" /> : null}
+                <div className="flex items-center gap-3 pr-5">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.035] text-xs font-medium text-neutral-300">{message.name.slice(0, 1).toUpperCase()}</span>
+                  <div className="min-w-0">
+                    <p className={`truncate text-sm ${message.status === "unread" ? "font-medium text-white" : "text-neutral-400"}`}>{message.name}</p>
+                    <p className="mt-1 truncate text-xs text-neutral-600">{message.email}</p>
+                  </div>
+                </div>
+                <p className="mt-4 truncate text-sm text-neutral-300">{message.subject}</p>
+                <div className="mt-3 flex items-center gap-2 font-mono text-[8px] uppercase tracking-[0.15em] text-neutral-700">
+                  <Clock3 className="h-3 w-3" /> {formatMessageDate(message.createdAt)}
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {selected ? (
+            <article className="min-h-[540px] p-6 md:p-8">
+              <div className="flex flex-wrap items-start justify-between gap-5 border-b border-white/[0.07] pb-6">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className={`rounded-full px-2.5 py-1 font-mono text-[8px] uppercase tracking-[0.16em] ${selected.status === "unread" ? "bg-cyan-300/10 text-cyan-200" : "bg-white/[0.05] text-neutral-500"}`}>{selected.status}</span>
+                    <span className="text-xs text-neutral-600">{formatMessageDate(selected.createdAt)}</span>
+                  </div>
+                  <h2 className="mt-5 text-2xl font-medium tracking-[-0.035em] text-white">{selected.subject}</h2>
+                  <p className="mt-3 text-sm text-neutral-500">From <span className="text-neutral-300">{selected.name}</span> · <a href={`mailto:${selected.email}`} className="text-cyan-200/80 hover:text-cyan-200">{selected.email}</a></p>
+                </div>
+                <div className="flex gap-2">
+                  <button type="button" disabled={working} onClick={() => void toggleReadStatus()} className="flex h-10 items-center gap-2 rounded-xl border border-white/10 px-3 text-xs text-neutral-400 transition hover:text-white disabled:opacity-40">
+                    <CheckCheck className="h-4 w-4" /> {selected.status === "read" ? "Mark unread" : "Mark read"}
+                  </button>
+                  <button type="button" disabled={working} onClick={() => void removeSelected()} aria-label="Delete message" className="flex h-10 w-10 items-center justify-center rounded-xl border border-red-500/15 text-red-400 transition hover:bg-red-500/10 disabled:opacity-40">
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+              <div className="whitespace-pre-wrap py-8 text-sm leading-7 text-neutral-300">{selected.message}</div>
+              <a href={`mailto:${selected.email}?subject=${encodeURIComponent(`Re: ${selected.subject}`)}`} className="inline-flex h-11 items-center gap-2 rounded-full bg-white px-5 text-xs font-medium text-black transition hover:bg-cyan-200">
+                <Mail className="h-3.5 w-3.5" /> Reply by email
+              </a>
+            </article>
+          ) : null}
+        </div>
+      )}
+    </section>
+  );
+}
+
 function AdminEditor({ initialContent }: { initialContent: PortfolioContent }) {
   const [active, setActive] = useState<SectionId>("hero");
   const [draft, setDraft] = useState(initialContent);
@@ -753,6 +915,8 @@ function AdminEditor({ initialContent }: { initialContent: PortfolioContent }) {
               </div>
             </section>
           ) : null}
+
+          {active === "inbox" ? <InboxManager /> : null}
 
           {active === "contact" ? (
             <section>

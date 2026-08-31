@@ -21,3 +21,4 @@ export const storage = getStorage(firebaseApp);
 export const ADMIN_EMAIL = "nirupampaldev@gmail.com";
 export const PORTFOLIO_COLLECTION = "siteContent";
 export const PORTFOLIO_DOCUMENT = "portfolio";
+export const CONTACT_MESSAGES_COLLECTION = "contactMessages";

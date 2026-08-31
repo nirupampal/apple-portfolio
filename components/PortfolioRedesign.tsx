@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import {
   AnimatePresence,
   motion,
@@ -12,10 +12,12 @@ import {
 import {
   ArrowDownRight,
   ArrowUpRight,
+  AlertCircle,
   Award,
   BadgeCheck,
   BookOpen,
   BriefcaseBusiness,
+  CheckCircle2,
   Code2,
   Command,
   ChevronRight,
@@ -28,12 +30,15 @@ import {
   Mail,
   MapPin,
   Menu,
+  Send,
   Sparkles,
   UserRound,
   X,
 } from "lucide-react";
 
 import type { PortfolioContent, ProjectItem } from "@/lib/portfolio-content";
+import { submitContactMessage } from "@/lib/contact-messages";
+import { PortfolioAiConcierge } from "@/components/PortfolioAiConcierge";
 import { BackgroundGradient } from "@/components/ui/background-gradient";
 import { HoverEffect } from "@/components/ui/card-hover-effect";
 import { FloatingDock } from "@/components/ui/floating-dock";
@@ -42,10 +47,11 @@ import { Spotlight } from "@/components/ui/spotlight-new";
 import { Timeline } from "@/components/ui/timeline";
 
 const reveal = {
-  initial: { opacity: 0, y: 42, scale: 0.985 },
-  whileInView: { opacity: 1, y: 0, scale: 1 },
-  viewport: { once: true, margin: "-8% 0px -8% 0px", amount: 0.14 },
-  transition: { duration: 0.72, ease: [0.22, 1, 0.36, 1] as const },
+  "data-scroll-reveal": "true",
+  initial: { opacity: 0, y: 20 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, margin: "0px 0px 220px 0px" },
+  transition: { duration: 0.42, ease: [0.22, 1, 0.36, 1] as const },
 };
 
 function PortfolioImage({
@@ -360,6 +366,128 @@ function SocialIcon({ label }: { label: string }) {
   return <FileText className="h-5 w-5" />;
 }
 
+function ContactForm() {
+  const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [feedback, setFeedback] = useState("");
+  const [lastSubmittedAt, setLastSubmittedAt] = useState(0);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const data = new FormData(form);
+
+    if (String(data.get("website") ?? "").trim()) {
+      form.reset();
+      setStatus("success");
+      setFeedback("Thanks — your message has been received.");
+      return;
+    }
+
+    if (Date.now() - lastSubmittedAt < 10_000) {
+      setStatus("error");
+      setFeedback("Please wait a few seconds before sending another message.");
+      return;
+    }
+
+    setStatus("sending");
+    setFeedback("");
+
+    try {
+      await submitContactMessage({
+        name: String(data.get("name") ?? ""),
+        email: String(data.get("email") ?? ""),
+        subject: String(data.get("subject") ?? ""),
+        message: String(data.get("message") ?? ""),
+      });
+      setLastSubmittedAt(Date.now());
+      setStatus("success");
+      setFeedback("Message sent. I’ll get back to you soon.");
+      form.reset();
+    } catch (error) {
+      setStatus("error");
+      setFeedback(
+        error instanceof Error && !error.message.toLowerCase().includes("firebase")
+          ? error.message
+          : "Could not send your message right now. Please try again.",
+      );
+    }
+  }
+
+  const fieldClass =
+    "w-full border-b border-white/10 bg-transparent px-0 py-3 text-sm text-white outline-none transition placeholder:text-neutral-700 focus:border-cyan-300/60";
+
+  return (
+    <motion.div {...reveal} className="mt-14 md:mt-20">
+      <BackgroundGradient
+        containerClassName="rounded-[2rem] p-px"
+        className="overflow-hidden rounded-[calc(2rem-1px)] bg-[#090a0d]"
+      >
+        <div className="relative grid lg:grid-cols-[0.72fr_1.28fr]">
+          <div className="relative overflow-hidden border-b border-white/[0.08] p-7 md:p-10 lg:border-b-0 lg:border-r">
+            <div className="absolute -left-20 -top-20 h-60 w-60 rounded-full bg-violet-500/[0.13] blur-[75px]" />
+            <div className="portrait-dot-field absolute inset-0 opacity-30" />
+            <div className="relative">
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-cyan-300/15 bg-cyan-300/[0.06] text-cyan-200">
+                <Mail className="h-4.5 w-4.5" />
+              </span>
+              <p className="mt-8 font-mono text-[9px] uppercase tracking-[0.22em] text-cyan-200/70">Direct message</p>
+              <h3 className="mt-4 max-w-sm text-3xl font-medium tracking-[-0.045em] text-white md:text-4xl">Tell me what you’re building.</h3>
+              <p className="mt-5 max-w-sm text-sm leading-7 text-neutral-500">Share the project, problem, or opportunity. Your message goes directly into my private admin inbox.</p>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="relative p-7 md:p-10">
+            <div className="grid gap-x-6 gap-y-6 sm:grid-cols-2">
+              <label className="block">
+                <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-neutral-500">Your name</span>
+                <input name="name" required maxLength={100} autoComplete="name" placeholder="Nirupam Pal" className={fieldClass} />
+              </label>
+              <label className="block">
+                <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-neutral-500">Email address</span>
+                <input name="email" type="email" required maxLength={160} autoComplete="email" placeholder="you@company.com" className={fieldClass} />
+              </label>
+              <label className="block sm:col-span-2">
+                <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-neutral-500">Subject</span>
+                <input name="subject" required maxLength={160} placeholder="Project collaboration" className={fieldClass} />
+              </label>
+              <label className="block sm:col-span-2">
+                <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-neutral-500">Message</span>
+                <textarea name="message" required maxLength={5000} rows={5} placeholder="A few details about your project..." className={`${fieldClass} resize-none leading-6`} />
+              </label>
+            </div>
+
+            <label className="absolute -left-[9999px]" aria-hidden="true">
+              Website
+              <input name="website" tabIndex={-1} autoComplete="off" />
+            </label>
+
+            <div className="mt-7 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div aria-live="polite" className="min-h-5">
+                {feedback ? (
+                  <p className={`flex items-center gap-2 text-xs ${status === "success" ? "text-emerald-300" : "text-red-300"}`}>
+                    {status === "success" ? <CheckCircle2 className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
+                    {feedback}
+                  </p>
+                ) : (
+                  <p className="font-mono text-[8px] uppercase tracking-[0.18em] text-neutral-700">Stored securely in Firebase</p>
+                )}
+              </div>
+              <button
+                type="submit"
+                disabled={status === "sending"}
+                className="group flex h-12 shrink-0 items-center justify-center gap-2 rounded-full bg-white px-6 text-xs font-medium text-black transition hover:bg-cyan-200 disabled:cursor-wait disabled:opacity-60"
+              >
+                {status === "sending" ? "Sending..." : "Send message"}
+                <Send className={`h-3.5 w-3.5 transition-transform ${status === "sending" ? "animate-pulse" : "group-hover:translate-x-0.5 group-hover:-translate-y-0.5"}`} />
+              </button>
+            </div>
+          </form>
+        </div>
+      </BackgroundGradient>
+    </motion.div>
+  );
+}
+
 export default function PortfolioRedesign({ content }: { content: PortfolioContent }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const fullName = `${content.hero.firstName} ${content.hero.lastName}`;
@@ -432,6 +560,7 @@ export default function PortfolioRedesign({ content }: { content: PortfolioConte
     <div className="dark relative overflow-clip bg-[#050608] text-white selection:bg-cyan-300 selection:text-black">
       <ScrollBeam />
       <MobileScrollRail />
+      <PortfolioAiConcierge />
 
       <div className="fixed bottom-5 left-1/2 z-[100] hidden -translate-x-1/2 md:block">
         <FloatingDock
@@ -590,7 +719,7 @@ export default function PortfolioRedesign({ content }: { content: PortfolioConte
               initial={{ y: 34 }}
               animate={{ y: 0 }}
               transition={{ duration: 0.9, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              className="max-w-6xl text-[clamp(3.4rem,10.5vw,9rem)] font-medium leading-[0.86] tracking-[-0.075em]"
+              className="relative z-20 max-w-6xl text-[clamp(3.4rem,10.5vw,9rem)] font-medium leading-[0.86] tracking-[-0.075em]"
             >
               <span className="block text-white">{content.hero.headlinePrimary}</span>
               <span className="block bg-gradient-to-r from-neutral-500 via-white to-cyan-200 bg-clip-text text-transparent">
@@ -598,7 +727,30 @@ export default function PortfolioRedesign({ content }: { content: PortfolioConte
               </span>
             </motion.h1>
 
-            <div className="mt-12 grid gap-10 md:grid-cols-[1fr_1fr] md:items-end">
+            <motion.div
+              initial={{ opacity: 0, y: 28, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.9, delay: 0.48, ease: [0.22, 1, 0.36, 1] }}
+              className="relative z-10 mx-auto mt-10 h-[370px] w-full max-w-[430px] overflow-hidden rounded-[2rem] border border-white/10 bg-[#090a0d] shadow-[0_35px_100px_rgba(0,0,0,0.45)] lg:absolute lg:right-0 lg:top-10 lg:mt-0 lg:h-[58%] lg:w-[44%] lg:max-w-none lg:overflow-visible lg:rounded-none lg:border-0 lg:bg-transparent lg:shadow-none"
+            >
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_60%_28%,rgba(139,92,246,0.2),transparent_38%),radial-gradient(circle_at_80%_68%,rgba(34,211,238,0.12),transparent_36%)] lg:inset-[-12%]" />
+              <div className="portrait-dot-field absolute inset-0 opacity-45" />
+              <div className="hero-portrait-material absolute inset-x-[8%] bottom-[3%] top-[5%]" />
+              <PortfolioImage
+                src={content.hero.imageSrc}
+                alt={content.hero.imageAlt}
+                sizes="(min-width: 1024px) 44vw, 430px"
+                className="z-10 object-contain object-bottom drop-shadow-[0_28px_34px_rgba(0,0,0,0.48)]"
+                priority
+              />
+              <div className="absolute inset-x-0 bottom-0 z-20 h-28 bg-gradient-to-t from-[#090a0d] via-[#090a0d]/35 to-transparent lg:from-[#050608]" />
+              <div className="absolute right-4 top-4 z-20 flex items-center gap-2 rounded-full border border-white/10 bg-black/25 px-3 py-2 backdrop-blur-xl lg:right-7 lg:top-7">
+                <Sparkles className="h-3 w-3 text-violet-200" />
+                <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-white/65">Fullstack creator</span>
+              </div>
+            </motion.div>
+
+            <div className="relative z-20 mt-12 grid gap-10 md:grid-cols-[1fr_1fr] md:items-end">
               <motion.div
                 initial={{ y: 12 }}
                 animate={{ y: 0 }}
@@ -968,6 +1120,8 @@ export default function PortfolioRedesign({ content }: { content: PortfolioConte
                 </span>
               </div>
             </motion.a>
+
+            <ContactForm />
 
             <div className="mt-12 grid gap-5 md:grid-cols-[1fr_2fr]">
               <div>
