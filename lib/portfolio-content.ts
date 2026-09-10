@@ -54,6 +54,9 @@ export type ProjectItem = {
   type: string;
   year: string;
   tech: string[];
+  points?: string[];
+  github?: string;
+  badge?: string;
 };
 
 export type WorksContent = {
@@ -306,24 +309,58 @@ export const defaultPortfolioContent: PortfolioContent = {
     githubLabel: "More on GitHub",
     projects: [
       {
+        title: "CreateQRCode SaaS",
+        description:
+          "Production-ready dynamic QR generator with real-time scan telemetry, bot filtering, multi-payload engines, and Razorpay monetization.",
+        image: "/createqrcode-dashboard.png",
+        link: "https://createqrcode.in",
+        github: "https://github.com/nirupampal",
+        type: "Fullstack SaaS",
+        year: "2025",
+        badge: "Flagship Project",
+        tech: ["Next.js", "TypeScript", "Tailwind CSS", "PostgreSQL", "Razorpay"],
+        points: [
+          "Sub-10ms dynamic redirects allowing target destination updates post-print without reprinting collateral.",
+          "Time-series scan tracking that isolates real user scans by filtering out crawlers and automated bots.",
+          "5 multi-payload builders: WiFi (WPA/WPA2/WPA3), WhatsApp with prefill, URL, PDF, and Google Review.",
+          "Monetization modal powered by Razorpay: instant UPI QR, Cards, Netbanking, and Pro renewal."
+        ],
+      },
+      {
         title: "E-Commerce Platform",
         description:
           "Fullstack Next.js store with Stripe payments, inventory management, and optimized performance for scale.",
         image: "/e-commerce.png",
         link: "https://delacruash.vercel.app/",
-        type: "Fullstack",
+        github: "https://github.com/nirupampal",
+        type: "Fullstack Store",
         year: "2024",
-        tech: ["Next.js", "Stripe", "PostgreSQL"],
+        badge: "Production Live",
+        tech: ["Next.js", "TypeScript", "Tailwind CSS", "Stripe", "PostgreSQL"],
+        points: [
+          "High-performance digital storefront with dynamic server-rendered product catalogs and instant search.",
+          "End-to-end Stripe payment gateway integration with real-time webhooks and automated order receipts.",
+          "Atomic inventory tracking and transactional cart states to prevent stock race conditions.",
+          "Mobile-first responsive UX with sub-second page transitions and modern micro-interactions."
+        ],
       },
       {
         title: "EdTech Website",
         description:
           "Interactive online learning platform with teacher dashboards, student progress tracking, and live classes.",
         image: "/edtech.webp",
-        link: "#",
-        type: "EdTech",
+        link: "https://github.com/nirupampal",
+        github: "https://github.com/nirupampal",
+        type: "EdTech Platform",
         year: "2024",
-        tech: ["React", "Node.js", "WebRTC"],
+        badge: "Real-time Architecture",
+        tech: ["React", "Node.js", "WebRTC", "Socket.io", "Tailwind CSS"],
+        points: [
+          "Peer-to-peer real-time video classrooms and live whiteboarding powered by WebRTC and Socket.io.",
+          "Dual-role authentication portals for teachers to publish courses and students to track milestones.",
+          "Automated quiz grading engine and personalized study progress analytics charts.",
+          "Robust Node.js and Express backend API architecture handling concurrent live session messaging."
+        ],
       },
       {
         title: "Weather App",
@@ -331,9 +368,17 @@ export const defaultPortfolioContent: PortfolioContent = {
           "A responsive weather dashboard built with React, consuming external weather APIs and providing forecasts.",
         image: "/weather.png",
         link: "https://weather-app-by-nirupampal.vercel.app/",
-        type: "Frontend",
+        github: "https://github.com/nirupampal",
+        type: "Frontend App",
         year: "2023",
-        tech: ["React", "API", "Tailwind"],
+        badge: "API Integration",
+        tech: ["React", "TypeScript", "Tailwind CSS", "JavaScript"],
+        points: [
+          "Precise geolocation-aware weather forecast dashboard fetching multi-day meteorological metrics.",
+          "Hourly precipitation probabilities, UV index gauges, air quality meters, and wind velocity telemetry.",
+          "Adaptive dynamic visual backgrounds that transition seamlessly with current weather conditions.",
+          "Lightweight client-side caching to minimize API rate-limits and deliver instant updates."
+        ],
       },
       {
         title: "Calculator App",
@@ -341,9 +386,17 @@ export const defaultPortfolioContent: PortfolioContent = {
           "A simple and intuitive calculator app built with React, featuring basic arithmetic operations and a clean UI.",
         image: "/calculator.png",
         link: "https://calculator-app-alpha-olive.vercel.app/",
-        type: "Frontend",
+        github: "https://github.com/nirupampal",
+        type: "Frontend Utility",
         year: "2023",
-        tech: ["React", "CSS"],
+        badge: "Interactive UI",
+        tech: ["React", "CSS", "JavaScript"],
+        points: [
+          "Clean mathematical evaluation engine supporting chained operations, percentages, and sign toggles.",
+          "Interactive calculation history log enabling users to review and restore prior results.",
+          "Tactile keyboard shortcut bindings and smooth button press micro-animations.",
+          "Fully responsive layout optimized for handheld mobile screens and desktop viewports."
+        ],
       },
     ],
   },

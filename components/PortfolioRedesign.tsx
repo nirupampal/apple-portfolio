@@ -39,6 +39,7 @@ import {
 import type { PortfolioContent, ProjectItem } from "@/lib/portfolio-content";
 import { submitContactMessage } from "@/lib/contact-messages";
 import { PortfolioAiConcierge } from "@/components/PortfolioAiConcierge";
+import { ProjectCard } from "@/components/shared/ProjectCard";
 import { BackgroundGradient } from "@/components/ui/background-gradient";
 import { HoverEffect } from "@/components/ui/card-hover-effect";
 import { FloatingDock } from "@/components/ui/floating-dock";
@@ -161,71 +162,7 @@ function SectionHeading({
   );
 }
 
-function ProjectCard({ project, index }: { project: ProjectItem; index: number }) {
-  const size = [
-    "lg:col-span-7",
-    "lg:col-span-5",
-    "lg:col-span-5",
-    "lg:col-span-7",
-  ][index % 4];
-  const tones = [
-    "from-violet-500/20 via-indigo-500/5 to-transparent",
-    "from-cyan-400/20 via-sky-500/5 to-transparent",
-    "from-amber-400/15 via-orange-500/5 to-transparent",
-    "from-fuchsia-500/15 via-purple-500/5 to-transparent",
-  ];
 
-  return (
-    <motion.a
-      {...reveal}
-      href={project.link}
-      target={project.link.startsWith("http") ? "_blank" : undefined}
-      rel={project.link.startsWith("http") ? "noreferrer" : undefined}
-      className={`group relative min-h-[520px] overflow-hidden rounded-[2rem] border border-white/10 bg-[#0b0c0f] p-3 ${size}`}
-    >
-      <div className={`absolute inset-0 bg-gradient-to-br ${tones[index % tones.length]} opacity-80`} />
-      <div className="project-shine absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-
-      <div className="relative flex h-full flex-col overflow-hidden rounded-[1.45rem] border border-white/[0.07] bg-black/25">
-        <div className="relative min-h-[295px] flex-1 overflow-hidden bg-neutral-900">
-          <PortfolioImage
-            src={project.image}
-            alt={project.title}
-            sizes="(min-width: 1024px) 60vw, 100vw"
-            className="object-cover object-top transition duration-700 ease-out group-hover:scale-[1.035]"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#090a0c] via-transparent to-transparent" />
-          <div className="absolute right-5 top-5 flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-black/40 text-white backdrop-blur-xl transition duration-300 group-hover:rotate-45 group-hover:bg-white group-hover:text-black">
-            <ArrowUpRight className="h-4 w-4" />
-          </div>
-        </div>
-
-        <div className="relative z-10 p-6 md:p-8">
-          <div className="mb-5 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.22em] text-neutral-500">
-            <span>{project.type}</span>
-            <span>{project.year}</span>
-          </div>
-          <h3 className="text-2xl font-medium tracking-[-0.035em] text-white md:text-3xl">
-            {project.title}
-          </h3>
-          <p className="mt-3 max-w-xl text-sm leading-6 text-neutral-400">
-            {project.description}
-          </p>
-          <div className="mt-6 flex flex-wrap gap-2">
-            {project.tech.map((tech) => (
-              <span
-                key={tech}
-                className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-neutral-300"
-              >
-                {tech}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-    </motion.a>
-  );
-}
 
 function ConsolePanel({ content }: { content: PortfolioContent["terminal"] }) {
   const [activeCommand, setActiveCommand] = useState(0);
@@ -822,7 +759,7 @@ export default function PortfolioRedesign({ content }: { content: PortfolioConte
               copy="A mix of product thinking, interface craft, and fullstack engineering—each project designed around a real job to be done."
             />
 
-            <div className="mt-16 grid grid-cols-1 gap-5 lg:grid-cols-12">
+            <div className="mt-16 space-y-10 md:space-y-14">
               {content.works.projects.map((project, index) => (
                 <ProjectCard key={project.title} project={project} index={index} />
               ))}
