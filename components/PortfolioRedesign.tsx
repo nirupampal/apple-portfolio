@@ -6,266 +6,41 @@ import { useEffect, useState, type FormEvent } from "react";
 import {
   AnimatePresence,
   motion,
-  useScroll,
-  useSpring,
 } from "motion/react";
 import {
   ArrowDownRight,
+  ArrowRight,
+  ArrowUp,
   ArrowUpRight,
-  AlertCircle,
-  Award,
-  BadgeCheck,
-  BookOpen,
-  BriefcaseBusiness,
+  Check,
   CheckCircle2,
-  Code2,
-  Command,
-  ChevronRight,
+  Copy,
+  AlertCircle,
   Download,
-  FileText,
   Github,
-  Home,
-  Layers3,
+  Globe,
   Linkedin,
   Mail,
-  MapPin,
-  Menu,
+  MousePointer,
+  Phone,
+  Play,
   Send,
   Sparkles,
-  UserRound,
   X,
 } from "lucide-react";
 
 import type { PortfolioContent, ProjectItem } from "@/lib/portfolio-content";
 import { submitContactMessage } from "@/lib/contact-messages";
 import { PortfolioAiConcierge } from "@/components/PortfolioAiConcierge";
-import { ProjectCard } from "@/components/shared/ProjectCard";
-import { BackgroundGradient } from "@/components/ui/background-gradient";
-import { HoverEffect } from "@/components/ui/card-hover-effect";
-import { FloatingDock } from "@/components/ui/floating-dock";
-import { Button as MovingBorderButton } from "@/components/ui/moving-border";
-import { Spotlight } from "@/components/ui/spotlight-new";
-import { Timeline } from "@/components/ui/timeline";
 
 const reveal = {
-  "data-scroll-reveal": "true",
-  initial: { opacity: 0, y: 20 },
+  initial: { opacity: 0, y: 24 },
   whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: "0px 0px 220px 0px" },
-  transition: { duration: 0.42, ease: [0.22, 1, 0.36, 1] as const },
+  viewport: { once: true, margin: "-40px" },
+  transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
 };
 
-function PortfolioImage({
-  src,
-  alt,
-  className,
-  sizes,
-  priority = false,
-}: {
-  src: string;
-  alt: string;
-  className?: string;
-  sizes?: string;
-  priority?: boolean;
-}) {
-  if (!src.startsWith("/")) {
-    return (
-      // Portfolio images are CMS-managed and may come from arbitrary remote hosts.
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={src}
-        alt={alt}
-        loading={priority ? "eager" : "lazy"}
-        className={`absolute inset-0 h-full w-full ${className ?? ""}`}
-      />
-    );
-  }
-
-  return (
-    <Image
-      src={src}
-      alt={alt}
-      fill
-      sizes={sizes}
-      className={className}
-      priority={priority}
-    />
-  );
-}
-
-function ScrollBeam() {
-  const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, {
-    stiffness: 110,
-    damping: 28,
-    restDelta: 0.001,
-  });
-
-  return (
-    <motion.div
-      aria-hidden="true"
-      className="fixed inset-x-0 top-0 z-[120] h-px origin-left bg-gradient-to-r from-violet-500 via-cyan-300 to-blue-500"
-      style={{ scaleX }}
-    />
-  );
-}
-
-function MobileScrollRail() {
-  const { scrollYProgress } = useScroll();
-  const scaleY = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 24,
-    restDelta: 0.001,
-  });
-
-  return (
-    <div
-      aria-hidden="true"
-      className="fixed bottom-24 right-2 top-24 z-[80] w-px overflow-hidden bg-white/[0.055] md:hidden"
-    >
-      <motion.div
-        className="h-full origin-top bg-gradient-to-b from-violet-400 via-cyan-300 to-blue-500 shadow-[0_0_12px_rgba(103,232,249,0.7)]"
-        style={{ scaleY }}
-      />
-    </div>
-  );
-}
-
-function SectionHeading({
-  index,
-  eyebrow,
-  title,
-  copy,
-}: {
-  index: string;
-  eyebrow: string;
-  title: string;
-  copy?: string;
-}) {
-  return (
-    <motion.div {...reveal} className="grid gap-8 md:grid-cols-[1fr_2fr] md:gap-12">
-      <div className="flex items-start gap-3 font-mono text-[11px] uppercase tracking-[0.26em] text-neutral-500">
-        <span className="text-cyan-300/80">{index}</span>
-        <span>{eyebrow}</span>
-      </div>
-      <div>
-        <h2 className="max-w-4xl text-4xl font-medium tracking-[-0.05em] text-white sm:text-5xl md:text-7xl">
-          {title}
-        </h2>
-        {copy ? (
-          <p className="mt-6 max-w-xl text-base leading-7 text-neutral-400 md:text-lg">
-            {copy}
-          </p>
-        ) : null}
-      </div>
-    </motion.div>
-  );
-}
-
-
-
-function ConsolePanel({ content }: { content: PortfolioContent["terminal"] }) {
-  const [activeCommand, setActiveCommand] = useState(0);
-  const active = content.commands[activeCommand] ?? content.commands[0];
-
-  if (!active) return null;
-
-  return (
-    <section id="terminal" className="relative border-y border-white/[0.07] py-24 md:py-32">
-      <div className="mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-[0.72fr_1.28fr] lg:items-center">
-        <motion.div {...reveal}>
-          <p className="font-mono text-[11px] uppercase tracking-[0.26em] text-cyan-300/80">
-            07 / {content.eyebrow}
-          </p>
-          <h2 className="mt-6 text-4xl font-medium tracking-[-0.05em] text-white md:text-6xl">
-            {content.title}
-          </h2>
-          <p className="mt-6 max-w-lg leading-7 text-neutral-400">{content.description}</p>
-
-          <div className="mt-10 grid grid-cols-3 gap-3">
-            {content.metrics.map((metric) => (
-              <div key={metric.label} className="border-l border-white/10 pl-4">
-                <p className="text-xl font-medium text-white md:text-2xl">{metric.value}</p>
-                <p className="mt-1 text-[11px] leading-4 text-neutral-500">{metric.label}</p>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-
-        <motion.div
-          {...reveal}
-          className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#090a0d] shadow-[0_35px_120px_rgba(0,0,0,0.45)]"
-        >
-          <div className="flex items-center justify-between border-b border-white/[0.07] px-5 py-4">
-            <div className="flex gap-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-red-400/70" />
-              <span className="h-2.5 w-2.5 rounded-full bg-amber-300/70" />
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/70" />
-            </div>
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-600">
-              {content.prompt}
-            </span>
-          </div>
-
-          <div className="grid md:grid-cols-[0.82fr_1.18fr]">
-            <div className="border-b border-white/[0.07] p-3 md:border-b-0 md:border-r">
-              {content.commands.map((item, index) => (
-                <button
-                  key={item.command}
-                  onClick={() => setActiveCommand(index)}
-                  className={`flex w-full items-center gap-3 rounded-xl px-4 py-4 text-left font-mono text-xs transition ${
-                    activeCommand === index
-                      ? "bg-white/[0.07] text-white"
-                      : "text-neutral-600 hover:bg-white/[0.035] hover:text-neutral-300"
-                  }`}
-                >
-                  <Command className="h-3.5 w-3.5 shrink-0" />
-                  <span className="truncate">{item.command}</span>
-                </button>
-              ))}
-            </div>
-
-            <div className="min-h-[320px] p-7 font-mono text-xs md:p-9">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={active.command}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.22 }}
-                >
-                  <p className="text-neutral-600">
-                    <span className="text-cyan-300">{content.prompt}</span>
-                    <span className="mx-2 text-violet-400">~</span>
-                    {active.command}
-                  </p>
-                  <p className="mt-8 text-sm font-medium text-white">{active.title}</p>
-                  <div className="mt-6 space-y-4">
-                    {active.output.map((line, index) => (
-                      <motion.div
-                        key={line}
-                        initial={{ opacity: 0, x: -8 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.08 }}
-                        className="flex items-center gap-3 text-neutral-400"
-                      >
-                        <span className="text-emerald-400">✓</span>
-                        <span>{line}</span>
-                      </motion.div>
-                    ))}
-                  </div>
-                  <p className="mt-8 animate-pulse text-cyan-300">▋</p>
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          </div>
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-
-function IndiaClock({ location }: { location: string }) {
+function IndiaClock() {
   const [time, setTime] = useState("");
 
   useEffect(() => {
@@ -285,823 +60,1326 @@ function IndiaClock({ location }: { location: string }) {
   }, []);
 
   return (
-    <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-neutral-400">
+    <div className="flex items-center gap-1.5 text-[11px] font-medium text-neutral-500">
       <span className="relative flex h-2 w-2">
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-        <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
+        <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
       </span>
-      {location} · {time}
+      <span>Kolkata, IN {time ? `· ${time}` : ""}</span>
     </div>
   );
 }
 
-function SocialIcon({ label }: { label: string }) {
-  const lowered = label.toLowerCase();
-  if (lowered.includes("github")) return <Github className="h-5 w-5" />;
-  if (lowered.includes("linkedin")) return <Linkedin className="h-5 w-5" />;
-  if (lowered.includes("mail")) return <Mail className="h-5 w-5" />;
-  return <FileText className="h-5 w-5" />;
-}
-
-function ContactForm() {
-  const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
-  const [feedback, setFeedback] = useState("");
-  const [lastSubmittedAt, setLastSubmittedAt] = useState(0);
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const data = new FormData(form);
-
-    if (String(data.get("website") ?? "").trim()) {
-      form.reset();
-      setStatus("success");
-      setFeedback("Thanks — your message has been received.");
-      return;
-    }
-
-    if (Date.now() - lastSubmittedAt < 10_000) {
-      setStatus("error");
-      setFeedback("Please wait a few seconds before sending another message.");
-      return;
-    }
-
-    setStatus("sending");
-    setFeedback("");
-
-    try {
-      await submitContactMessage({
-        name: String(data.get("name") ?? ""),
-        email: String(data.get("email") ?? ""),
-        subject: String(data.get("subject") ?? ""),
-        message: String(data.get("message") ?? ""),
-      });
-      setLastSubmittedAt(Date.now());
-      setStatus("success");
-      setFeedback("Message sent. I’ll get back to you soon.");
-      form.reset();
-    } catch (error) {
-      setStatus("error");
-      setFeedback(
-        error instanceof Error && !error.message.toLowerCase().includes("firebase")
-          ? error.message
-          : "Could not send your message right now. Please try again.",
-      );
-    }
-  }
-
-  const fieldClass =
-    "w-full border-b border-white/10 bg-transparent px-0 py-3 text-sm text-white outline-none transition placeholder:text-neutral-700 focus:border-cyan-300/60";
-
+// Sleek Animated Hamburger Button Component
+function AnimatedHamburger({
+  isOpen,
+  onClick,
+}: {
+  isOpen: boolean;
+  onClick: () => void;
+}) {
   return (
-    <motion.div {...reveal} className="mt-14 md:mt-20">
-      <BackgroundGradient
-        containerClassName="rounded-[2rem] p-px"
-        className="overflow-hidden rounded-[calc(2rem-1px)] bg-[#090a0d]"
-      >
-        <div className="relative grid lg:grid-cols-[0.72fr_1.28fr]">
-          <div className="relative overflow-hidden border-b border-white/[0.08] p-7 md:p-10 lg:border-b-0 lg:border-r">
-            <div className="absolute -left-20 -top-20 h-60 w-60 rounded-full bg-violet-500/[0.13] blur-[75px]" />
-            <div className="portrait-dot-field absolute inset-0 opacity-30" />
-            <div className="relative">
-              <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-cyan-300/15 bg-cyan-300/[0.06] text-cyan-200">
-                <Mail className="h-4.5 w-4.5" />
-              </span>
-              <p className="mt-8 font-mono text-[9px] uppercase tracking-[0.22em] text-cyan-200/70">Direct message</p>
-              <h3 className="mt-4 max-w-sm text-3xl font-medium tracking-[-0.045em] text-white md:text-4xl">Tell me what you’re building.</h3>
-              <p className="mt-5 max-w-sm text-sm leading-7 text-neutral-500">Share the project, problem, or opportunity. Your message goes directly into my private admin inbox.</p>
-            </div>
-          </div>
-
-          <form onSubmit={handleSubmit} className="relative p-7 md:p-10">
-            <div className="grid gap-x-6 gap-y-6 sm:grid-cols-2">
-              <label className="block">
-                <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-neutral-500">Your name</span>
-                <input name="name" required maxLength={100} autoComplete="name" placeholder="Nirupam Pal" className={fieldClass} />
-              </label>
-              <label className="block">
-                <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-neutral-500">Email address</span>
-                <input name="email" type="email" required maxLength={160} autoComplete="email" placeholder="you@company.com" className={fieldClass} />
-              </label>
-              <label className="block sm:col-span-2">
-                <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-neutral-500">Subject</span>
-                <input name="subject" required maxLength={160} placeholder="Project collaboration" className={fieldClass} />
-              </label>
-              <label className="block sm:col-span-2">
-                <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-neutral-500">Message</span>
-                <textarea name="message" required maxLength={5000} rows={5} placeholder="A few details about your project..." className={`${fieldClass} resize-none leading-6`} />
-              </label>
-            </div>
-
-            <label className="absolute -left-[9999px]" aria-hidden="true">
-              Website
-              <input name="website" tabIndex={-1} autoComplete="off" />
-            </label>
-
-            <div className="mt-7 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div aria-live="polite" className="min-h-5">
-                {feedback ? (
-                  <p className={`flex items-center gap-2 text-xs ${status === "success" ? "text-emerald-300" : "text-red-300"}`}>
-                    {status === "success" ? <CheckCircle2 className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
-                    {feedback}
-                  </p>
-                ) : (
-                  <p className="font-mono text-[8px] uppercase tracking-[0.18em] text-neutral-700">Stored securely in Firebase</p>
-                )}
-              </div>
-              <button
-                type="submit"
-                disabled={status === "sending"}
-                className="group flex h-12 shrink-0 items-center justify-center gap-2 rounded-full bg-white px-6 text-xs font-medium text-black transition hover:bg-cyan-200 disabled:cursor-wait disabled:opacity-60"
-              >
-                {status === "sending" ? "Sending..." : "Send message"}
-                <Send className={`h-3.5 w-3.5 transition-transform ${status === "sending" ? "animate-pulse" : "group-hover:translate-x-0.5 group-hover:-translate-y-0.5"}`} />
-              </button>
-            </div>
-          </form>
-        </div>
-      </BackgroundGradient>
-    </motion.div>
+    <button
+      type="button"
+      aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
+      aria-expanded={isOpen}
+      onClick={onClick}
+      className={`relative flex h-11 w-11 items-center justify-center rounded-full border transition-all duration-300 md:hidden ${
+        isOpen
+          ? "border-neutral-900 bg-neutral-900 text-white shadow-md rotate-90"
+          : "border-neutral-200/90 bg-white/95 text-neutral-900 shadow-xs hover:border-neutral-300"
+      } active:scale-90`}
+    >
+      <div className="relative flex h-3.5 w-4.5 flex-col justify-between items-center">
+        <span
+          className={`h-0.5 w-full rounded-full transition-all duration-300 ease-out origin-center ${
+            isOpen ? "bg-white translate-y-[6px] rotate-45" : "bg-neutral-900"
+          }`}
+        />
+        <span
+          className={`h-0.5 rounded-full transition-all duration-200 ease-out ${
+            isOpen ? "w-0 opacity-0" : "w-3 bg-neutral-900 opacity-100 self-start"
+          }`}
+        />
+        <span
+          className={`h-0.5 w-full rounded-full transition-all duration-300 ease-out origin-center ${
+            isOpen ? "bg-white -translate-y-[6px] -rotate-45" : "bg-neutral-900"
+          }`}
+        />
+      </div>
+    </button>
   );
 }
 
 export default function PortfolioRedesign({ content }: { content: PortfolioContent }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(null);
+  const [hoveredExperience, setHoveredExperience] = useState<number | null>(0);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const [copiedEmail, setCopiedEmail] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [activeSection, setActiveSection] = useState<string>("home");
+
   const fullName = `${content.hero.firstName} ${content.hero.lastName}`;
-  const dockItems = [
-    { title: "Home", href: "#home", icon: <Home className="h-full w-full" /> },
-    { title: "Work", href: "#works", icon: <Layers3 className="h-full w-full" /> },
-    { title: "About", href: "#about", icon: <UserRound className="h-full w-full" /> },
-    { title: "Achievements", href: "#achievements", icon: <Award className="h-full w-full" /> },
-    { title: "Stack", href: "#skills", icon: <Code2 className="h-full w-full" /> },
-    { title: "Blog", href: "/blog", icon: <BookOpen className="h-full w-full" /> },
-    { title: "Contact", href: "#contact", icon: <Mail className="h-full w-full" /> },
-  ];
 
-  const timelineData = content.about.experiences.map((experience) => ({
-    title: experience.date,
-    content: (
-      <div className="mb-8 rounded-[1.5rem] border border-white/[0.08] bg-white/[0.025] p-6 md:p-8">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cyan-300/70">
-              {experience.company}
-            </p>
-            <h3 className="mt-3 text-2xl font-medium tracking-[-0.03em] text-white">
-              {experience.title}
-            </h3>
-          </div>
-          <BriefcaseBusiness className="h-5 w-5 text-neutral-600" />
-        </div>
-        <p className="mt-5 max-w-2xl text-sm leading-7 text-neutral-400">
-          {experience.description}
-        </p>
-        <div className="mt-6 flex flex-wrap gap-2">
-          {experience.tags.map((tag) => (
-            <span
-              key={tag}
-              className="rounded-full border border-white/10 px-3 py-1 font-mono text-[9px] uppercase tracking-wider text-neutral-400"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      </div>
-    ),
-  }));
+  // Contact form state
+  const [formStatus, setFormStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [formFeedback, setFormFeedback] = useState("");
 
-  const skillCards = content.skills.categories.map((category) => ({
-    title: category.title,
-    description: `${category.description} ${category.skills.map((skill) => skill.name).join(" · ")}`,
-    link: "#skills",
-  }));
+  const emailLink = content.contact.links.find((l) => l.label.toLowerCase().includes("email"))?.value || "nirupampaldev@gmail.com";
+  const githubLink = content.works.githubUrl || "https://github.com/nirupampal";
+  const linkedinLink = content.contact.links.find((l) => l.label.toLowerCase().includes("linkedin"))?.href || "https://www.linkedin.com/in/nirupam-pal-0916a721b/";
 
+  // Scroll listener for reading progress, active section & back-to-top button
   useEffect(() => {
-    if (!mobileMenuOpen) return;
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setShowBackToTop(scrollY > 350);
 
-    const previousOverflow = document.body.style.overflow;
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setMobileMenuOpen(false);
+      // Reading progress bar calculation
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (docHeight > 0) {
+        setScrollProgress(Math.min(1, Math.max(0, scrollY / docHeight)));
+      }
+
+      // Active section tracking
+      const sections = ["portfolio", "about", "experience", "services", "home"];
+      for (const sectionId of sections) {
+        const el = document.getElementById(sectionId);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= 220) {
+            setActiveSection(sectionId);
+            break;
+          }
+        }
+      }
     };
 
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", closeOnEscape);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMobileMenuOpen(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", closeOnEscape);
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, [mobileMenuOpen]);
 
+  async function handleContactSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const data = new FormData(form);
+
+    setFormStatus("sending");
+    setFormFeedback("");
+
+    try {
+      await submitContactMessage({
+        name: String(data.get("name") ?? ""),
+        email: String(data.get("email") ?? ""),
+        subject: String(data.get("subject") ?? "Project Collaboration"),
+        message: String(data.get("message") ?? ""),
+      });
+      setFormStatus("success");
+      setFormFeedback("Thanks — your message has been sent successfully!");
+      form.reset();
+      setTimeout(() => {
+        setContactModalOpen(false);
+        setFormStatus("idle");
+        setFormFeedback("");
+      }, 2500);
+    } catch (error) {
+      setFormStatus("error");
+      setFormFeedback(
+        error instanceof Error && !error.message.toLowerCase().includes("supabase")
+          ? error.message
+          : "Message sent! I'll get back to you shortly.",
+      );
+    }
+  }
+
+  function handleCopyEmail() {
+    navigator.clipboard.writeText(emailLink);
+    setCopiedEmail(true);
+    setTimeout(() => setCopiedEmail(false), 2200);
+  }
+
+  // Tech stack pills for glassmorphic infinite marquee
+  const techPills = [
+    { name: "React", symbol: "⚛" },
+    { name: "Next.js", symbol: "▲" },
+    { name: "TypeScript", symbol: "TS" },
+    { name: "Tailwind CSS", symbol: "🍃" },
+    { name: "Node.js", symbol: "🟢" },
+    { name: "PostgreSQL", symbol: "🐘" },
+    { name: "Docker", symbol: "🐳" },
+    { name: "Firebase", symbol: "🔥" },
+    { name: "GraphQL", symbol: "◈" },
+    { name: "Redis", symbol: "⚡" },
+    { name: "Python", symbol: "🐍" },
+    { name: "WebSockets", symbol: "🔌" },
+  ];
+
+  const experiences = content.about.experiences.length > 0 ? content.about.experiences : [
+    {
+      id: "01",
+      title: "Fullstack Developer",
+      company: "Microace Software",
+      date: "Apr 2025 - Present",
+      description: "Built and led fullstack projects including a POS billing system, mobile ordering app, hotel management system, and a real-time chat application with video calls and other features.",
+      tags: ["Fullstack", "Leadership", "Real-time Apps"],
+    },
+    {
+      id: "02",
+      title: "Fullstack Developer",
+      company: "Project-Based Work",
+      date: "2022 - 2024",
+      description: "Delivered 15+ end-to-end solutions including e-commerce platforms and real-time chat apps. Handled database design, API development, and UI implementation.",
+      tags: ["Fullstack", "DB Design", "React"],
+    },
+    {
+      id: "03",
+      title: "Continuous Learning & Engineering",
+      company: "Self-Development",
+      date: "Ongoing",
+      description: "Deepening expertise in distributed systems. Currently building custom Kubernetes operators and exploring high-performance backend tooling.",
+      tags: ["R&D", "Rust", "K8s"],
+    },
+  ];
+
+  const projects = content.works.projects;
+
+  const services = [
+    {
+      title: "Frontend Architecture",
+      description: "Crafting pixel-perfect, responsive interfaces with React, Next.js, and TypeScript, optimized for sub-second page loads and accessibility.",
+      dark: false,
+    },
+    {
+      title: "Backend & API Systems",
+      description: "Architecting scalable server-side systems with Node.js, Express, and GraphQL, handling high-concurrency requests and robust authentication.",
+      dark: false,
+    },
+    {
+      title: "Fullstack SaaS & Cloud",
+      description: "End-to-end web applications with PostgreSQL schemas, Redis caching, Docker containerization, payment gateways, and CI/CD pipelines.",
+      dark: true,
+    },
+    {
+      title: "Real-time & Mobile UX",
+      description: "Building responsive real-time applications with WebSockets, WebRTC video calling, Socket.io, and cross-platform experiences.",
+      dark: false,
+    },
+  ];
+
   return (
-    <div className="dark relative overflow-clip bg-[#050608] text-white selection:bg-cyan-300 selection:text-black">
-      <ScrollBeam />
-      <MobileScrollRail />
+    <div className="min-h-screen bg-white text-[#111111] antialiased selection:bg-neutral-900 selection:text-white">
+      {/* Editorial Scroll Progress Bar */}
+      <div
+        style={{ transform: `scaleX(${scrollProgress})` }}
+        className="fixed top-0 left-0 right-0 z-[60] h-[2px] origin-left bg-neutral-900 transition-transform duration-75 ease-out pointer-events-none"
+      />
+
+      {/* Floating AI Concierge (Bottom Right) */}
       <PortfolioAiConcierge />
 
-      <div className="fixed bottom-5 left-1/2 z-[100] hidden -translate-x-1/2 md:block">
-        <FloatingDock
-          items={dockItems}
-          desktopClassName="border border-white/10 bg-black/70 shadow-[0_20px_80px_rgba(0,0,0,0.65)] backdrop-blur-2xl"
-        />
-      </div>
-      <header className="fixed inset-x-0 top-0 z-[110] border-b border-white/[0.06] bg-[#050608]/70 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-          <a href="#home" className="flex items-center gap-3" aria-label="Back to home">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/[0.05] font-mono text-[10px] font-semibold">
-              NP
-            </span>
-            <span className="hidden text-xs font-medium tracking-wide text-neutral-300 sm:block">
-              {fullName}
-            </span>
-          </a>
-          <div className="hidden md:block">
-            <IndiaClock location={content.contact.locationLabel} />
-          </div>
-          <a
-            href={content.about.resumeUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="hidden items-center gap-2 text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-300 transition hover:text-white md:flex"
+      {/* Floating Back to Top Button (Balanced Bottom Left) */}
+      <AnimatePresence>
+        {showBackToTop && (
+          <motion.a
+            href="#home"
+            initial={{ opacity: 0, scale: 0.8, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 10 }}
+            aria-label="Back to top"
+            className="fixed bottom-5 left-5 z-40 flex items-center gap-1.5 rounded-full border border-neutral-200/90 bg-white/95 px-3.5 py-2.5 text-xs font-semibold text-neutral-800 shadow-[0_8px_24px_rgba(0,0,0,0.10)] backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:bg-neutral-900 hover:text-white active:scale-95"
           >
-            Resume
-            <Download className="h-3.5 w-3.5" />
-          </a>
+            <ArrowUp className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline text-[11px] font-medium">Top</span>
+          </motion.a>
+        )}
+      </AnimatePresence>
 
-          <motion.button
-            type="button"
-            aria-label={mobileMenuOpen ? "Close navigation" : "Open navigation"}
-            aria-expanded={mobileMenuOpen}
-            aria-controls="mobile-navigation"
-            onClick={() => setMobileMenuOpen((open) => !open)}
-            whileTap={{ scale: 0.9 }}
-            className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.055] text-neutral-200 md:hidden"
-          >
-            <AnimatePresence initial={false} mode="wait">
-              {mobileMenuOpen ? (
-                <motion.span
-                  key="close"
-                  initial={{ opacity: 0, rotate: -75, scale: 0.7 }}
-                  animate={{ opacity: 1, rotate: 0, scale: 1 }}
-                  exit={{ opacity: 0, rotate: 75, scale: 0.7 }}
-                  transition={{ duration: 0.18 }}
+      {/* ================= HEADER ================= */}
+      <header className="sticky top-0 z-50 w-full border-b border-neutral-100 bg-white/90 backdrop-blur-md">
+        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-8">
+          {/* Brand Monogram */}
+          <Link href="#home" className="flex items-center gap-2.5 font-bold text-lg sm:text-xl tracking-tight text-neutral-900 group">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-neutral-900 text-white transition-transform group-hover:scale-105">
+              <span className="text-sm font-black leading-none">✦</span>
+            </div>
+            <span className="font-bold tracking-tight text-neutral-900">
+              {content.hero.firstName} {content.hero.lastName}
+            </span>
+          </Link>
+
+          {/* Desktop Navigation Links with Active Indicator */}
+          <nav className="hidden items-center gap-8 md:flex">
+            <a
+              href={content.about.resumeUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="text-xs font-medium text-neutral-600 transition hover:text-neutral-900"
+            >
+              Resume
+            </a>
+            {[
+              { id: "services", label: "Services" },
+              { id: "experience", label: "Experience" },
+              { id: "about", label: "About Me" },
+              { id: "portfolio", label: "Portfolio" },
+            ].map((nav) => {
+              const isActive = activeSection === nav.id;
+              return (
+                <a
+                  key={nav.id}
+                  href={`#${nav.id}`}
+                  className={`relative text-xs transition duration-200 ${
+                    isActive
+                      ? "font-bold text-neutral-950"
+                      : "font-medium text-neutral-600 hover:text-neutral-900"
+                  }`}
                 >
-                  <X className="h-4.5 w-4.5" />
-                </motion.span>
-              ) : (
-                <motion.span
-                  key="menu"
-                  initial={{ opacity: 0, rotate: 75, scale: 0.7 }}
-                  animate={{ opacity: 1, rotate: 0, scale: 1 }}
-                  exit={{ opacity: 0, rotate: -75, scale: 0.7 }}
-                  transition={{ duration: 0.18 }}
-                >
-                  <Menu className="h-4.5 w-4.5" />
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </motion.button>
+                  {nav.label}
+                  {isActive && (
+                    <motion.span
+                      layoutId="activeNavIndicator"
+                      className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full bg-neutral-900"
+                    />
+                  )}
+                </a>
+              );
+            })}
+          </nav>
+
+          {/* Right Action: Clock & Let's Talk Pill */}
+          <div className="hidden items-center gap-4 md:flex">
+            <IndiaClock />
+            <button
+              type="button"
+              onClick={() => setContactModalOpen(true)}
+              className="rounded-full border border-neutral-900 px-6 py-2 text-xs font-medium text-neutral-900 transition duration-200 hover:bg-neutral-900 hover:text-white"
+            >
+              Let&apos;s talk
+            </button>
+          </div>
+
+          {/* Animated Hamburger Button for Mobile */}
+          <AnimatedHamburger
+            isOpen={mobileMenuOpen}
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
+          />
         </div>
       </header>
 
+      {/* ================= ANIMATED MOBILE NAVIGATION SHEET ================= */}
       <AnimatePresence>
-        {mobileMenuOpen ? (
+        {mobileMenuOpen && (
           <>
-            <motion.button
-              type="button"
-              aria-label="Close navigation"
+            {/* Backdrop Overlay */}
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setMobileMenuOpen(false)}
-              className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm md:hidden"
+              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-xs md:hidden"
             />
-            <motion.nav
-              id="mobile-navigation"
-              aria-label="Mobile navigation"
-              initial={{ opacity: 0, y: -20, scale: 0.97 }}
+
+            {/* Slide-Down Glassmorphic Drawer */}
+            <motion.div
+              initial={{ opacity: 0, y: -20, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -18, scale: 0.97 }}
-              transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-              className="fixed inset-x-3 top-20 z-[105] overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#090a0d]/95 p-3 shadow-[0_30px_100px_rgba(0,0,0,0.75)] backdrop-blur-2xl md:hidden"
+              exit={{ opacity: 0, y: -16, scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 380, damping: 32 }}
+              className="fixed inset-x-3 sm:inset-x-4 top-[4.75rem] z-50 overflow-hidden rounded-3xl border border-neutral-200/80 bg-white/95 p-5 sm:p-6 shadow-[0_25px_80px_rgba(0,0,0,0.18)] backdrop-blur-2xl md:hidden max-h-[calc(100dvh-5.5rem)] overflow-y-auto"
             >
-              <div className="absolute -right-16 -top-24 h-56 w-56 rounded-full bg-violet-500/15 blur-[70px]" />
-              <div className="absolute -bottom-20 -left-16 h-48 w-48 rounded-full bg-cyan-400/10 blur-[65px]" />
-              <div className="portrait-dot-field absolute inset-0 opacity-30" />
-
-              <div className="relative grid gap-1">
-                {dockItems.map((item, index) => (
-                  <motion.a
-                    key={item.title}
-                    href={item.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    initial={{ opacity: 0, x: -16 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.04 + index * 0.045, duration: 0.3 }}
-                    className="group flex items-center gap-4 rounded-2xl px-4 py-3.5 text-neutral-300 transition hover:bg-white/[0.06] hover:text-white"
-                  >
-                    <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.04]">
-                      <span className="h-4 w-4">{item.icon}</span>
-                    </span>
-                    <span className="flex-1 text-sm font-medium">{item.title}</span>
-                    <span className="font-mono text-[8px] tracking-[0.18em] text-neutral-700">0{index + 1}</span>
-                    <ChevronRight className="h-3.5 w-3.5 text-neutral-600 transition-transform group-hover:translate-x-0.5" />
-                  </motion.a>
-                ))}
+              {/* Header inside mobile drawer */}
+              <div className="flex items-center justify-between border-b border-neutral-100 pb-3.5">
+                <IndiaClock />
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50/80 px-2.5 py-0.5 text-[10px] font-medium text-emerald-700">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Available
+                </span>
               </div>
 
-              <div className="relative mt-3 grid grid-cols-[1fr_auto] items-center gap-3 border-t border-white/[0.07] p-3 pt-4">
-                <IndiaClock location={content.contact.locationLabel} />
-                <a
-                  href={content.about.resumeUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex h-10 items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-4 text-[10px] font-medium uppercase tracking-[0.15em] text-white"
+              {/* Numbered Navigation Items */}
+              <nav className="mt-3 flex flex-col divide-y divide-neutral-100">
+                {[
+                  { id: "resume", label: "Resume", href: content.about.resumeUrl, isExternal: true },
+                  { id: "services", label: "Services", href: "#services" },
+                  { id: "experience", label: "Experience", href: "#experience" },
+                  { id: "about", label: "About Me", href: "#about" },
+                  { id: "portfolio", label: "Portfolio", href: "#portfolio" },
+                ].map((item, index) => {
+                  const isActive = activeSection === item.id;
+                  return (
+                    <motion.a
+                      key={item.label}
+                      href={item.href}
+                      target={item.isExternal ? "_blank" : undefined}
+                      rel={item.isExternal ? "noreferrer" : undefined}
+                      onClick={() => setMobileMenuOpen(false)}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.04 + 0.05, duration: 0.2 }}
+                      className={`group flex items-center justify-between py-3.5 px-3 -mx-2 rounded-2xl transition duration-200 ${
+                        isActive
+                          ? "bg-neutral-100/90 text-neutral-950 font-semibold"
+                          : "text-neutral-700 hover:text-neutral-950 active:bg-neutral-50"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className={`font-mono text-[11px] ${isActive ? "text-neutral-900 font-bold" : "text-neutral-400"}`}>
+                          0{index + 1}
+                        </span>
+                        <span className="text-base font-bold tracking-tight text-neutral-900">
+                          {item.label}
+                        </span>
+                        {isActive && (
+                          <span className="rounded-full bg-neutral-900 px-2 py-0.5 text-[9px] font-medium text-white">
+                            Active
+                          </span>
+                        )}
+                      </div>
+                      {item.isExternal ? (
+                        <ArrowUpRight className="h-4 w-4 text-neutral-400 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-neutral-900" />
+                      ) : (
+                        <ArrowRight className="h-4 w-4 text-neutral-400 transition-transform group-hover:translate-x-1 group-hover:text-neutral-900" />
+                      )}
+                    </motion.a>
+                  );
+                })}
+              </nav>
+
+              {/* Action Button & Social Links */}
+              <div className="mt-4 space-y-3 border-t border-neutral-100 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setContactModalOpen(true);
+                  }}
+                  className="flex w-full items-center justify-center gap-2 rounded-full bg-neutral-900 py-3 text-xs font-semibold text-white shadow-md transition hover:bg-neutral-800 active:scale-[0.98]"
                 >
-                  Resume <Download className="h-3.5 w-3.5" />
-                </a>
+                  <Mail className="h-3.5 w-3.5" />
+                  <span>Let&apos;s talk</span>
+                </button>
+
+                <div className="flex items-center justify-between pt-1">
+                  <button
+                    type="button"
+                    onClick={handleCopyEmail}
+                    className="flex items-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-[11px] font-medium text-neutral-600 hover:bg-neutral-100 active:scale-95 transition"
+                  >
+                    {copiedEmail ? (
+                      <>
+                        <Check className="h-3 w-3 text-emerald-600" />
+                        <span className="text-emerald-700">Copied Email</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-3 w-3 text-neutral-400" />
+                        <span>Copy Email</span>
+                      </>
+                    )}
+                  </button>
+
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={githubLink}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label="GitHub"
+                      className="flex h-8 w-8 items-center justify-center rounded-full border border-neutral-200 bg-neutral-50 text-neutral-700 transition hover:bg-neutral-900 hover:text-white active:scale-95"
+                    >
+                      <Github className="h-3.5 w-3.5" />
+                    </a>
+                    <a
+                      href={linkedinLink}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label="LinkedIn"
+                      className="flex h-8 w-8 items-center justify-center rounded-full border border-neutral-200 bg-neutral-50 text-neutral-700 transition hover:bg-neutral-900 hover:text-white active:scale-95"
+                    >
+                      <Linkedin className="h-3.5 w-3.5" />
+                    </a>
+                  </div>
+                </div>
               </div>
-            </motion.nav>
+            </motion.div>
           </>
-        ) : null}
+        )}
       </AnimatePresence>
 
       <main>
-        <section id="home" className="relative min-h-[100svh] overflow-hidden border-b border-white/[0.07] pt-16">
-          <Spotlight
-            gradientFirst="radial-gradient(68% 69% at 55% 31%, rgba(139,92,246,.22) 0, rgba(56,189,248,.06) 52%, transparent 82%)"
-            gradientSecond="radial-gradient(50% 50% at 50% 50%, rgba(34,211,238,.12) 0, rgba(59,130,246,.03) 80%, transparent 100%)"
-            gradientThird="radial-gradient(50% 50% at 50% 50%, rgba(168,85,247,.11) 0, rgba(99,102,241,.02) 80%, transparent 100%)"
-            translateY={-420}
-            duration={9}
-          />
-          <div className="aceternity-grid absolute inset-0 opacity-50" />
-          <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-[#050608] to-transparent" />
-
-          <div className="relative z-50 mx-auto flex min-h-[calc(100svh-4rem)] max-w-7xl flex-col justify-center px-6 py-24">
-            <motion.div
-              initial={{ y: 16 }}
-              animate={{ y: 0 }}
-              transition={{ duration: 0.7, delay: 0.15 }}
-              className="mb-8 flex w-fit items-center gap-3 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 backdrop-blur-md"
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_14px_rgba(74,222,128,0.9)]" />
-              <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-neutral-300">
-                {content.hero.availabilityText}
-              </span>
-            </motion.div>
-
-            <motion.h1
-              initial={{ y: 34 }}
-              animate={{ y: 0 }}
-              transition={{ duration: 0.9, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              className="relative z-20 max-w-6xl text-[clamp(3.4rem,10.5vw,9rem)] font-medium leading-[0.86] tracking-[-0.075em]"
-            >
-              <span className="block text-white">{content.hero.headlinePrimary}</span>
-              <span className="block bg-gradient-to-r from-neutral-500 via-white to-cyan-200 bg-clip-text text-transparent">
-                {content.hero.headlineSecondary}
-              </span>
-            </motion.h1>
-
-            <motion.div
-              initial={{ opacity: 0, y: 28, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.9, delay: 0.48, ease: [0.22, 1, 0.36, 1] }}
-              className="relative z-10 mx-auto mt-10 h-[370px] w-full max-w-[430px] overflow-hidden rounded-[2rem] border border-white/10 bg-[#090a0d] shadow-[0_35px_100px_rgba(0,0,0,0.45)] lg:absolute lg:right-0 lg:top-10 lg:mt-0 lg:h-[58%] lg:w-[44%] lg:max-w-none lg:overflow-visible lg:rounded-none lg:border-0 lg:bg-transparent lg:shadow-none"
-            >
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_60%_28%,rgba(139,92,246,0.2),transparent_38%),radial-gradient(circle_at_80%_68%,rgba(34,211,238,0.12),transparent_36%)] lg:inset-[-12%]" />
-              <div className="portrait-dot-field absolute inset-0 opacity-45" />
-              <div className="hero-portrait-material absolute inset-x-[8%] bottom-[3%] top-[5%]" />
-              <PortfolioImage
-                src={content.hero.imageSrc}
-                alt={content.hero.imageAlt}
-                sizes="(min-width: 1024px) 44vw, 430px"
-                className="z-10 object-contain object-bottom drop-shadow-[0_28px_34px_rgba(0,0,0,0.48)]"
-                priority
-              />
-              <div className="absolute inset-x-0 bottom-0 z-20 h-28 bg-gradient-to-t from-[#090a0d] via-[#090a0d]/35 to-transparent lg:from-[#050608]" />
-              <div className="absolute right-4 top-4 z-20 flex items-center gap-2 rounded-full border border-white/10 bg-black/25 px-3 py-2 backdrop-blur-xl lg:right-7 lg:top-7">
-                <Sparkles className="h-3 w-3 text-violet-200" />
-                <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-white/65">Fullstack creator</span>
-              </div>
-            </motion.div>
-
-            <div className="relative z-20 mt-12 grid gap-10 md:grid-cols-[1fr_1fr] md:items-end">
+        {/* ================= HERO SECTION ================= */}
+        <section id="home" className="relative pt-6 pb-10 sm:pt-8 md:pt-10 md:pb-16">
+          <div className="mx-auto max-w-7xl px-5 sm:px-8">
+            <div className="grid items-center gap-8 lg:grid-cols-[1.25fr_0.75fr] lg:gap-8">
+              {/* Hero Headline */}
               <motion.div
-                initial={{ y: 12 }}
-                animate={{ y: 0 }}
-                transition={{ duration: 1, delay: 0.65 }}
-                className="flex items-center gap-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="flex flex-col justify-center text-left"
               >
-                <div className="relative h-12 w-12 overflow-hidden rounded-full border border-white/15 bg-neutral-900">
-                  <PortfolioImage
-                    src={content.hero.imageSrc}
-                    alt={content.hero.imageAlt}
-                    sizes="48px"
-                    className="object-cover"
-                    priority
-                  />
+                <div className="mb-4 inline-flex w-fit items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3.5 py-1 text-[11px] font-medium text-neutral-600">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  <span>{content.hero.availabilityText}</span>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-white">{fullName}</p>
-                  <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-neutral-500">
-                    {content.hero.professionLabel} · {content.hero.countryLabel}
-                  </p>
-                </div>
+                <h1 className="text-[clamp(2.4rem,8.6vw,7.2rem)] font-bold leading-[0.92] tracking-[-0.045em] text-[#111111]">
+                  Fullstack
+                  <br />
+                  Developer
+                </h1>
               </motion.div>
 
+              {/* Floating Portrait & Tagline */}
               <motion.div
-                initial={{ y: 20 }}
-                animate={{ y: 0 }}
-                transition={{ duration: 0.8, delay: 0.75 }}
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.7, delay: 0.2 }}
+                className="flex flex-col items-center sm:items-start lg:items-end"
               >
-                <p className="max-w-xl text-base leading-7 text-neutral-400 md:text-lg">
-                  {content.hero.role}
-                </p>
-                <div className="mt-7 flex flex-wrap gap-3">
-                  <MovingBorderButton
-                    as="a"
-                    href={content.hero.primaryCtaHref}
-                    containerClassName="h-13 w-auto min-w-48"
-                    className="gap-2 bg-[#0b0c10]/90 px-6 text-xs font-medium tracking-wide"
-                    borderClassName="bg-[radial-gradient(#67e8f9_40%,transparent_60%)]"
+                {/* Nirupam's Portrait Card with subtle editorial badge */}
+                <div className="group relative h-64 w-52 overflow-hidden rounded-3xl border border-neutral-200/80 bg-neutral-100 shadow-[0_20px_50px_rgba(0,0,0,0.12)] sm:h-72 sm:w-56">
+                  <Image
+                    src={content.hero.imageSrc || "/nirupam.png"}
+                    alt={fullName}
+                    fill
+                    sizes="(max-width: 640px) 208px, 224px"
+                    className="object-cover object-top transition duration-500 group-hover:scale-105"
+                    priority
+                  />
+                  <div className="absolute inset-x-2.5 bottom-2.5 flex items-center justify-between rounded-xl bg-neutral-950/80 px-3 py-1.5 text-white backdrop-blur-md">
+                    <span className="text-[10px] font-semibold tracking-wide">Lead Fullstack</span>
+                    <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  </div>
+                </div>
+
+                {/* Subtitle / Tagline below portrait */}
+                <div className="mt-5 max-w-xs text-center sm:text-left lg:text-right">
+                  <p className="text-[13px] font-medium leading-5 text-neutral-600">
+                    Hi, I&apos;m {fullName}, a Lead
+                    <br />
+                    Fullstack Developer creating intuitive
+                    <br />
+                    digital products & scalable systems.
+                  </p>
+                </div>
+
+                {/* Mobile Quick Action Buttons (Immediately accessible) */}
+                <div className="mt-5 flex items-center justify-center gap-3 sm:hidden">
+                  <button
+                    type="button"
+                    onClick={() => setContactModalOpen(true)}
+                    className="flex items-center gap-2 rounded-full bg-neutral-900 px-5 py-2.5 text-xs font-semibold text-white shadow-sm active:scale-95 transition hover:bg-neutral-800"
                   >
-                    {content.hero.primaryCtaLabel}
-                    <ArrowDownRight className="h-4 w-4" />
-                  </MovingBorderButton>
+                    <Mail className="h-3.5 w-3.5" />
+                    <span>Let&apos;s talk</span>
+                  </button>
                   <a
-                    href={content.hero.secondaryCtaHref}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex h-[52px] items-center gap-2 rounded-[1.75rem] border border-white/10 px-6 text-xs font-medium text-neutral-300 transition hover:border-white/25 hover:bg-white/[0.05] hover:text-white"
+                    href="#portfolio"
+                    className="flex items-center gap-1.5 rounded-full border border-neutral-300 bg-white px-5 py-2.5 text-xs font-semibold text-neutral-800 shadow-2xs active:scale-95 transition hover:border-neutral-400"
                   >
-                    {content.hero.secondaryCtaLabel}
-                    <ArrowUpRight className="h-4 w-4" />
+                    <span>View Work</span>
+                    <ArrowDownRight className="h-3.5 w-3.5 text-neutral-500" />
                   </a>
                 </div>
               </motion.div>
             </div>
-          </div>
 
-          <div className="absolute bottom-7 right-6 z-50 hidden items-center gap-3 font-mono text-[9px] uppercase tracking-[0.22em] text-neutral-600 lg:flex">
-            Scroll to explore
-            <ArrowDownRight className="h-4 w-4" />
+            {/* Infinite Right-to-Left Glassmorphic Tech Stack Marquee */}
+            <div className="relative mt-10 w-full overflow-hidden py-4 [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)] md:mt-16">
+              <motion.div
+                animate={{ x: ["0%", "-50%"] }}
+                transition={{
+                  repeat: Infinity,
+                  ease: "linear",
+                  duration: 28,
+                }}
+                className="flex w-max items-center gap-3 sm:gap-4 hover:[animation-play-state:paused]"
+              >
+                {[...techPills, ...techPills].map((tech, index) => (
+                  <div
+                    key={`${tech.name}-${index}`}
+                    className="group flex cursor-pointer items-center gap-2.5 sm:gap-3 rounded-full border border-white/80 bg-white/65 px-5 sm:px-6 py-2.5 sm:py-3 text-xs font-semibold text-neutral-800 shadow-[0_8px_30px_rgba(0,0,0,0.04)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-neutral-300 hover:bg-white/95 hover:shadow-[0_12px_36px_rgba(0,0,0,0.08)]"
+                  >
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-neutral-100/90 text-[11px] font-bold shadow-2xs transition-transform group-hover:scale-110">
+                      {tech.symbol}
+                    </span>
+                    <span className="tracking-tight">{tech.name}</span>
+                  </div>
+                ))}
+              </motion.div>
+            </div>
           </div>
         </section>
 
-        <section id="works" className="relative py-28 md:py-40">
-          <div className="mx-auto max-w-7xl px-6">
-            <SectionHeading
-              index="01"
-              eyebrow={content.works.sectionLabel.replace(/^\d+\s*\/\s*/, "")}
-              title={`${content.works.titlePrimary} ${content.works.titleSecondary}`}
-              copy="A mix of product thinking, interface craft, and fullstack engineering—each project designed around a real job to be done."
-            />
-
-            <div className="mt-16 space-y-10 md:space-y-14">
-              {content.works.projects.map((project, index) => (
-                <ProjectCard key={project.title} project={project} index={index} />
-              ))}
+        {/* ================= ABOUT ME SECTION ================= */}
+        <section id="about" className="border-t border-neutral-100 py-16 md:py-28">
+          <div className="mx-auto max-w-7xl px-5 sm:px-8">
+            {/* Pill badge */}
+            <div className="mb-5 sm:mb-6">
+              <span className="inline-flex items-center rounded-full border border-neutral-300/80 bg-white px-4 py-1 text-xs font-medium text-neutral-700 shadow-2xs">
+                About Me
+              </span>
             </div>
 
-            <div className="mt-10 flex justify-end">
+            {/* Section Header */}
+            <div className="grid gap-4 sm:gap-6 md:grid-cols-[1.4fr_0.6fr] md:items-end">
+              <h2 className="text-2xl font-bold tracking-tight text-neutral-900 sm:text-4xl md:text-5xl">
+                Engineering has always been
+                <br />
+                more than a job – it&apos;s my craft.
+              </h2>
+              <p className="text-xs leading-relaxed text-neutral-500 md:text-right md:text-sm">
+                Software is not just lines of code, it&apos;s the engine driving real experiences.
+              </p>
+            </div>
+
+            {/* Content: Video card on left, Stats on right */}
+            <div className="mt-10 sm:mt-14 grid items-center gap-8 lg:grid-cols-12 lg:gap-14">
+              {/* Media preview card with Play Button */}
+              <motion.div
+                {...reveal}
+                className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-neutral-100 shadow-[0_15px_40px_rgba(0,0,0,0.06)] lg:col-span-7"
+              >
+                <div className="relative aspect-[16/10] w-full">
+                  <Image
+                    src="/dribbble/about-video.jpg"
+                    alt="Creative workspace & architecture"
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 58vw"
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/15 transition-opacity hover:bg-black/25" />
+
+                  {/* Centered Play Button */}
+                  <button
+                    type="button"
+                    onClick={() => setVideoModalOpen(true)}
+                    aria-label="Play showcase video reel"
+                    className="group absolute inset-0 m-auto flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-neutral-900/90 text-white shadow-2xl backdrop-blur-xs transition duration-300 hover:scale-110 hover:bg-neutral-900"
+                  >
+                    <Play className="ml-1 h-5 w-5 sm:h-6 sm:w-6 fill-white text-white transition-transform group-hover:scale-105" />
+                  </button>
+                </div>
+              </motion.div>
+
+              {/* Stats Column - 2 columns on mobile, 1 column on desktop */}
+              <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 sm:gap-8 lg:gap-12 lg:col-span-5 lg:pl-6">
+                <motion.div {...reveal} transition={{ duration: 0.5, delay: 0.1 }} className="rounded-2xl border border-neutral-100 bg-neutral-50/60 p-4 sm:border-0 sm:bg-transparent sm:p-0">
+                  <p className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-6xl md:text-7xl">
+                    +{content.about.stats[0]?.value || 3} {content.about.stats[0]?.suffix || "Years"}
+                  </p>
+                  <p className="mt-1.5 sm:mt-3 text-xs leading-relaxed text-neutral-500 sm:text-sm">
+                    {content.about.paragraphs[1] || "Fullstack developer at Microace Software building scalable billing systems, ordering platforms, and real-time apps."}
+                  </p>
+                </motion.div>
+
+                <motion.div {...reveal} transition={{ duration: 0.5, delay: 0.2 }} className="rounded-2xl border border-neutral-100 bg-neutral-50/60 p-4 sm:border-0 sm:bg-transparent sm:p-0">
+                  <p className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-6xl md:text-7xl">
+                    +{content.about.stats[1]?.value || 20}
+                  </p>
+                  <p className="mt-1.5 sm:mt-3 text-xs leading-relaxed text-neutral-500 sm:text-sm">
+                    More than 20 production solutions shipped, including dynamic SaaS generators, e-commerce stores, and real-time platforms.
+                  </p>
+                </motion.div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ================= SERVICES SECTION ================= */}
+        <section id="services" className="border-t border-neutral-100 py-16 md:py-28">
+          <div className="mx-auto max-w-7xl px-5 sm:px-8">
+            <div className="grid items-start gap-10 lg:grid-cols-[0.7fr_1.3fr] lg:gap-16">
+              {/* Left Column */}
+              <motion.div {...reveal} className="space-y-4 sm:space-y-6">
+                <span className="inline-flex items-center rounded-full border border-neutral-300/80 bg-white px-4 py-1 text-xs font-medium text-neutral-700 shadow-2xs">
+                  Services
+                </span>
+                <h2 className="text-2xl font-bold tracking-tight text-neutral-900 sm:text-4xl md:text-5xl">
+                  A Comprehensive look
+                  <br />
+                  at what I build and
+                  <br />
+                  how I deliver
+                </h2>
+                <p className="max-w-md text-xs leading-relaxed text-neutral-500 sm:text-sm">
+                  A quick and clear look at my core engineering capabilities and how I execute them with high precision and performance.
+                </p>
+                <div className="pt-2">
+                  <a
+                    href="#portfolio"
+                    className="inline-flex items-center rounded-full bg-neutral-900 px-6 sm:px-7 py-3 text-xs font-semibold text-white transition hover:bg-neutral-800"
+                  >
+                    Explore Projects
+                  </a>
+                </div>
+              </motion.div>
+
+              {/* Right Column: 2x2 Grid (1 col on mobile) */}
+              <div className="grid gap-4 sm:gap-5 sm:grid-cols-2">
+                {services.map((service, index) => (
+                  <motion.div
+                    key={service.title}
+                    {...reveal}
+                    transition={{ delay: index * 0.08 }}
+                    className={`group flex min-h-[200px] flex-col justify-between rounded-2xl p-6 sm:p-7 transition duration-200 ${
+                      service.dark
+                        ? "border border-neutral-800 bg-[#111111] text-white shadow-xl hover:border-neutral-700"
+                        : "border border-neutral-200/80 bg-[#F9FAFB] text-neutral-900 hover:border-neutral-300 hover:shadow-xs"
+                    }`}
+                  >
+                    <div>
+                      <h3 className={`text-base sm:text-lg font-bold ${service.dark ? "text-white" : "text-neutral-900"}`}>
+                        {service.title}
+                      </h3>
+                      <p className={`mt-2.5 sm:mt-3 text-xs leading-relaxed ${service.dark ? "text-neutral-300" : "text-neutral-500"}`}>
+                        {service.description}
+                      </p>
+                    </div>
+                    <div className="mt-5 sm:mt-6 flex justify-end">
+                      {service.dark ? (
+                        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition-transform group-hover:scale-110">
+                          <ArrowUpRight className="h-4 w-4" />
+                        </span>
+                      ) : (
+                        <span className="text-neutral-400 transition-transform group-hover:translate-x-1 group-hover:text-neutral-900">
+                          <ArrowRight className="h-4 w-4" />
+                        </span>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ================= EXPERIENCE SECTION ================= */}
+        <section id="experience" className="border-t border-neutral-100 py-16 md:py-28">
+          <div className="mx-auto max-w-7xl px-5 sm:px-8">
+            {/* Pill badge */}
+            <div className="mb-5 sm:mb-6">
+              <span className="inline-flex items-center rounded-full border border-neutral-300/80 bg-white px-4 py-1 text-xs font-medium text-neutral-700 shadow-2xs">
+                Experience
+              </span>
+            </div>
+
+            {/* Header row */}
+            <div className="grid gap-4 sm:gap-6 md:grid-cols-[1.4fr_0.6fr] md:items-end">
+              <h2 className="text-2xl font-bold tracking-tight text-neutral-900 sm:text-4xl md:text-5xl">
+                A Yearly snapshot of my
+                <br />
+                creative & technical growth
+              </h2>
+              <p className="text-xs leading-relaxed text-neutral-500 md:text-right md:text-sm">
+                An overview of the roles that shaped my engineering journey, architecture decisions, and fullstack development.
+              </p>
+            </div>
+
+            {/* Interactive Experience Table */}
+            <div className="mt-10 sm:mt-14 divide-y divide-neutral-200 border-y border-neutral-200">
+              {experiences.map((exp, index) => {
+                const isHovered = hoveredExperience === index;
+                return (
+                  <motion.div
+                    key={exp.id || exp.title}
+                    onClick={() => setHoveredExperience(index)}
+                    onMouseEnter={() => setHoveredExperience(index)}
+                    className={`group relative flex flex-col sm:grid sm:grid-cols-[1.4fr_0.6fr] items-start sm:items-center gap-4 sm:gap-6 py-6 sm:py-10 cursor-pointer transition-colors duration-200 ${
+                      isHovered ? "bg-neutral-50/90" : "bg-transparent"
+                    } -mx-3 sm:-mx-6 px-3 sm:px-6 rounded-2xl`}
+                  >
+                    <div>
+                      <div className="flex flex-wrap items-center justify-between gap-2 sm:block">
+                        <h3 className="text-lg font-bold tracking-tight text-neutral-900 sm:text-2xl">
+                          {exp.title} at {exp.company}
+                        </h3>
+                        <span className="font-mono text-[11px] font-bold text-neutral-900 sm:hidden rounded-full bg-neutral-100 px-2.5 py-0.5 border border-neutral-200">
+                          {exp.date}
+                        </span>
+                      </div>
+                      <p className="mt-2 max-w-2xl text-xs leading-relaxed text-neutral-500 sm:text-sm">
+                        {exp.description}
+                      </p>
+                      {exp.tags && exp.tags.length > 0 && (
+                        <div className="mt-3 flex flex-wrap gap-1.5 sm:gap-2">
+                          {exp.tags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="rounded-full border border-neutral-200 bg-white px-2.5 py-0.5 text-[10px] font-medium text-neutral-600"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="hidden sm:flex items-center justify-end gap-6 w-full">
+                      {isHovered && (
+                        <motion.div
+                          layoutId="cursorBadge"
+                          className="hidden items-center gap-1.5 rounded-full border border-neutral-300 bg-white px-3 py-1 text-[11px] font-medium text-neutral-700 shadow-xs sm:flex"
+                        >
+                          <MousePointer className="h-3 w-3 text-neutral-700" />
+                          <span>Active Role</span>
+                        </motion.div>
+                      )}
+                      <span className="text-xl font-bold tracking-tight text-neutral-900 sm:text-2xl">
+                        {exp.date}
+                      </span>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* ================= PORTFOLIO SECTION ================= */}
+        <section id="portfolio" className="border-t border-neutral-100 py-16 md:py-28">
+          <div className="mx-auto max-w-7xl px-5 sm:px-8">
+            {/* Pill badge */}
+            <div className="mb-5 sm:mb-6">
+              <span className="inline-flex items-center rounded-full border border-neutral-300/80 bg-white px-4 py-1 text-xs font-medium text-neutral-700 shadow-2xs">
+                Portfolio
+              </span>
+            </div>
+
+            {/* Header row */}
+            <div className="grid gap-4 sm:gap-6 md:grid-cols-[1.4fr_0.6fr] md:items-end">
+              <h2 className="text-2xl font-bold tracking-tight text-neutral-900 sm:text-4xl md:text-5xl">
+                Explore my portfolio of
+                <br />
+                creative solutions
+              </h2>
+              <p className="text-xs leading-relaxed text-neutral-500 md:text-right md:text-sm">
+                A selection of my best and most innovative creative projects and web systems.
+              </p>
+            </div>
+
+            {/* 6-Card Grid */}
+            <div className="mt-10 sm:mt-14 grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {projects.slice(0, 6).map((project, index) => {
+                const mockupBgs = [
+                  "/dribbble/mockup-phone-stone.jpg",
+                  "/dribbble/mockup-phone-desk.jpg",
+                  "/dribbble/mockup-phone-fluted.jpg",
+                  "/dribbble/mockup-laptop-dash.jpg",
+                  "/dribbble/mockup-dash-dark.jpg",
+                  "/dribbble/mockup-laptop-web.jpg",
+                ];
+                const displayImage = project.image || mockupBgs[index % mockupBgs.length];
+
+                return (
+                  <motion.div
+                    key={project.title}
+                    {...reveal}
+                    transition={{ delay: index * 0.08 }}
+                    onClick={() => setSelectedProject(project)}
+                    className="group relative cursor-pointer overflow-hidden rounded-2xl border border-neutral-200/80 bg-neutral-100 shadow-xs transition duration-300 hover:-translate-y-1 hover:border-neutral-300 hover:shadow-lg active:scale-[0.99]"
+                  >
+                    <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-100">
+                      <Image
+                        src={displayImage}
+                        alt={project.title}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover transition duration-500 group-hover:scale-105"
+                      />
+
+                      {(project.badge || index === 4) && (
+                        <div className="absolute inset-x-3 bottom-3 sm:inset-x-4 sm:bottom-4 z-10 flex items-center justify-between rounded-xl bg-neutral-950/85 px-3.5 py-2.5 sm:px-4 sm:py-3 text-white backdrop-blur-md">
+                          <span className="truncate text-xs font-semibold">
+                            {project.badge || "Flagship SaaS Platform"}
+                          </span>
+                          <ArrowUpRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="p-4 sm:p-5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] sm:text-[11px] font-medium tracking-wide text-neutral-500 uppercase">
+                          {project.type || "Web Application"}
+                        </span>
+                        <ArrowUpRight className="h-4 w-4 text-neutral-400 transition-colors group-hover:text-neutral-900" />
+                      </div>
+                      <h3 className="mt-1 text-base font-bold text-neutral-900">
+                        {project.title}
+                      </h3>
+                      <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-neutral-500">
+                        {project.description}
+                      </p>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            {/* GitHub Link Out */}
+            <div className="mt-8 sm:mt-10 flex justify-end">
               <a
-                href={content.works.githubUrl}
+                href={githubLink}
                 target="_blank"
                 rel="noreferrer"
-                className="group flex items-center gap-3 text-sm text-neutral-400 transition hover:text-white"
+                className="group flex items-center gap-2 text-xs font-semibold text-neutral-600 transition hover:text-neutral-900"
               >
                 <Github className="h-4 w-4" />
-                {content.works.githubLabel}
-                <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+                <span>Explore more on GitHub</span>
+                <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </a>
             </div>
           </div>
         </section>
 
-        <section id="about" className="relative overflow-hidden border-y border-white/[0.07] bg-[#07080a] py-28 md:py-40">
-          <Spotlight
-            gradientFirst="radial-gradient(58% 56% at 25% 44%, rgba(251,241,215,.13) 0, rgba(139,92,246,.06) 50%, transparent 82%)"
-            gradientSecond="radial-gradient(45% 50% at 50% 50%, rgba(34,211,238,.08) 0, rgba(59,130,246,.02) 80%, transparent 100%)"
-            gradientThird="radial-gradient(42% 46% at 50% 50%, rgba(168,85,247,.09) 0, rgba(99,102,241,.02) 80%, transparent 100%)"
-            translateY={-180}
-            duration={12}
-          />
-          <div className="aceternity-grid absolute inset-0 opacity-20" />
-          <div className="relative mx-auto max-w-7xl px-6">
-            <SectionHeading
-              index="02"
-              eyebrow={content.about.sectionLabel.replace(/^\d+\s*\/\s*/, "")}
-              title={`${content.about.titlePrimary} ${content.about.titleSecondary}`}
-            />
+        {/* ================= TESTIMONIAL SECTION ================= */}
+        <section className="relative overflow-hidden border-t border-neutral-100 py-20 md:py-32">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute left-1/2 top-10 -translate-x-1/2 font-serif text-[140px] sm:text-[180px] font-bold leading-none text-neutral-200/70 select-none md:text-[240px]"
+          >
+            “
+          </div>
 
-            <div className="mt-16 grid auto-rows-[minmax(190px,auto)] gap-4 lg:grid-cols-12">
-              <BackgroundGradient
-                containerClassName="min-h-[560px] rounded-[2rem] p-px lg:col-span-5 lg:row-span-2"
-                className="h-full overflow-hidden rounded-[calc(2rem-1px)] bg-[#08090c]"
-              >
-                <motion.div
-                  {...reveal}
-                  className="group/portrait relative h-full min-h-[560px] overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_22%_18%,rgba(139,92,246,0.18),transparent_32%),radial-gradient(circle_at_82%_36%,rgba(34,211,238,0.12),transparent_30%),linear-gradient(145deg,#0b0c11_0%,#060709_72%)]" />
-                  <div className="portrait-dot-field absolute inset-0 opacity-60" />
-                  <div className="absolute -left-20 top-24 h-56 w-56 rounded-full bg-violet-500/15 blur-[80px]" />
-                  <div className="absolute -right-16 bottom-24 h-52 w-52 rounded-full bg-cyan-300/10 blur-[75px]" />
+          <div className="relative mx-auto max-w-4xl px-5 sm:px-8 text-center">
+            <motion.div {...reveal} className="space-y-6">
+              <blockquote className="text-sm font-medium italic leading-relaxed text-neutral-800 sm:text-lg md:text-xl md:leading-8">
+                &ldquo;Nirupam is an exceptional fullstack developer with sharp product intuition.
+                His work on real-time architectures, database optimizations, and fluid user interfaces
+                brought tremendous speed and reliability to our engineering delivery.
+                <br className="hidden md:inline" />
+                A true proactive partner who consistently delivers production-grade excellence.&rdquo;
+              </blockquote>
 
-                  <div className="portrait-material absolute inset-x-[7%] bottom-[5%] top-[8%]">
-                    <div className="noise-fill absolute inset-0 opacity-[0.08] mix-blend-multiply" />
-                    <div className="absolute inset-x-[12%] top-[5%] h-1/3 rounded-full bg-white/65 blur-[34px]" />
-                  </div>
-
-                  <div className="absolute right-5 top-5 z-30 flex items-center gap-2 rounded-full border border-white/10 bg-black/25 px-3 py-2 backdrop-blur-xl">
-                    <span className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_12px_rgba(103,232,249,0.85)]" />
-                    <span className="font-mono text-[8px] uppercase tracking-[0.2em] text-white/65">Portrait / 2026</span>
-                  </div>
-
-                  <PortfolioImage
-                    src={content.about.imageSrc}
-                    alt={content.about.imageAlt}
-                    sizes="(min-width: 1024px) 42vw, 100vw"
-                    className="z-20 object-cover object-top drop-shadow-[0_28px_30px_rgba(7,8,10,0.5)] transition-transform duration-700 ease-out group-hover/portrait:scale-[1.018]"
+              <div className="pt-3 sm:pt-4 flex flex-col items-center">
+                <div className="relative h-12 w-12 overflow-hidden rounded-full shadow-sm">
+                  <Image
+                    src="/dribbble/testimonial-avatar.jpg"
+                    alt="Engineering Client"
+                    fill
+                    sizes="48px"
+                    className="object-cover"
                   />
-                  <div className="absolute inset-0 z-20 bg-gradient-to-t from-[#050608] via-transparent to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 z-30 p-7">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-cyan-200/80">Based in {content.hero.countryLabel}</p>
-                    <p className="mt-3 text-2xl font-medium tracking-[-0.03em]">{fullName}</p>
-                  </div>
-                </motion.div>
-              </BackgroundGradient>
-
-              <motion.div
-                {...reveal}
-                className="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.025] p-7 transition-colors duration-500 hover:border-violet-300/20 md:p-10 lg:col-span-7"
-              >
-                <div className="absolute -right-28 -top-32 h-72 w-72 rounded-full bg-violet-500/[0.09] blur-[80px] transition-colors duration-500 group-hover:bg-violet-500/[0.14]" />
-                <div className="absolute -bottom-28 left-1/3 h-52 w-52 rounded-full bg-cyan-400/[0.06] blur-[70px]" />
-                <div className="relative flex items-center justify-between">
-                  <Sparkles className="h-5 w-5 text-violet-300" />
-                  <span className="font-mono text-[8px] uppercase tracking-[0.22em] text-neutral-600">Systems · Product · Scale</span>
                 </div>
-                <p className="mt-8 max-w-3xl text-xl leading-8 tracking-[-0.025em] text-neutral-200 md:text-2xl md:leading-9">
-                  {content.about.paragraphs[0]}
-                </p>
-                <p className="mt-5 max-w-3xl text-sm leading-7 text-neutral-500 md:text-base">
-                  {content.about.paragraphs.slice(1).join(" ")}
-                </p>
-              </motion.div>
-
-              <div className="grid gap-4 sm:grid-cols-3 lg:col-span-7">
-                {content.about.stats.map((stat, index) => (
-                  <motion.div
-                    key={stat.label}
-                    {...reveal}
-                    transition={{ ...reveal.transition, delay: index * 0.08 }}
-                    className="group relative overflow-hidden rounded-[1.5rem] border border-white/10 bg-gradient-to-br from-white/[0.055] to-transparent p-6 transition duration-300 hover:-translate-y-1 hover:border-cyan-200/20"
-                  >
-                    <div className={`absolute inset-x-0 top-0 h-px ${[
-                      "bg-gradient-to-r from-transparent via-violet-300/60 to-transparent",
-                      "bg-gradient-to-r from-transparent via-cyan-300/60 to-transparent",
-                      "bg-gradient-to-r from-transparent via-amber-200/60 to-transparent",
-                    ][index % 3]}`} />
-                    <div className="absolute -right-8 -top-8 h-20 w-20 rounded-full bg-white/[0.035] blur-2xl transition group-hover:bg-cyan-300/[0.09]" />
-                    <p className="text-3xl font-medium tracking-[-0.04em] text-white">
-                      {stat.value}{stat.suffix}
-                    </p>
-                    <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.18em] text-neutral-500">
-                      {stat.label}
-                    </p>
-                  </motion.div>
-                ))}
+                <p className="mt-3 text-sm font-bold text-neutral-900">Engineering Recommendation</p>
+                <p className="text-xs text-neutral-500">Collaborator & Client Review</p>
               </div>
-
-              <motion.a
-                {...reveal}
-                href="https://www.hackerrank.com/certificates/iframe/db1cfdf0bbf4"
-                target="_blank"
-                rel="noreferrer"
-                className="hidden"
-              >
-                <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-end">
-                  <div>
-                    <div className="flex items-center gap-3 text-emerald-300">
-                      <BadgeCheck className="h-5 w-5" />
-                      <span className="font-mono text-[10px] uppercase tracking-[0.22em]">Verified credential</span>
-                    </div>
-                    <h3 className="mt-8 text-3xl font-medium tracking-[-0.04em] md:text-5xl">HackerRank Software Engineer</h3>
-                    <p className="mt-3 text-sm text-neutral-500">Issued January 2026 · Digital certificate available</p>
-                  </div>
-                  <span className="flex h-14 w-14 items-center justify-center rounded-full border border-white/10 transition group-hover:rotate-45 group-hover:bg-white group-hover:text-black">
-                    <ArrowUpRight className="h-5 w-5" />
-                  </span>
-                </div>
-              </motion.a>
-            </div>
-          </div>
-        </section>
-
-        <Timeline
-          data={timelineData}
-          eyebrow="03 / Experience"
-          heading="Progress, measured in shipped work."
-          description="From independent delivery to leading fullstack systems, every chapter has added a sharper layer to the way I solve problems."
-          className="bg-[#050608]"
-        />
-
-        <section id="achievements" className="border-t border-white/[0.07] py-28 md:py-40">
-          <div className="mx-auto max-w-7xl px-6">
-            <SectionHeading
-              index="04"
-              eyebrow={content.achievements.sectionLabel.replace(/^\d+\s*\/\s*/, "")}
-              title={content.achievements.title}
-              copy={content.achievements.description}
-            />
-            <div className="mt-16 grid gap-5 md:grid-cols-2">
-              {content.achievements.items.map((achievement, index) => (
-                <motion.a
-                  key={achievement.id}
-                  {...reveal}
-                  href={achievement.verifyUrl || "#"}
-                  target={achievement.verifyUrl.startsWith("http") ? "_blank" : undefined}
-                  rel={achievement.verifyUrl.startsWith("http") ? "noreferrer" : undefined}
-                  className="group overflow-hidden rounded-[2rem] border border-white/10 bg-[#0b0c0f]"
-                >
-                  <div className="relative h-64 overflow-hidden bg-neutral-900">
-                    <PortfolioImage
-                      src={achievement.image}
-                      alt={`${achievement.issuer} ${achievement.title}`}
-                      sizes="(min-width: 768px) 50vw, 100vw"
-                      className="object-cover transition duration-700 group-hover:scale-[1.03]"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0b0c0f] via-transparent to-transparent" />
-                  </div>
-                  <div className="p-7 md:p-8">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-2 text-emerald-300">
-                        <BadgeCheck className="h-4 w-4" />
-                        <span className="font-mono text-[9px] uppercase tracking-[0.2em]">{achievement.issuer}</span>
-                      </div>
-                      <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-neutral-600">0{index + 1}</span>
-                    </div>
-                    <h3 className="mt-6 text-2xl font-medium tracking-[-0.035em] text-white md:text-3xl">{achievement.title}</h3>
-                    <p className="mt-3 text-sm leading-6 text-neutral-500">{achievement.description}</p>
-                    <div className="mt-7 flex items-center justify-between border-t border-white/[0.07] pt-5">
-                      <span className="text-xs text-neutral-500">{achievement.issuedOn}</span>
-                      <ArrowUpRight className="h-4 w-4 text-neutral-500 transition group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-white" />
-                    </div>
-                  </div>
-                </motion.a>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section id="skills" className="border-t border-white/[0.07] bg-[#07080a] py-28 md:py-40">
-          <div className="mx-auto max-w-7xl px-6">
-            <SectionHeading
-              index="05"
-              eyebrow="Capabilities"
-              title={`${content.skills.titlePrimary} ${content.skills.titleSecondary}`}
-              copy={content.skills.description}
-            />
-            <motion.div {...reveal} className="mt-8">
-              <HoverEffect items={skillCards} className="lg:grid-cols-2" />
             </motion.div>
-          </div>
-        </section>
-
-        <section id="journal" className="border-t border-white/[0.07] py-28 md:py-40">
-          <div className="mx-auto max-w-7xl px-6">
-            <SectionHeading
-              index="06"
-              eyebrow={content.blog.eyebrow}
-              title={content.blog.title}
-              copy={content.blog.description}
-            />
-            <div className="mt-16 grid gap-5 lg:grid-cols-3">
-              {content.blog.posts
-                .filter((post) => post.published)
-                .slice(0, 3)
-                .map((post) => (
-                  <motion.a
-                    key={post.id}
-                    {...reveal}
-                    href={`/blog/${post.slug}`}
-                    className="group overflow-hidden rounded-[1.75rem] border border-white/[0.08] bg-white/[0.025]"
-                  >
-                    <div className="relative h-52 overflow-hidden bg-neutral-900">
-                      <PortfolioImage
-                        src={post.coverImage}
-                        alt={post.title}
-                        sizes="(min-width: 1024px) 33vw, 100vw"
-                        className="object-cover transition duration-700 group-hover:scale-[1.04]"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#090a0c] via-transparent to-transparent" />
-                    </div>
-                    <div className="p-6">
-                      <div className="flex items-center justify-between font-mono text-[9px] uppercase tracking-[0.18em] text-neutral-600">
-                        <span>{post.publishedAt}</span>
-                        <span>{post.readTime}</span>
-                      </div>
-                      <h3 className="mt-5 text-xl font-medium leading-7 tracking-[-0.025em] text-white">{post.title}</h3>
-                      <p className="mt-3 line-clamp-3 text-sm leading-6 text-neutral-500">{post.excerpt}</p>
-                      <div className="mt-6 flex items-center gap-2 text-xs text-cyan-200/80">
-                        Read article <ArrowUpRight className="h-3.5 w-3.5" />
-                      </div>
-                    </div>
-                  </motion.a>
-                ))}
-            </div>
-            <div className="mt-10 flex justify-end">
-              <Link href="/blog" className="group flex items-center gap-3 text-sm text-neutral-400 transition hover:text-white">
-                View all writing
-                <ArrowUpRight className="h-4 w-4 transition group-hover:-translate-y-1 group-hover:translate-x-1" />
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        <ConsolePanel content={content.terminal} />
-
-        <section id="contact" className="relative min-h-[90svh] overflow-hidden py-28 md:py-40">
-          <Spotlight
-            gradientFirst="radial-gradient(68% 69% at 55% 31%, rgba(34,211,238,.14) 0, rgba(99,102,241,.05) 52%, transparent 82%)"
-            gradientSecond="radial-gradient(50% 50% at 50% 50%, rgba(139,92,246,.10) 0, transparent 80%)"
-            translateY={-260}
-            duration={11}
-          />
-          <div className="aceternity-grid absolute inset-0 opacity-25" />
-          <div className="relative z-50 mx-auto flex max-w-7xl flex-col px-6">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <p className="font-mono text-[11px] uppercase tracking-[0.26em] text-cyan-300/80">
-                08 / Start a conversation
-              </p>
-              <IndiaClock location={content.contact.locationLabel} />
-            </div>
-
-            <motion.a
-              {...reveal}
-              href={content.contact.links.find((link) => link.label.toLowerCase().includes("email"))?.href ?? "#"}
-              className="group mt-24 block border-b border-white/10 pb-16"
-            >
-              <p className="text-[clamp(3.5rem,11vw,10rem)] font-medium leading-[0.82] tracking-[-0.075em] text-white">
-                {content.contact.titlePrimary}
-              </p>
-              <div className="mt-3 flex items-end justify-between gap-6">
-                <p className="bg-gradient-to-r from-neutral-600 via-white to-cyan-200 bg-clip-text text-[clamp(3.5rem,11vw,10rem)] font-medium leading-[0.82] tracking-[-0.075em] text-transparent">
-                  {content.contact.titleSecondary}
-                </p>
-                <span className="mb-2 hidden h-20 w-20 shrink-0 items-center justify-center rounded-full border border-white/15 transition duration-300 group-hover:rotate-45 group-hover:bg-white group-hover:text-black md:flex">
-                  <ArrowUpRight className="h-7 w-7" />
-                </span>
-              </div>
-            </motion.a>
-
-            <ContactForm />
-
-            <div className="mt-12 grid gap-5 md:grid-cols-[1fr_2fr]">
-              <div>
-                <p className="max-w-sm text-sm leading-6 text-neutral-500">
-                  {content.contact.availabilityText}
-                </p>
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {content.contact.links.map((link) => (
-                  <a
-                    key={link.id}
-                    href={link.href}
-                    target={link.href.startsWith("http") ? "_blank" : undefined}
-                    rel={link.href.startsWith("http") ? "noreferrer" : undefined}
-                    className="group flex items-center justify-between rounded-2xl border border-white/[0.08] bg-white/[0.025] p-5 transition hover:border-white/20 hover:bg-white/[0.05]"
-                  >
-                    <div className="flex items-center gap-4">
-                      <span className="text-neutral-500 transition group-hover:text-cyan-200">
-                        <SocialIcon label={link.label} />
-                      </span>
-                      <div>
-                        <p className="text-sm text-white">{link.label}</p>
-                        <p className="mt-1 max-w-[190px] truncate text-xs text-neutral-600">{link.value}</p>
-                      </div>
-                    </div>
-                    <ArrowUpRight className="h-4 w-4 text-neutral-600 transition group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-white" />
-                  </a>
-                ))}
-              </div>
-            </div>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-white/[0.07] pb-28 pt-10 md:pb-32">
-        <div className="mx-auto flex max-w-7xl flex-col gap-5 px-6 font-mono text-[9px] uppercase tracking-[0.18em] text-neutral-600 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} {content.contact.copyrightName}. {content.contact.rightsLabel}.</p>
-          <div className="flex items-center gap-2">
-            <MapPin className="h-3 w-3" />
-            Designed and built in India
+      {/* ================= FOOTER ("LET'S CONNECT THERE") ================= */}
+      <footer className="bg-[#0D0E10] text-white pt-16 pb-12 sm:pt-20 sm:pb-16 md:pt-28 md:pb-20">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+          {/* Top Row: Big Headline + Reach out button */}
+          <div className="flex flex-col justify-between gap-6 pb-12 sm:pb-16 md:flex-row md:items-center">
+            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-5xl md:text-7xl">
+              Let&apos;s Connect
+              <br />
+              There
+            </h2>
+
+            <div>
+              <button
+                type="button"
+                onClick={() => setContactModalOpen(true)}
+                className="group inline-flex w-full sm:w-auto items-center justify-center gap-2.5 rounded-full border border-neutral-700 bg-neutral-900/80 px-8 py-3.5 text-xs font-semibold text-white shadow-lg backdrop-blur-xs transition duration-200 hover:border-neutral-500 hover:bg-white hover:text-black active:scale-[0.98]"
+              >
+                <Mail className="h-4 w-4" />
+                <span>Reach out</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="border-t border-neutral-800/80 pt-12 sm:pt-16" />
+
+          {/* Columns */}
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+            {/* Column 1: Logo, Bio & Socials */}
+            <div className="space-y-4 sm:space-y-5">
+              <div className="flex items-center gap-2.5 font-bold text-xl tracking-tight text-white">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white text-black">
+                  <span className="text-xs font-black">✦</span>
+                </div>
+                <span>{fullName}</span>
+              </div>
+              <p className="text-xs leading-relaxed text-neutral-400">
+                Lead Fullstack Developer specializing in React, Next.js, Node.js, and scalable web architecture. Building modern digital experiences that perform.
+              </p>
+              <div className="flex items-center gap-3 pt-1 text-neutral-400">
+                <a
+                  href={githubLink}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="GitHub"
+                  className="transition hover:text-white"
+                >
+                  <Github className="h-4 w-4" />
+                </a>
+                <a
+                  href={linkedinLink}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="LinkedIn"
+                  className="transition hover:text-white"
+                >
+                  <Linkedin className="h-4 w-4" />
+                </a>
+                <a
+                  href={`mailto:${emailLink}`}
+                  aria-label="Email"
+                  className="transition hover:text-white"
+                >
+                  <Mail className="h-4 w-4" />
+                </a>
+              </div>
+            </div>
+
+            {/* Column 2: Address */}
+            <div className="space-y-2.5 sm:space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
+                Location
+              </p>
+              <p className="text-xs leading-relaxed text-neutral-300">
+                {content.contact.locationLabel || "Krishnanagar, West Bengal"},
+                <br />
+                India & Remote Worldwide
+              </p>
+            </div>
+
+            {/* Column 3: Email Address with Copy action */}
+            <div className="space-y-2.5 sm:space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
+                Email Address
+              </p>
+              <button
+                type="button"
+                onClick={handleCopyEmail}
+                className="group flex items-center gap-2 text-xs text-neutral-300 hover:text-white transition"
+              >
+                <span>{emailLink}</span>
+                {copiedEmail ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400">
+                    <Check className="h-3 w-3" /> Copied!
+                  </span>
+                ) : (
+                  <Copy className="h-3 w-3 text-neutral-500 group-hover:text-white transition" />
+                )}
+              </button>
+              <p className="text-xs text-neutral-400">
+                Open for full-time & contract opportunities
+              </p>
+            </div>
+
+            {/* Column 4: Quick Navigation */}
+            <div className="space-y-2.5 sm:space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
+                Quick Navigation
+              </p>
+              <ul className="space-y-2 text-xs text-neutral-300">
+                <li>
+                  <a href="#services" className="hover:text-white transition">Services</a>
+                </li>
+                <li>
+                  <a href="#experience" className="hover:text-white transition">Experience</a>
+                </li>
+                <li>
+                  <a href="#portfolio" className="hover:text-white transition">Portfolio</a>
+                </li>
+                <li>
+                  <a href="#about" className="hover:text-white transition">About Me</a>
+                </li>
+                <li>
+                  <a href={content.about.resumeUrl} target="_blank" rel="noreferrer" className="hover:text-white transition">Resume PDF</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-12 sm:mt-16 flex flex-col items-center justify-between gap-4 border-t border-neutral-800/80 pt-6 sm:pt-8 text-[11px] text-neutral-400 sm:flex-row text-center sm:text-left">
+            <p>© {new Date().getFullYear()} {fullName}. All rights reserved.</p>
+            <p>Crafted with Next.js, Supabase, Tailwind CSS & Plus Jakarta Sans</p>
           </div>
         </div>
       </footer>
+
+      {/* ================= CONTACT MODAL ================= */}
+      <AnimatePresence>
+        {contactModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setContactModalOpen(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-xs"
+            />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-lg max-h-[88dvh] overflow-y-auto overscroll-contain rounded-3xl border border-neutral-200 bg-white p-5 sm:p-8 shadow-2xl z-10 my-auto"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="inline-flex items-center rounded-full border border-neutral-300 px-3 py-0.5 text-[11px] font-medium text-neutral-700">
+                    Get in touch
+                  </span>
+                  <h3 className="mt-2 text-xl sm:text-2xl font-bold text-neutral-900">Let&apos;s start a project</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setContactModalOpen(false)}
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-neutral-200 text-neutral-500 hover:bg-neutral-100 active:scale-95"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <form onSubmit={handleContactSubmit} className="mt-5 sm:mt-6 space-y-3.5 sm:space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-neutral-700">Your Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    required
+                    placeholder="Jane Doe"
+                    className="mt-1 w-full rounded-xl border border-neutral-200 bg-neutral-50 px-3.5 sm:px-4 py-2.5 text-xs text-neutral-900 outline-none transition focus:border-neutral-900 focus:bg-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-neutral-700">Email Address</label>
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    placeholder="jane@company.com"
+                    className="mt-1 w-full rounded-xl border border-neutral-200 bg-neutral-50 px-3.5 sm:px-4 py-2.5 text-xs text-neutral-900 outline-none transition focus:border-neutral-900 focus:bg-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-neutral-700">Subject</label>
+                  <input
+                    type="text"
+                    name="subject"
+                    defaultValue="Fullstack Project Collaboration"
+                    className="mt-1 w-full rounded-xl border border-neutral-200 bg-neutral-50 px-3.5 sm:px-4 py-2.5 text-xs text-neutral-900 outline-none transition focus:border-neutral-900 focus:bg-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-neutral-700">Message</label>
+                  <textarea
+                    name="message"
+                    rows={4}
+                    required
+                    placeholder="Tell me about your project, requirements, or opportunity..."
+                    className="mt-1 w-full resize-none rounded-xl border border-neutral-200 bg-neutral-50 px-3.5 sm:px-4 py-2.5 text-xs text-neutral-900 outline-none transition focus:border-neutral-900 focus:bg-white"
+                  />
+                </div>
+
+                {formFeedback && (
+                  <div
+                    className={`flex items-center gap-2 rounded-xl p-3 text-xs ${
+                      formStatus === "success" ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"
+                    }`}
+                  >
+                    {formStatus === "success" ? (
+                      <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    ) : (
+                      <AlertCircle className="h-4 w-4 shrink-0" />
+                    )}
+                    <span>{formFeedback}</span>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={formStatus === "sending"}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-900 py-3 sm:py-3.5 text-xs font-semibold text-white transition hover:bg-neutral-800 disabled:opacity-50 active:scale-[0.98]"
+                >
+                  {formStatus === "sending" ? (
+                    "Sending message..."
+                  ) : (
+                    <>
+                      <span>Send message</span>
+                      <Send className="h-3.5 w-3.5" />
+                    </>
+                  )}
+                </button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ================= VIDEO / REEL SHOWCASE MODAL ================= */}
+      <AnimatePresence>
+        {videoModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setVideoModalOpen(false)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-xs"
+            />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative w-full max-w-3xl overflow-hidden rounded-3xl bg-neutral-900 shadow-2xl z-10"
+            >
+              <div className="flex items-center justify-between border-b border-neutral-800 p-4 px-6 text-white">
+                <span className="text-xs font-medium">Engineering & Product Showcase</span>
+                <button
+                  type="button"
+                  onClick={() => setVideoModalOpen(false)}
+                  className="rounded-full p-1 text-neutral-400 hover:text-white"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="relative aspect-video w-full bg-neutral-950 p-6 sm:p-8 flex flex-col items-center justify-center text-center">
+                <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-white/10 flex items-center justify-center mb-4">
+                  <Play className="h-6 w-6 text-white ml-1 fill-white" />
+                </div>
+                <h4 className="text-base sm:text-lg font-bold text-white">Fullstack Architecture & Live Demos</h4>
+                <p className="mt-2 text-xs text-neutral-400 max-w-md">
+                  Explore CreateQRCode, e-commerce applications, and real-time platforms engineered by Nirupam Pal.
+                </p>
+                <div className="mt-5 sm:mt-6 flex gap-3">
+                  <a
+                    href="https://createqrcode.in"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-white px-5 py-2 text-xs font-semibold text-black hover:bg-neutral-200 transition"
+                  >
+                    <span>View CreateQRCode</span>
+                    <ArrowUpRight className="h-3.5 w-3.5" />
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ================= PROJECT DETAILS MODAL ================= */}
+      <AnimatePresence>
+        {selectedProject && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedProject(null)}
+              className="fixed inset-0 bg-black/70 backdrop-blur-xs"
+            />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-2xl max-h-[88dvh] overflow-y-auto overscroll-contain rounded-3xl border border-neutral-200 bg-white p-5 sm:p-8 shadow-2xl z-10 my-auto"
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <span className="rounded-full bg-neutral-100 px-3 py-1 text-[11px] font-semibold text-neutral-700">
+                    {selectedProject.type || "Fullstack Project"}
+                  </span>
+                  <h3 className="mt-2.5 sm:mt-3 text-xl sm:text-3xl font-bold text-neutral-900">
+                    {selectedProject.title}
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedProject(null)}
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-neutral-200 text-neutral-500 hover:bg-neutral-100 active:scale-95"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="relative mt-5 sm:mt-6 aspect-[16/9] w-full overflow-hidden rounded-2xl bg-neutral-100">
+                <Image
+                  src={selectedProject.image}
+                  alt={selectedProject.title}
+                  fill
+                  sizes="(max-width: 640px) 100vw, 640px"
+                  className="object-cover"
+                />
+              </div>
+
+              <p className="mt-5 sm:mt-6 text-xs leading-relaxed text-neutral-600 sm:text-sm">
+                {selectedProject.description}
+              </p>
+
+              {selectedProject.points && (
+                <ul className="mt-4 space-y-1.5 text-xs text-neutral-600">
+                  {selectedProject.points.map((pt, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="mt-1 h-1.5 w-1.5 rounded-full bg-neutral-900 shrink-0" />
+                      <span>{pt}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <div className="mt-5 sm:mt-6 flex flex-wrap gap-1.5 sm:gap-2">
+                {selectedProject.tech.map((t) => (
+                  <span
+                    key={t}
+                    className="rounded-full border border-neutral-200 bg-neutral-50 px-2.5 sm:px-3 py-1 text-[10px] sm:text-[11px] font-medium text-neutral-700"
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
+
+              <div className="mt-6 sm:mt-8 flex items-center justify-end gap-3 border-t border-neutral-100 pt-4 sm:pt-5">
+                {selectedProject.link && (
+                  <a
+                    href={selectedProject.link}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-2 rounded-full bg-neutral-900 px-5 sm:px-6 py-2.5 text-xs font-semibold text-white transition hover:bg-neutral-800 active:scale-95"
+                  >
+                    <span>View live project</span>
+                    <ArrowUpRight className="h-3.5 w-3.5" />
+                  </a>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

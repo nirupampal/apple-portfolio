@@ -1,12 +1,7 @@
 "use client";
 
 import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
-import {
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  signOut,
-  type User,
-} from "firebase/auth";
+import type { User } from "@supabase/supabase-js";
 import {
   Award,
   BookOpenText,
@@ -37,7 +32,7 @@ import {
 } from "lucide-react";
 
 import { Spotlight } from "@/components/ui/spotlight-new";
-import { ADMIN_EMAIL, auth } from "@/firebase";
+import { ADMIN_EMAIL, supabase } from "@/lib/supabase";
 import {
   deleteContactMessage,
   setContactMessageStatus,
@@ -636,7 +631,7 @@ function AdminEditor({ initialContent }: { initialContent: PortfolioContent }) {
         </nav>
         <div className="space-y-2 border-t border-white/[0.07] p-4">
           <a href="/" target="_blank" className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-neutral-500 transition hover:bg-white/[0.04] hover:text-white"><ExternalLink className="h-4 w-4" />Open portfolio</a>
-          <button type="button" onClick={() => void signOut(auth)} className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm text-neutral-500 transition hover:bg-red-500/[0.07] hover:text-red-300"><LogOut className="h-4 w-4" />Sign out</button>
+          <button type="button" onClick={() => void supabase.auth.signOut()} className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm text-neutral-500 transition hover:bg-red-500/[0.07] hover:text-red-300"><LogOut className="h-4 w-4" />Sign out</button>
         </div>
       </aside>
 
@@ -965,9 +960,13 @@ function LoginScreen() {
     setLoading(true);
     setError(null);
     try {
-      const credential = await signInWithEmailAndPassword(auth, email.trim(), password);
-      if (credential.user.email !== ADMIN_EMAIL) {
-        await signOut(auth);
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+      if (signInError) throw signInError;
+      if (data.user?.email !== ADMIN_EMAIL) {
+        await supabase.auth.signOut();
         setError("This account does not have admin access.");
       }
     } catch (nextError) {
@@ -1027,16 +1026,20 @@ export default function AdminPage() {
   const editorKey = useMemo(() => JSON.stringify(content), [content]);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (nextUser) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const nextUser = session?.user ?? null;
       if (nextUser?.email && nextUser.email !== ADMIN_EMAIL) {
-        await signOut(auth);
+        await supabase.auth.signOut();
         setUser(null);
       } else {
         setUser(nextUser);
       }
       setAuthLoading(false);
     });
-    return unsubscribe;
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
   if (authLoading || (user && isLoading)) {

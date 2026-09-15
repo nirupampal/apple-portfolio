@@ -1,17 +1,4 @@
-import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  onSnapshot,
-  orderBy,
-  query,
-  serverTimestamp,
-  type Timestamp,
-  updateDoc,
-} from "firebase/firestore";
-
-import { CONTACT_MESSAGES_COLLECTION, db } from "@/firebase";
+import { supabase, CONTACT_MESSAGES_TABLE } from "@/lib/supabase";
 
 export type ContactMessageStatus = "unread" | "read";
 
@@ -32,8 +19,6 @@ export interface ContactMessageInput {
   message: string;
 }
 
-const messagesCollection = collection(db, CONTACT_MESSAGES_COLLECTION);
-
 function normalizeInput(input: ContactMessageInput): ContactMessageInput {
   return {
     name: input.name.trim(),
@@ -50,57 +35,93 @@ export async function submitContactMessage(input: ContactMessageInput) {
     throw new Error("Please complete every field.");
   }
 
-  if (message.name.length > 100 || message.email.length > 160 || message.subject.length > 160 || message.message.length > 5000) {
+  if (
+    message.name.length > 100 ||
+    message.email.length > 160 ||
+    message.subject.length > 160 ||
+    message.message.length > 5000
+  ) {
     throw new Error("One or more fields are too long.");
   }
 
-  await addDoc(messagesCollection, {
-    ...message,
-    status: "unread" satisfies ContactMessageStatus,
-    createdAt: serverTimestamp(),
-  });
+  const { error } = await supabase.from(CONTACT_MESSAGES_TABLE).insert([
+    {
+      name: message.name,
+      email: message.email,
+      subject: message.subject,
+      message: message.message,
+      status: "unread",
+      created_at: new Date().toISOString(),
+    },
+  ]);
+
+  if (error) {
+    console.error("Supabase contact insert error:", error);
+    throw new Error(error.message || "Could not save message to Supabase.");
+  }
 }
 
 export function subscribeToContactMessages(
   callback: (messages: ContactMessage[]) => void,
   onError?: (error: Error) => void,
 ) {
-  const messagesQuery = query(messagesCollection, orderBy("createdAt", "desc"));
+  const fetchMessages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from(CONTACT_MESSAGES_TABLE)
+        .select("*")
+        .order("created_at", { ascending: false });
 
-  return onSnapshot(
-    messagesQuery,
-    (snapshot) => {
-      callback(
-        snapshot.docs.map((snapshotDoc) => {
-          const data = snapshotDoc.data() as {
-            name?: string;
-            email?: string;
-            subject?: string;
-            message?: string;
-            status?: ContactMessageStatus;
-            createdAt?: Timestamp | null;
-          };
+      if (error) throw error;
 
-          return {
-            id: snapshotDoc.id,
-            name: data.name ?? "Unknown sender",
-            email: data.email ?? "",
-            subject: data.subject ?? "No subject",
-            message: data.message ?? "",
-            status: data.status === "read" ? "read" : "unread",
-            createdAt: data.createdAt?.toDate() ?? null,
-          };
-        }),
-      );
-    },
-    (error) => onError?.(error),
-  );
+      if (data) {
+        callback(
+          data.map((row) => ({
+            id: String(row.id),
+            name: row.name ?? "Unknown sender",
+            email: row.email ?? "",
+            subject: row.subject ?? "No subject",
+            message: row.message ?? "",
+            status: row.status === "read" ? "read" : "unread",
+            createdAt: row.created_at ? new Date(row.created_at) : null,
+          })),
+        );
+      }
+    } catch (err) {
+      onError?.(err instanceof Error ? err : new Error(String(err)));
+    }
+  };
+
+  fetchMessages();
+
+  const channel = supabase
+    .channel("contact_messages_changes")
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: CONTACT_MESSAGES_TABLE },
+      () => {
+        fetchMessages();
+      },
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
 }
 
 export async function setContactMessageStatus(id: string, status: ContactMessageStatus) {
-  await updateDoc(doc(db, CONTACT_MESSAGES_COLLECTION, id), { status });
+  const { error } = await supabase
+    .from(CONTACT_MESSAGES_TABLE)
+    .update({ status })
+    .eq("id", id);
+  if (error) throw error;
 }
 
 export async function deleteContactMessage(id: string) {
-  await deleteDoc(doc(db, CONTACT_MESSAGES_COLLECTION, id));
+  const { error } = await supabase
+    .from(CONTACT_MESSAGES_TABLE)
+    .delete()
+    .eq("id", id);
+  if (error) throw error;
 }

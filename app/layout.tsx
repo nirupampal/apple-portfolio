@@ -1,7 +1,15 @@
 import type { Metadata } from "next";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/context/ThemeContext";
 import SmoothScroll from "@/components/ui/SmoothScroll";
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
+  variable: "--font-plus-jakarta",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Nirupam Pal | Fullstack Developer",
@@ -9,7 +17,12 @@ export const metadata: Metadata = {
   keywords: ["Fullstack Developer", "React", "Next.js", "Node.js", "Web Developer", "Nirupam Pal"],
   authors: [{ name: "Nirupam Pal" }],
   icons: {
-    icon: "/image.png",
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicon.svg",
+    apple: "/icon.svg",
   },
   openGraph: {
     title: "Nirupam Pal | Fullstack Developer",
@@ -44,14 +57,16 @@ const jsonLd = {
   "description": siteDescription
 };
 
+
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className="min-h-screen bg-[#050608] text-white">
+    <html lang="en" className={`${plusJakartaSans.variable} scroll-smooth`}>
+      <body className={`${plusJakartaSans.className} min-h-screen bg-white text-[#111111] antialiased selection:bg-neutral-900 selection:text-white`}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <ThemeProvider>
           <SmoothScroll>

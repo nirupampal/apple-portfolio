@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1c1d21"/>
+      <stop offset="100%" stop-color="#0b0c0e"/>
+    </linearGradient>
+    <radialGradient id="starGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- High-end squircle background matching Dribbble UI -->
+  <rect width="512" height="512" rx="124" fill="url(#bgGrad)" />
+  <rect width="504" height="504" x="4" y="4" rx="120" fill="none" stroke="rgba(255, 255, 255, 0.12)" stroke-width="8" />
+
+  <!-- Subtle glow behind mark -->
+  <circle cx="256" cy="256" r="160" fill="url(#starGlow)" />
+
+  <!-- The iconic 4-point star mark (✦) identical to header brand mark -->
+  <path d="M256 108 C256 189.7 189.7 256 108 256 C189.7 256 256 322.3 256 404 C256 322.3 322.3 256 404 256 C322.3 256 256 189.7 256 108 Z" fill="#ffffff" />
+</svg>

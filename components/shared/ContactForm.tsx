@@ -47,7 +47,7 @@ export function ContactForm() {
     } catch (error) {
       setStatus("error");
       setFeedback(
-        error instanceof Error && !error.message.toLowerCase().includes("firebase")
+        error instanceof Error && !error.message.toLowerCase().includes("supabase")
           ? error.message
           : "Could not send your message right now. Please try again.",
       );

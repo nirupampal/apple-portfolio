@@ -1,13 +1,11 @@
-import { doc, onSnapshot, serverTimestamp, setDoc } from "firebase/firestore";
-
-import { db, PORTFOLIO_COLLECTION, PORTFOLIO_DOCUMENT } from "@/firebase";
+import { supabase, SITE_CONTENT_TABLE } from "@/lib/supabase";
 import {
   defaultPortfolioContent,
   developerTerminalPreset,
   type PortfolioContent,
 } from "@/lib/portfolio-content";
 
-const portfolioRef = doc(db, PORTFOLIO_COLLECTION, PORTFOLIO_DOCUMENT);
+const DOCUMENT_KEY = "portfolio";
 
 function mergePortfolioContent(data: Partial<PortfolioContent>): PortfolioContent {
   const containsLegacyDemoCommand = data.terminal?.commands?.some(
@@ -32,27 +30,53 @@ export function subscribeToPortfolioContent(
   callback: (content: PortfolioContent) => void,
   onError?: (error: Error) => void,
 ) {
-  return onSnapshot(
-    portfolioRef,
-    (snapshot) => {
-      if (!snapshot.exists()) {
+  const fetchContent = async () => {
+    try {
+      const { data, error } = await supabase
+        .from(SITE_CONTENT_TABLE)
+        .select("content")
+        .eq("key", DOCUMENT_KEY)
+        .maybeSingle();
+
+      if (error || !data) {
         callback(defaultPortfolioContent);
         return;
       }
 
-      callback(mergePortfolioContent(snapshot.data() as Partial<PortfolioContent>));
-    },
-    (error) => onError?.(error),
-  );
+      callback(mergePortfolioContent(data.content as Partial<PortfolioContent>));
+    } catch (err) {
+      callback(defaultPortfolioContent);
+      onError?.(err instanceof Error ? err : new Error(String(err)));
+    }
+  };
+
+  fetchContent();
+
+  const channel = supabase
+    .channel("site_content_changes")
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: SITE_CONTENT_TABLE },
+      () => {
+        fetchContent();
+      },
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
 }
 
 export async function savePortfolioContent(content: PortfolioContent) {
-  await setDoc(
-    portfolioRef,
-    {
-      ...content,
-      updatedAt: serverTimestamp(),
-    },
-    { merge: true },
-  );
+  const { error } = await supabase.from(SITE_CONTENT_TABLE).upsert({
+    key: DOCUMENT_KEY,
+    content,
+    updated_at: new Date().toISOString(),
+  });
+
+  if (error) {
+    console.error("Failed to save portfolio content to Supabase:", error);
+    throw error;
+  }
 }
