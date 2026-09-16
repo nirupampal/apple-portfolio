@@ -34,10 +34,11 @@ import { submitContactMessage } from "@/lib/contact-messages";
 import { PortfolioAiConcierge } from "@/components/PortfolioAiConcierge";
 
 const reveal = {
-  initial: { opacity: 0, y: 24 },
+  initial: { opacity: 0, y: 20 },
   whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: "-40px" },
-  transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
+  viewport: { once: true, margin: "0px" },
+  transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const },
+  "data-scroll-reveal": "true" as const,
 };
 
 function IndiaClock() {
@@ -533,9 +534,10 @@ export default function PortfolioRedesign({ content }: { content: PortfolioConte
             <div className="grid items-center gap-8 lg:grid-cols-[1.25fr_0.75fr] lg:gap-8">
               {/* Hero Headline */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={false}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
+                data-scroll-reveal="true"
                 className="flex flex-col justify-center text-left"
               >
                 <div className="mb-4 inline-flex w-fit items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3.5 py-1 text-[11px] font-medium text-neutral-600">
@@ -551,25 +553,22 @@ export default function PortfolioRedesign({ content }: { content: PortfolioConte
 
               {/* Floating Portrait & Tagline */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.96 }}
+                initial={false}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.7, delay: 0.2 }}
+                data-scroll-reveal="true"
                 className="flex flex-col items-center sm:items-start lg:items-end"
               >
-                {/* Nirupam's Portrait Card with subtle editorial badge */}
-                <div className="group relative h-64 w-52 overflow-hidden rounded-3xl border border-neutral-200/80 bg-neutral-100 shadow-[0_20px_50px_rgba(0,0,0,0.12)] sm:h-72 sm:w-56">
+                {/* Nirupam's Portrait with clean white background */}
+                <div className="relative h-64 w-52 sm:h-72 sm:w-56 overflow-hidden rounded-3xl bg-white border border-neutral-100 shadow-[0_12px_36px_rgba(0,0,0,0.06)] transition duration-500 hover:shadow-[0_16px_44px_rgba(0,0,0,0.10)]">
                   <Image
                     src={content.hero.imageSrc || "/nirupam.png"}
                     alt={fullName}
                     fill
                     sizes="(max-width: 640px) 208px, 224px"
-                    className="object-cover object-top transition duration-500 group-hover:scale-105"
+                    className="object-cover object-top transition duration-500 hover:scale-105"
                     priority
                   />
-                  <div className="absolute inset-x-2.5 bottom-2.5 flex items-center justify-between rounded-xl bg-neutral-950/80 px-3 py-1.5 text-white backdrop-blur-md">
-                    <span className="text-[10px] font-semibold tracking-wide">Lead Fullstack</span>
-                    <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  </div>
                 </div>
 
                 {/* Subtitle / Tagline below portrait */}
@@ -662,8 +661,8 @@ export default function PortfolioRedesign({ content }: { content: PortfolioConte
               >
                 <div className="relative aspect-[16/10] w-full">
                   <Image
-                    src="/dribbble/about-video.jpg"
-                    alt="Creative workspace & architecture"
+                    src="/about-workspace.jpg"
+                    alt="Fullstack developer engineering workstation"
                     fill
                     sizes="(max-width: 1024px) 100vw, 58vw"
                     className="object-cover"

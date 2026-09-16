@@ -213,11 +213,20 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    opacity: 1 !important;
   }
 }
 
 @media (max-width: 767px) {
-  [data-scroll-reveal="true"] {
+  [data-scroll-reveal="true"],
+  [data-reveal="true"],
+  main > section:first-of-type,
+  main > section:first-of-type * {
+    opacity: 1;
+  }
+
+  [data-scroll-reveal="true"],
+  [data-reveal="true"] {
     opacity: 1 !important;
     transform: none !important;
   }

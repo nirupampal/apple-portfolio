@@ -167,9 +167,10 @@ export function PortfolioAiConcierge() {
         <motion.button
           type="button"
           onClick={() => setOpen(true)}
-          initial={{ opacity: 0, y: 14 }}
+          initial={false}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1, duration: 0.45 }}
+          transition={{ duration: 0.3 }}
+          data-scroll-reveal="true"
           whileHover={{ y: -3 }}
           whileTap={{ scale: 0.96 }}
           className="fixed bottom-5 right-5 z-[95] flex h-12 items-center gap-2 rounded-full border border-white/10 bg-[#0b0c10]/85 px-4 text-xs font-medium text-white shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur-2xl"
