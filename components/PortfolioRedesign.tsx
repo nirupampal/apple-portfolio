@@ -908,12 +908,25 @@ export default function PortfolioRedesign({ content }: { content: PortfolioConte
                         unoptimized={displayImage.startsWith("http")}
                       />
 
-                      {(project.badge || index === 4) && (
+                      {(project.badge || project.link || index === 4) && (
                         <div className="absolute inset-x-3 bottom-3 sm:inset-x-4 sm:bottom-4 z-10 flex items-center justify-between rounded-xl bg-neutral-950/85 px-3.5 py-2.5 sm:px-4 sm:py-3 text-white backdrop-blur-md">
                           <span className="truncate text-xs font-semibold">
-                            {project.badge || "Flagship SaaS Platform"}
+                            {project.badge || "Live Project"}
                           </span>
-                          <ArrowUpRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                          {project.link ? (
+                            <a
+                              href={project.link}
+                              target="_blank"
+                              rel="noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              aria-label={`Open ${project.title} live link`}
+                              className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/10 text-white transition hover:bg-white hover:text-black active:scale-90"
+                            >
+                              <ArrowUpRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                            </a>
+                          ) : (
+                            <ArrowUpRight className="h-4 w-4 shrink-0 opacity-40" />
+                          )}
                         </div>
                       )}
                     </div>
@@ -923,7 +936,6 @@ export default function PortfolioRedesign({ content }: { content: PortfolioConte
                         <span className="text-[10px] sm:text-[11px] font-medium tracking-wide text-neutral-500 uppercase">
                           {project.type || "Web Application"}
                         </span>
-                        <ArrowUpRight className="h-4 w-4 text-neutral-400 transition-colors group-hover:text-neutral-900" />
                       </div>
                       <h3 className="mt-1 text-base font-bold text-neutral-900">
                         {project.title}
