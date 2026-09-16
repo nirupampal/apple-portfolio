@@ -33,7 +33,6 @@ import {
 
 import type { PortfolioContent, ProjectItem } from "@/lib/portfolio-content";
 import { submitContactMessage } from "@/lib/contact-messages";
-import { PortfolioAiConcierge } from "@/components/PortfolioAiConcierge";
 
 const reveal = {
   initial: { opacity: 0, y: 20 },
@@ -320,8 +319,6 @@ export default function PortfolioRedesign({ content }: { content: PortfolioConte
         className="fixed top-0 left-0 right-0 z-[60] h-[2px] origin-left bg-neutral-900 transition-transform duration-75 ease-out pointer-events-none"
       />
 
-      {/* Floating AI Concierge (Bottom Right) */}
-      <PortfolioAiConcierge />
 
       {/* Floating Back to Top Button (Balanced Bottom Left) */}
       <AnimatePresence>
