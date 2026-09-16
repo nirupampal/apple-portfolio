@@ -166,22 +166,44 @@ export default function PortfolioRedesign({ content }: { content: PortfolioConte
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Lock body scroll when mobile menu is open
+  // Lock body scroll, pause Lenis, and handle Escape key when any modal is open
   useEffect(() => {
-    if (mobileMenuOpen) {
+    const isAnyModalOpen = selectedProject !== null || contactModalOpen || videoModalOpen || mobileMenuOpen;
+    const lenis = (window as unknown as { __lenis?: { stop: () => void; start: () => void } }).__lenis;
+
+    if (isAnyModalOpen) {
+      const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
       document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+      if (scrollBarWidth > 0) {
+        document.body.style.paddingRight = `${scrollBarWidth}px`;
+      }
+      if (lenis) lenis.stop();
     } else {
       document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+      document.body.style.paddingRight = "";
+      if (lenis) lenis.start();
     }
+
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setMobileMenuOpen(false);
+      if (event.key === "Escape") {
+        setSelectedProject(null);
+        setContactModalOpen(false);
+        setVideoModalOpen(false);
+        setMobileMenuOpen(false);
+      }
     };
+
     window.addEventListener("keydown", handleKeyDown);
     return () => {
       document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+      document.body.style.paddingRight = "";
+      if (lenis) lenis.start();
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [mobileMenuOpen]);
+  }, [selectedProject, contactModalOpen, videoModalOpen, mobileMenuOpen]);
 
   async function handleContactSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -1232,7 +1254,7 @@ export default function PortfolioRedesign({ content }: { content: PortfolioConte
       {/* ================= CONTACT MODAL ================= */}
       <AnimatePresence>
         {contactModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+          <div data-lenis-prevent="true" className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -1242,6 +1264,7 @@ export default function PortfolioRedesign({ content }: { content: PortfolioConte
             />
 
             <motion.div
+              data-lenis-prevent="true"
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -1398,88 +1421,114 @@ export default function PortfolioRedesign({ content }: { content: PortfolioConte
       {/* ================= PROJECT DETAILS MODAL ================= */}
       <AnimatePresence>
         {selectedProject && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+          <div data-lenis-prevent="true" className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-hidden">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setSelectedProject(null)}
-              className="fixed inset-0 bg-black/70 backdrop-blur-xs"
+              className="fixed inset-0 bg-black/75 backdrop-blur-xs"
             />
 
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              data-lenis-prevent="true"
+              initial={{ opacity: 0, scale: 0.96, y: 16 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-2xl max-h-[88dvh] overflow-y-auto overscroll-contain rounded-3xl border border-neutral-200 bg-white p-5 sm:p-8 shadow-2xl z-10 my-auto"
+              exit={{ opacity: 0, scale: 0.96, y: 16 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+              className="relative w-full max-w-2xl max-h-[88dvh] flex flex-col overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-2xl z-10 my-auto"
             >
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="rounded-full bg-neutral-100 px-3 py-1 text-[11px] font-semibold text-neutral-700">
+              {/* Sticky Top Header (Never scrolls away) */}
+              <div className="flex items-center justify-between border-b border-neutral-100 bg-white/95 px-5 py-4 sm:px-7 sm:py-5 backdrop-blur-md shrink-0 z-20">
+                <div className="min-w-0 pr-4">
+                  <span className="inline-flex items-center rounded-full bg-neutral-100 px-3 py-0.5 text-[10px] sm:text-[11px] font-semibold text-neutral-700 uppercase tracking-wide">
                     {selectedProject.type || "Fullstack Project"}
                   </span>
-                  <h3 className="mt-2.5 sm:mt-3 text-xl sm:text-3xl font-bold text-neutral-900">
+                  <h3 className="mt-1 text-lg sm:text-2xl font-bold text-neutral-900 truncate">
                     {selectedProject.title}
                   </h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setSelectedProject(null)}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-neutral-200 text-neutral-500 hover:bg-neutral-100 active:scale-95"
+                  aria-label="Close project details"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-neutral-200 text-neutral-500 hover:bg-neutral-100 active:scale-95 transition"
                 >
                   <X className="h-4 w-4" />
                 </button>
               </div>
 
-              <div className="relative mt-5 sm:mt-6 aspect-[16/9] w-full overflow-hidden rounded-2xl bg-neutral-100">
-                <Image
-                  src={selectedProject.image}
-                  alt={selectedProject.title}
-                  fill
-                  sizes="(max-width: 640px) 100vw, 640px"
-                  className="object-cover"
-                  unoptimized={selectedProject.image.startsWith("http")}
-                />
-              </div>
+              {/* Scrollable Content Body */}
+              <div data-lenis-prevent="true" className="flex-1 overflow-y-auto overscroll-contain p-5 sm:p-7 space-y-5">
+                {/* Project Image */}
+                <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-neutral-100 border border-neutral-100">
+                  <Image
+                    src={selectedProject.image}
+                    alt={selectedProject.title}
+                    fill
+                    sizes="(max-width: 640px) 100vw, 640px"
+                    className="object-cover"
+                    unoptimized={selectedProject.image.startsWith("http")}
+                  />
+                </div>
 
-              <p className="mt-5 sm:mt-6 text-xs leading-relaxed text-neutral-600 sm:text-sm">
-                {selectedProject.description}
-              </p>
+                {/* Description */}
+                <p className="text-xs leading-relaxed text-neutral-600 sm:text-sm">
+                  {selectedProject.description}
+                </p>
 
-              {selectedProject.points && (
-                <ul className="mt-4 space-y-1.5 text-xs text-neutral-600">
-                  {selectedProject.points.map((pt, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <span className="mt-1 h-1.5 w-1.5 rounded-full bg-neutral-900 shrink-0" />
-                      <span>{pt}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-
-              <div className="mt-5 sm:mt-6 flex flex-wrap gap-1.5 sm:gap-2">
-                {selectedProject.tech.map((t) => (
-                  <span
-                    key={t}
-                    className="rounded-full border border-neutral-200 bg-neutral-50 px-2.5 sm:px-3 py-1 text-[10px] sm:text-[11px] font-medium text-neutral-700"
-                  >
-                    {t}
-                  </span>
-                ))}
-              </div>
-
-              <div className="mt-6 sm:mt-8 flex items-center justify-end gap-3 border-t border-neutral-100 pt-4 sm:pt-5">
-                {selectedProject.link && (
-                  <a
-                    href={selectedProject.link}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center gap-2 rounded-full bg-neutral-900 px-5 sm:px-6 py-2.5 text-xs font-semibold text-white transition hover:bg-neutral-800 active:scale-95"
-                  >
-                    <span>View live project</span>
-                    <ArrowUpRight className="h-3.5 w-3.5" />
-                  </a>
+                {/* Key Points */}
+                {selectedProject.points && selectedProject.points.length > 0 && (
+                  <ul className="space-y-2 text-xs text-neutral-600 border-t border-neutral-100 pt-4">
+                    {selectedProject.points.map((pt, i) => (
+                      <li key={i} className="flex items-start gap-2.5">
+                        <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-neutral-900 shrink-0" />
+                        <span className="leading-relaxed">{pt}</span>
+                      </li>
+                    ))}
+                  </ul>
                 )}
+
+                {/* Tech Badges */}
+                {selectedProject.tech && selectedProject.tech.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2 pt-1">
+                    {selectedProject.tech.map((t) => (
+                      <span
+                        key={t}
+                        className="rounded-full border border-neutral-200 bg-neutral-50 px-2.5 sm:px-3 py-1 text-[10px] sm:text-[11px] font-medium text-neutral-700"
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Sticky Bottom Footer */}
+              <div className="flex items-center justify-between border-t border-neutral-100 bg-neutral-50/80 px-5 py-3.5 sm:px-7 sm:py-4 shrink-0">
+                <span className="text-[11px] text-neutral-500 font-medium">
+                  {selectedProject.year ? `Year: ${selectedProject.year}` : "Production Release"}
+                </span>
+                <div className="flex items-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedProject(null)}
+                    className="rounded-full border border-neutral-300 bg-white px-4 py-2 text-xs font-semibold text-neutral-700 transition hover:bg-neutral-100 active:scale-95"
+                  >
+                    Close
+                  </button>
+                  {selectedProject.link && (
+                    <a
+                      href={selectedProject.link}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-2 rounded-full bg-neutral-900 px-5 py-2 text-xs font-semibold text-white transition hover:bg-neutral-800 active:scale-95"
+                    >
+                      <span>View live project</span>
+                      <ArrowUpRight className="h-3.5 w-3.5" />
+                    </a>
+                  )}
+                </div>
               </div>
             </motion.div>
           </div>
