@@ -10,6 +10,10 @@ const supabaseAnonKey =
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export const ADMIN_EMAIL = "nirupampaldev@gmail.com";
+export const ADMIN_PASSWORD =
+  process.env.NEXT_PUBLIC_ADMIN_PASSWORD ||
+  process.env.ADMIN_PASSWORD ||
+  "nirupam2026";
 export const CONTACT_MESSAGES_TABLE = "contact_messages";
 export const SITE_CONTENT_TABLE = "site_content";
 export const PORTFOLIO_STORAGE_BUCKET = "portfolio";

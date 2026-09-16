@@ -39,6 +39,9 @@ export async function uploadPortfolioImage(
 
   if (error) {
     console.error("Supabase storage upload error:", error);
+    if (error.message?.toLowerCase().includes("not found") || (error as { statusCode?: string }).statusCode === "404") {
+      throw new Error("Supabase storage bucket 'portfolio' not found. Please create a public bucket named 'portfolio' in your Supabase dashboard, or paste an image URL directly.");
+    }
     throw new Error(error.message || "Failed to upload image to Supabase.");
   }
 
