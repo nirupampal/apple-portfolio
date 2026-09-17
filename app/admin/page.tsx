@@ -12,6 +12,8 @@ import {
   Clock3,
   Code2,
   ExternalLink,
+  Eye,
+  EyeOff,
   FolderKanban,
   ImageIcon,
   Inbox,
@@ -24,6 +26,7 @@ import {
   Plus,
   RotateCcw,
   Save,
+  ShieldCheck,
   TerminalSquare,
   Trash2,
   UploadCloud,
@@ -587,7 +590,15 @@ function InboxManager() {
   );
 }
 
-function AdminEditor({ initialContent, onSignOut }: { initialContent: PortfolioContent; onSignOut: () => void }) {
+function AdminEditor({
+  initialContent,
+  onSignOut,
+  userEmail,
+}: {
+  initialContent: PortfolioContent;
+  onSignOut: () => void;
+  userEmail?: string | null;
+}) {
   const [active, setActive] = useState<SectionId>("hero");
   const [draft, setDraft] = useState(initialContent);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
@@ -629,9 +640,18 @@ function AdminEditor({ initialContent, onSignOut }: { initialContent: PortfolioC
             );
           })}
         </nav>
-        <div className="space-y-2 border-t border-white/[0.07] p-4">
-          <a href="/" target="_blank" className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-neutral-500 transition hover:bg-white/[0.04] hover:text-white"><ExternalLink className="h-4 w-4" />Open portfolio</a>
-          <button type="button" onClick={onSignOut} className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm text-neutral-500 transition hover:bg-red-500/[0.07] hover:text-red-300"><LogOut className="h-4 w-4" />Sign out</button>
+        <div className="space-y-3 border-t border-white/[0.07] p-4">
+          <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-3">
+            <p className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.16em] text-cyan-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              Supabase Auth
+            </p>
+            <p className="mt-1 truncate font-mono text-xs text-neutral-300" title={userEmail || "Admin User"}>
+              {userEmail || "Admin User"}
+            </p>
+          </div>
+          <a href="/" target="_blank" className="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm text-neutral-400 transition hover:bg-white/[0.04] hover:text-white"><ExternalLink className="h-4 w-4" />Open portfolio</a>
+          <button type="button" onClick={onSignOut} className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm text-neutral-400 transition hover:bg-red-500/[0.07] hover:text-red-300"><LogOut className="h-4 w-4" />Sign out</button>
         </div>
       </aside>
 
@@ -949,62 +969,96 @@ function AdminEditor({ initialContent, onSignOut }: { initialContent: PortfolioC
   );
 }
 
-function LoginScreen({ onLoginSuccess }: { onLoginSuccess: () => void }) {
-  const [email, setEmail] = useState(ADMIN_EMAIL);
+function LoginScreen({ onLoginSuccess }: { onLoginSuccess: (email?: string) => void }) {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    try {
+      const savedEmail = localStorage.getItem("admin_login_email");
+      if (savedEmail) {
+        setEmail(savedEmail);
+      }
+    } catch {
+      // Ignore local storage error
+    }
+  }, []);
 
   async function login(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
     setError(null);
+    const cleanEmail = email.trim();
     const cleanPassword = password.trim();
 
+    if (!cleanEmail) {
+      setError("Please enter your Supabase account email.");
+      setLoading(false);
+      return;
+    }
+
+    if (!cleanPassword) {
+      setError("Please enter your password.");
+      setLoading(false);
+      return;
+    }
+
     try {
-      // 1. Check Master Admin Password first
+      // 1. Check Master Admin Password fallback (for emergency direct access)
       if (cleanPassword === ADMIN_PASSWORD) {
-        localStorage.setItem(
-          "portfolio_admin_auth",
-          JSON.stringify({ email: ADMIN_EMAIL, timestamp: Date.now() })
-        );
-        onLoginSuccess();
+        try {
+          localStorage.setItem("admin_login_email", cleanEmail);
+          localStorage.setItem(
+            "portfolio_admin_auth",
+            JSON.stringify({ email: cleanEmail, timestamp: Date.now() })
+          );
+        } catch {
+          // Ignore local storage error
+        }
+        onLoginSuccess(cleanEmail);
         return;
       }
 
-      // 2. Try Supabase Authentication
+      // 2. Direct Supabase Authentication
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
+        email: cleanEmail,
         password: cleanPassword,
       });
 
       if (signInError) {
-        if (
-          signInError.message?.toLowerCase().includes("email not confirmed") ||
-          signInError.message?.toLowerCase().includes("invalid login credentials")
-        ) {
-          setError(
-            `Invalid credentials. Use your Admin Password (default: ${ADMIN_PASSWORD}) or verify your Supabase account.`
-          );
+        const msg = signInError.message?.toLowerCase() || "";
+        if (msg.includes("invalid login credentials")) {
+          setError("Invalid email or password. Please verify the credentials for your Supabase account.");
+        } else if (msg.includes("email not confirmed")) {
+          setError("Email not confirmed yet. Please confirm your email in Supabase Auth or disable 'Confirm email' in Supabase Auth Settings.");
         } else {
-          setError(signInError.message);
+          setError(signInError.message || "Authentication failed. Please check your credentials.");
         }
         return;
       }
 
-      if (data.user?.email !== ADMIN_EMAIL) {
-        await supabase.auth.signOut();
-        setError("This account does not have admin access.");
+      if (!data?.user) {
+        setError("Supabase did not return an active user session. Please try again.");
         return;
       }
 
-      localStorage.setItem(
-        "portfolio_admin_auth",
-        JSON.stringify({ email: ADMIN_EMAIL, timestamp: Date.now() })
-      );
-      onLoginSuccess();
+      // Single-user Supabase project: any authenticated user from this Supabase project is the admin
+      const loggedInEmail = data.user.email || cleanEmail;
+      try {
+        localStorage.setItem("admin_login_email", loggedInEmail);
+        localStorage.setItem(
+          "portfolio_admin_auth",
+          JSON.stringify({ email: loggedInEmail, timestamp: Date.now() })
+        );
+      } catch {
+        // Ignore local storage error
+      }
+      onLoginSuccess(loggedInEmail);
     } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : "Login failed.");
+      setError(nextError instanceof Error ? nextError.message : "Login failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -1019,48 +1073,78 @@ function LoginScreen({ onLoginSuccess }: { onLoginSuccess: () => void }) {
       />
       <div className="aceternity-grid absolute inset-0 opacity-30" />
       <div className="relative z-40 w-full max-w-md overflow-hidden rounded-[2rem] border border-white/10 bg-black/45 p-7 shadow-[0_35px_120px_rgba(0,0,0,0.55)] backdrop-blur-2xl md:p-9">
-        <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-300/20 bg-cyan-300/[0.07] font-mono text-xs text-cyan-200">NP</span>
-          <div>
-            <p className="text-sm font-medium">Content studio</p>
-            <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.18em] text-neutral-600">Secure admin portal</p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-300/20 bg-cyan-300/[0.07] font-mono text-xs text-cyan-200">NP</span>
+            <div>
+              <p className="text-sm font-medium">Content studio</p>
+              <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.18em] text-neutral-600">Secure admin portal</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/[0.07] px-2.5 py-1 font-mono text-[10px] text-emerald-400">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            Supabase Auth
           </div>
         </div>
-        <h1 className="mt-10 text-3xl font-medium tracking-[-0.04em]">Welcome back.</h1>
-        <p className="mt-3 text-sm leading-6 text-neutral-500">
-          Sign in to manage every part of the portfolio and review incoming messages.
+
+        <h1 className="mt-8 text-3xl font-medium tracking-[-0.04em]">Welcome back.</h1>
+        <p className="mt-3 text-sm leading-6 text-neutral-400">
+          Sign in with your Supabase account to manage portfolio content and messages.
         </p>
+
         <form onSubmit={login} className="mt-8 space-y-4">
           <div>
             <label className="block text-[11px] font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
-              Admin Email
+              Supabase Email
             </label>
             <input
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              placeholder="Email address"
+              placeholder="Enter your Supabase email"
               autoComplete="email"
+              autoFocus={!email}
               className={inputClass}
             />
           </div>
           <div>
             <label className="block text-[11px] font-mono uppercase tracking-wider text-neutral-400 mb-1.5">
-              Admin Password / Key
+              Password
             </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              placeholder="Enter admin password"
-              autoComplete="current-password"
-              autoFocus
-              className={inputClass}
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="Enter your Supabase password"
+                autoComplete="current-password"
+                autoFocus={Boolean(email)}
+                className={`${inputClass} pr-11`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white transition p-1"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
           </div>
-          {error ? <p className="rounded-xl border border-red-500/20 bg-red-500/[0.07] px-4 py-3 text-xs text-red-300">{error}</p> : null}
-          <button type="submit" disabled={loading || !password} className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-white text-sm font-medium text-black transition hover:bg-cyan-200 disabled:opacity-40">
-            {loading ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <LogIn className="h-4 w-4" />}{loading ? "Signing in" : "Sign in"}
+
+          {error ? (
+            <div className="rounded-xl border border-red-500/20 bg-red-500/[0.07] px-4 py-3 text-xs leading-5 text-red-300">
+              {error}
+            </div>
+          ) : null}
+
+          <button
+            type="submit"
+            disabled={loading || !password || !email.trim()}
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-white text-sm font-medium text-black transition hover:bg-cyan-200 disabled:opacity-40"
+          >
+            {loading ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <LogIn className="h-4 w-4" />}
+            {loading ? "Authenticating…" : "Sign in with Supabase"}
           </button>
         </form>
       </div>
@@ -1071,45 +1155,64 @@ function LoginScreen({ onLoginSuccess }: { onLoginSuccess: () => void }) {
 export default function AdminPage() {
   const { content, isLoading, error } = usePortfolioContent();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState<boolean>(true);
   const editorKey = useMemo(() => JSON.stringify(content), [content]);
 
   useEffect(() => {
     let mounted = true;
 
-    // 1. Check local session
-    try {
-      const savedAuth = localStorage.getItem("portfolio_admin_auth");
-      if (savedAuth) {
-        const parsed = JSON.parse(savedAuth);
-        if (parsed?.email === ADMIN_EMAIL) {
+    async function checkAuth() {
+      try {
+        // 1. Check Supabase active session
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
           if (mounted) {
+            setCurrentUserEmail(session.user.email ?? null);
             setIsAuthenticated(true);
+            setIsCheckingAuth(false);
+          }
+          return;
+        }
+
+        // 2. Fallback: check saved local auth
+        const savedAuth = localStorage.getItem("portfolio_admin_auth");
+        if (savedAuth) {
+          const parsed = JSON.parse(savedAuth);
+          if (parsed?.email) {
+            if (mounted) {
+              setCurrentUserEmail(parsed.email);
+              setIsAuthenticated(true);
+              setIsCheckingAuth(false);
+            }
             return;
           }
         }
+      } catch {
+        // Ignore local parse errors
+      } finally {
+        if (mounted) {
+          setIsCheckingAuth(false);
+        }
       }
-    } catch {
-      // Ignore local storage parse error
     }
 
-    // 2. Check Supabase session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
-      if (session?.user?.email === ADMIN_EMAIL) {
-        setIsAuthenticated(true);
-      }
-    }).catch(() => {});
+    void checkAuth();
 
-    // 3. Listen to auth changes
+    // 3. Listen to Supabase auth state changes
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
-      const nextUser = session?.user ?? null;
-      if (nextUser?.email && nextUser.email !== ADMIN_EMAIL) {
-        await supabase.auth.signOut();
-        localStorage.removeItem("portfolio_admin_auth");
-        setIsAuthenticated(false);
-      } else if (nextUser?.email === ADMIN_EMAIL) {
+      if (session?.user) {
+        setCurrentUserEmail(session.user.email ?? null);
         setIsAuthenticated(true);
+      } else if (event === "SIGNED_OUT") {
+        try {
+          localStorage.removeItem("portfolio_admin_auth");
+        } catch {
+          // Ignore
+        }
+        setCurrentUserEmail(null);
+        setIsAuthenticated(false);
       }
     });
 
@@ -1120,12 +1223,22 @@ export default function AdminPage() {
   }, []);
 
   const handleSignOut = async () => {
-    localStorage.removeItem("portfolio_admin_auth");
-    await supabase.auth.signOut();
+    try {
+      localStorage.removeItem("portfolio_admin_auth");
+      await supabase.auth.signOut();
+    } catch {
+      // Ignore
+    }
+    setCurrentUserEmail(null);
     setIsAuthenticated(false);
   };
 
-  if (isAuthenticated && isLoading) {
+  const handleLoginSuccess = (email?: string) => {
+    if (email) setCurrentUserEmail(email);
+    setIsAuthenticated(true);
+  };
+
+  if (isCheckingAuth || (isAuthenticated && isLoading)) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#050608] text-white">
         <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-600">
@@ -1136,13 +1249,13 @@ export default function AdminPage() {
   }
 
   if (!isAuthenticated) {
-    return <LoginScreen onLoginSuccess={() => setIsAuthenticated(true)} />;
+    return <LoginScreen onLoginSuccess={handleLoginSuccess} />;
   }
 
   return (
     <>
       {error ? <div className="fixed inset-x-0 top-0 z-[100] bg-red-950 px-4 py-2 text-center text-xs text-red-300">{error}</div> : null}
-      <AdminEditor key={editorKey} initialContent={content} onSignOut={handleSignOut} />
+      <AdminEditor key={editorKey} initialContent={content} onSignOut={handleSignOut} userEmail={currentUserEmail} />
     </>
   );
 }
