@@ -425,6 +425,56 @@ export const defaultPortfolioContent: PortfolioContent = {
           "Persistent message history and media sharing."
         ],
       },
+      {
+        title: "Swastik Organic (Kisan Mitra)",
+        description:
+          "Bilingual marketing and product site for an organic bio-fertilizer brand, with an immersive 3D-enhanced landing experience.",
+        image: "/swastik-bio.jpg",
+        link: "https://github.com/nirupampal/swastik-bio",
+        github: "https://github.com/nirupampal/swastik-bio",
+        type: "Frontend Website",
+        year: "2025",
+        badge: "Client Project",
+        tech: ["React", "Vite", "Tailwind CSS", "Three.js", "Motion"],
+        points: [
+          "English and Hindi language switcher so farmers can browse products in their own language.",
+          "Product catalogue with grid and detail pages, driven by a structured product data file.",
+          "Scroll-driven parallax, preloader and 3D elements built with React Three Fiber and Lenis."
+        ],
+      },
+      {
+        title: "HOTTALK - Live Video Chat App",
+        description:
+          "Social video-calling platform with user and host accounts, OTP login, wallet, withdrawals and admin controls.",
+        image: "/hottalk-login.jpg",
+        link: "https://github.com/nirupampal/hottalk-project",
+        github: "https://github.com/nirupampal/hottalk-project",
+        type: "Fullstack Real-time App",
+        year: "2026",
+        badge: "Real-time Architecture",
+        tech: ["React", "Node.js", "Express", "MongoDB", "Socket.io", "Agora"],
+        points: [
+          "Live video calls powered by Agora RTC with server-issued access tokens.",
+          "Separate user and host flows with phone/OTP auth, JWT sessions and Google OAuth.",
+          "Wallet, bank details and withdrawal requests, plus uploads and admin reports."
+        ],
+      },
+      {
+        title: "ERP Desktop",
+        description:
+          "Desktop ERP application built in Java with a JavaFX interface, splash screen, secure login and a management dashboard.",
+        image: "/dribbble/mockup-laptop-dash.jpg",
+        link: "https://github.com/nirupampal/java-erp",
+        github: "https://github.com/nirupampal/java-erp",
+        type: "Desktop Application",
+        year: "2026",
+        badge: "Java / JavaFX",
+        tech: ["Java", "JavaFX", "Maven"],
+        points: [
+          "JavaFX FXML screens for splash, login and dashboard, structured per controller.",
+          "Maven-based build producing a runnable desktop package."
+        ],
+      },
     ],
   },
   skills: {
