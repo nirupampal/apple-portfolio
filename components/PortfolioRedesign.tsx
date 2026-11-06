@@ -902,7 +902,7 @@ export default function PortfolioRedesign({ content }: { content: PortfolioConte
 
             {/* 6-Card Grid */}
             <div className="mt-10 sm:mt-14 grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {projects.slice(0, 6).map((project, index) => {
+              {projects.slice(0, 8).map((project, index) => {
                 const mockupBgs = [
                   "/dribbble/mockup-phone-stone.jpg",
                   "/dribbble/mockup-phone-desk.jpg",

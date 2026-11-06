@@ -345,57 +345,84 @@ export const defaultPortfolioContent: PortfolioContent = {
         ],
       },
       {
-        title: "EdTech Website",
+        title: "BuildNerd Tools",
         description:
-          "Interactive online learning platform with teacher dashboards, student progress tracking, and live classes.",
-        image: "/edtech.webp",
+          "A suite of online developer and builder utilities designed to speed up everyday workflows in a clean, fast interface.",
+        image: "/dribbble/mockup-laptop-web.jpg",
         link: "https://github.com/nirupampal",
         github: "https://github.com/nirupampal",
-        type: "EdTech Platform",
-        year: "2024",
+        type: "Web Tools Platform",
+        year: "2025",
+        badge: "Tools Suite",
+        tech: ["Next.js", "TypeScript", "Tailwind CSS", "Node.js"],
+        points: [
+          "Collection of focused, instant-loading utilities that run in the browser with no sign-up friction.",
+          "Consistent, responsive tool UI with shared components so new tools ship quickly.",
+          "SEO-friendly pages per tool for discoverability and fast first paint."
+        ],
+      },
+      {
+        title: "POS Billing System",
+        description:
+          "Point-of-sale billing software for retail and food businesses with fast checkout, invoicing, and sales reporting.",
+        image: "/dribbble/mockup-laptop-dash.jpg",
+        link: "https://github.com/nirupampal",
+        type: "Fullstack Business App",
+        year: "2025",
+        badge: "Built at Microace",
+        tech: ["React", "Node.js", "PostgreSQL", "REST APIs"],
+        points: [
+          "Quick-billing screen with product search, discounts, taxes, and multiple payment modes.",
+          "Printable invoices and daily sales, stock, and staff reports.",
+          "Role-based access for owners, managers, and cashiers."
+        ],
+      },
+      {
+        title: "Resto - Restaurant Ordering",
+        description:
+          "Mobile ordering and restaurant management app that connects tables, kitchen, and billing in real time.",
+        image: "/dribbble/mockup-phone-desk.jpg",
+        link: "https://github.com/nirupampal",
+        type: "Mobile + Web App",
+        year: "2025",
+        badge: "Built at Microace",
+        tech: ["React Native", "Node.js", "Socket.io", "PostgreSQL"],
+        points: [
+          "Customers and waiters place orders from mobile; the kitchen receives them instantly.",
+          "Live order status, table management, and menu control from an admin panel.",
+          "Integrated with the POS billing system for one-tap settlement."
+        ],
+      },
+      {
+        title: "Hotel Management System",
+        description:
+          "End-to-end hotel operations software covering reservations, room inventory, check-in/out, and billing.",
+        image: "/dribbble/mockup-dash-dark.jpg",
+        link: "https://github.com/nirupampal",
+        type: "Fullstack Business App",
+        year: "2025",
+        badge: "Built at Microace",
+        tech: ["React", "Node.js", "PostgreSQL", "REST APIs"],
+        points: [
+          "Room availability calendar, bookings, and guest records in one dashboard.",
+          "Check-in/check-out workflow with itemised folio and invoice generation.",
+          "Occupancy and revenue reports for management."
+        ],
+      },
+      {
+        title: "Real-time Chat & Video Calls",
+        description:
+          "Chat application with one-to-one and group messaging, video calling, and presence indicators.",
+        image: "/dribbble/mockup-phone-stone.jpg",
+        link: "https://github.com/nirupampal",
+        type: "Real-time App",
+        year: "2025",
         badge: "Real-time Architecture",
-        tech: ["React", "Node.js", "WebRTC", "Socket.io", "Tailwind CSS"],
+        tech: ["React", "Node.js", "WebRTC", "Socket.io"],
         points: [
-          "Peer-to-peer real-time video classrooms and live whiteboarding powered by WebRTC and Socket.io.",
-          "Dual-role authentication portals for teachers to publish courses and students to track milestones.",
-          "Automated quiz grading engine and personalized study progress analytics charts.",
-          "Robust Node.js and Express backend API architecture handling concurrent live session messaging."
-        ],
-      },
-      {
-        title: "Weather App",
-        description:
-          "A responsive weather dashboard built with React, consuming external weather APIs and providing forecasts.",
-        image: "/weather.png",
-        link: "https://weather-app-by-nirupampal.vercel.app/",
-        github: "https://github.com/nirupampal",
-        type: "Frontend App",
-        year: "2023",
-        badge: "API Integration",
-        tech: ["React", "TypeScript", "Tailwind CSS", "JavaScript"],
-        points: [
-          "Precise geolocation-aware weather forecast dashboard fetching multi-day meteorological metrics.",
-          "Hourly precipitation probabilities, UV index gauges, air quality meters, and wind velocity telemetry.",
-          "Adaptive dynamic visual backgrounds that transition seamlessly with current weather conditions.",
-          "Lightweight client-side caching to minimize API rate-limits and deliver instant updates."
-        ],
-      },
-      {
-        title: "Calculator App",
-        description:
-          "A simple and intuitive calculator app built with React, featuring basic arithmetic operations and a clean UI.",
-        image: "/calculator.png",
-        link: "https://calculator-app-alpha-olive.vercel.app/",
-        github: "https://github.com/nirupampal",
-        type: "Frontend Utility",
-        year: "2023",
-        badge: "Interactive UI",
-        tech: ["React", "CSS", "JavaScript"],
-        points: [
-          "Clean mathematical evaluation engine supporting chained operations, percentages, and sign toggles.",
-          "Interactive calculation history log enabling users to review and restore prior results.",
-          "Tactile keyboard shortcut bindings and smooth button press micro-animations.",
-          "Fully responsive layout optimized for handheld mobile screens and desktop viewports."
+          "Instant messaging over WebSockets with typing and online indicators.",
+          "Peer-to-peer video calls using WebRTC.",
+          "Persistent message history and media sharing."
         ],
       },
     ],
