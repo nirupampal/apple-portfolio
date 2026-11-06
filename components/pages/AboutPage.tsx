@@ -16,7 +16,6 @@ import { PortfolioImage } from "@/components/shared/PortfolioImage";
 
 export default function AboutPage() {
   const { content } = usePortfolioContent();
-  const fullName = `${content.hero.firstName} ${content.hero.lastName}`;
 
   const timelineData = content.about.experiences.map((experience) => ({
     title: experience.date,
@@ -62,27 +61,10 @@ export default function AboutPage() {
           />
 
           <div className="mt-14 grid gap-6 lg:grid-cols-12">
-            {/* Portrait Card */}
-            <motion.div
-              {...reveal}
-              className="relative min-h-[480px] overflow-hidden rounded-2xl bg-[#e5e5e5] lg:col-span-5 lg:row-span-2"
-            >
-              <PortfolioImage
-                src={content.about.imageSrc}
-                alt={content.about.imageAlt}
-                sizes="(min-width: 1024px) 42vw, 100vw"
-                className="photo-bw object-cover object-top"
-              />
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/50 to-transparent p-7">
-                <p className="text-[11px] uppercase tracking-[0.15em] text-white/70">Based in {content.hero.countryLabel}</p>
-                <p className="mt-2 text-xl font-semibold text-white">{fullName}</p>
-              </div>
-            </motion.div>
-
             {/* Bio Card */}
             <motion.div
               {...reveal}
-              className="rounded-2xl border border-[#e5e5e5] bg-white p-8 md:p-10 lg:col-span-7"
+              className="rounded-2xl border border-[#e5e5e5] bg-white p-8 md:p-10 lg:col-span-12"
             >
               <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#7b7b7b]">
                 Systems · Product · Scale
@@ -96,7 +78,7 @@ export default function AboutPage() {
             </motion.div>
 
             {/* Stats */}
-            <div className="grid gap-4 sm:grid-cols-3 lg:col-span-7">
+            <div className="grid gap-4 sm:grid-cols-3 lg:col-span-12">
               {content.about.stats.map((stat, index) => (
                 <motion.div
                   key={stat.label}

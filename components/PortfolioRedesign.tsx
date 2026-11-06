@@ -582,20 +582,8 @@ export default function PortfolioRedesign({ content }: { content: PortfolioConte
                 data-scroll-reveal="true"
                 className="flex flex-col items-center sm:items-start lg:items-end"
               >
-                {/* Nirupam's Portrait with clean white background */}
-                <div className="relative h-64 w-52 sm:h-72 sm:w-56 overflow-hidden rounded-3xl bg-white border border-neutral-100 shadow-[0_12px_36px_rgba(0,0,0,0.06)] transition duration-500 hover:shadow-[0_16px_44px_rgba(0,0,0,0.10)]">
-                  <Image
-                    src={content.hero.imageSrc || "/nirupam.png"}
-                    alt={fullName}
-                    fill
-                    sizes="(max-width: 640px) 208px, 224px"
-                    className="object-cover object-top transition duration-500 hover:scale-105"
-                    priority
-                  />
-                </div>
-
-                {/* Subtitle / Tagline below portrait */}
-                <div className="mt-5 max-w-xs text-center sm:text-left lg:text-right">
+                {/* Tagline */}
+                <div className="max-w-xs text-center sm:text-left lg:text-right">
                   <p className="text-[13px] font-medium leading-5 text-neutral-600">
                     Hi, I&apos;m {fullName}, a Lead
                     <br />

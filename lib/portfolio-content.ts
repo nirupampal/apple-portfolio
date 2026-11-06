@@ -236,7 +236,7 @@ export const defaultPortfolioContent: PortfolioContent = {
     availabilityText: "Available for new projects",
     firstName: "NIRUPAM",
     lastName: "PAL",
-    imageSrc: "/nirupam.png",
+    imageSrc: "",
     imageAlt: "Nirupam Pal",
     headlinePrimary: "Ideas into",
     headlineSecondary: "interfaces.",
@@ -256,7 +256,7 @@ export const defaultPortfolioContent: PortfolioContent = {
     titlePrimary: "Engineer.",
     titleSecondary: "Problem Solver.",
     resumeUrl: "https://drive.google.com/file/d/1WdiR6QzRi3tsuMX-d5JHZ3_t3tnH_F-z/view",
-    imageSrc: "/nirupam.png",
+    imageSrc: "",
     imageAlt: "Nirupam Pal",
     paragraphs: [
       "I build production-ready web applications with a relentless focus on performance and scalability.",
