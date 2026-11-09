@@ -606,7 +606,7 @@ function AdminEditor({
 
   const dirty = useMemo(() => JSON.stringify(draft) !== JSON.stringify(initialContent), [draft, initialContent]);
 
-  function patch<K extends keyof PortfolioContent>(section: K, values: Partial<PortfolioContent[K]>) {
+  function patch<K extends Exclude<keyof PortfolioContent, "contentRevision">>(section: K, values: Partial<PortfolioContent[K]>) {
     setDraft((current) => ({ ...current, [section]: { ...current[section], ...values } }));
   }
 

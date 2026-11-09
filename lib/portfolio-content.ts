@@ -166,6 +166,7 @@ export type BlogContent = {
 };
 
 export type PortfolioContent = {
+  contentRevision?: number;
   hero: HeroContent;
   terminal: TerminalContent;
   about: AboutContent;
@@ -232,340 +233,401 @@ export const developerTerminalPreset: TerminalContent = {
 };
 
 export const defaultPortfolioContent: PortfolioContent = {
-  hero: {
-    availabilityText: "Available for new projects",
-    firstName: "NIRUPAM",
-    lastName: "PAL",
-    imageSrc: "",
-    imageAlt: "Nirupam Pal",
-    headlinePrimary: "Ideas into",
-    headlineSecondary: "interfaces.",
-    professionLabel: "Fullstack developer",
-    countryLabel: "India",
-    role: "Engineering digital excellence. I build scalable backend architecture and fluid interfaces that define the modern web.",
-    description:
-      "Fullstack developer focused on modern interfaces, strong backend architecture, and production-ready delivery.",
-    primaryCtaLabel: "View Selected Works",
-    primaryCtaHref: "#works",
-    secondaryCtaLabel: "Download CV",
-    secondaryCtaHref: "https://drive.google.com/file/d/1WdiR6QzRi3tsuMX-d5JHZ3_t3tnH_F-z/view",
+  "contentRevision": 2,
+  "hero": {
+    "availabilityText": "Open to full-time opportunities",
+    "firstName": "Nirupam",
+    "lastName": "Pal",
+    "imageSrc": "/nirupam-pal.png",
+    "imageAlt": "Nirupam Pal, Full Stack Developer",
+    "headlinePrimary": "Software for",
+    "headlineSecondary": "the everyday.",
+    "professionLabel": "Full Stack Developer",
+    "countryLabel": "India · Open to relocation",
+    "role": "I build web and mobile products that businesses use every day.",
+    "description": "From billing across 200+ franchises to tools for independent businesses. I work across the interface, backend and deployment.",
+    "primaryCtaLabel": "Explore my work",
+    "primaryCtaHref": "#work",
+    "secondaryCtaLabel": "Download CV",
+    "secondaryCtaHref": "/Nirupam_Pal_CV.pdf"
   },
-  terminal: developerTerminalPreset,
-  about: {
-    sectionLabel: "01 / ABOUT ME",
-    titlePrimary: "Engineer.",
-    titleSecondary: "Problem Solver.",
-    resumeUrl: "https://drive.google.com/file/d/1WdiR6QzRi3tsuMX-d5JHZ3_t3tnH_F-z/view",
-    imageSrc: "",
-    imageAlt: "Nirupam Pal",
-    paragraphs: [
-      "I build production-ready web applications with a relentless focus on performance and scalability.",
-      "Since April 2025, I have been working at Microace Software as a Fullstack Developer, where I build and lead projects across billing, mobile ordering, hotel management, and real-time chat with video calling.",
-      "When I'm not pushing code, I'm likely exploring cloud-native technologies, optimizing CI/CD pipelines, or contributing to the developer community in India.",
+  "about": {
+    "sectionLabel": "ABOUT / EXPERIENCE",
+    "titlePrimary": "Built with care.",
+    "titleSecondary": "Used in the real world.",
+    "resumeUrl": "/Nirupam_Pal_CV.pdf",
+    "imageSrc": "/nirupam-pal.png",
+    "imageAlt": "Portrait of Nirupam Pal",
+    "paragraphs": [
+      "I’m Nirupam, a Full Stack Developer based in Krishnanagar, Nadia, West Bengal. I build web and mobile applications from interface to deployment.",
+      "At Microace Software, I developed the Taste N Bite POS, mobile ordering app and admin portal, as well as Hisab Restro for restaurant billing, KOT generation and table QR ordering.",
+      "I also run BuildNerd, my sole proprietorship, where I build and operate business software products. I’m seeking a full-time developer role and can join from 1 December 2026."
     ],
-    experiences: [
+    "experiences": [
       {
-        id: "01",
-        title: "Fullstack Developer",
-        company: "Microace Software",
-        date: "Apr 2025 - Present",
-        description:
-          "Built and led fullstack projects including a POS billing system, mobile ordering app, hotel management system, and a real-time chat application with video calls and other features.",
-        tags: ["Fullstack", "Leadership", "Real-time Apps"],
+        "id": "microace",
+        "title": "Full Stack Developer",
+        "company": "Microace Software",
+        "date": "April 2025 – Present",
+        "description": "Built the Taste N Bite POS, companion ordering app and admin portal supporting 200+ franchises. Developed Hisab Restro for restaurant billing, kitchen tickets and QR ordering, plus business websites including microacesoftware.com and tnbpos.in.",
+        "tags": [
+          "Next.js",
+          "TypeScript",
+          "Firebase",
+          "Web & mobile"
+        ]
       },
       {
-        id: "02",
-        title: "Fullstack Developer",
-        company: "Project-Based Work",
-        date: "2022 - 2024",
-        description:
-          "Delivered 15+ end-to-end solutions including e-commerce platforms and real-time chat apps. Handled database design, API development, and UI implementation.",
-        tags: ["Fullstack", "DB Design", "React"],
+        "id": "buildnerd",
+        "title": "Founder & Developer",
+        "company": "BuildNerd Technologies",
+        "date": "Independent venture",
+        "description": "Building and operating Catalogue, Quotes, Catalogue Studio, Create QRcode and Bookings. Also developed Rupvia, an offline money manager.",
+        "tags": [
+          "Own products",
+          "SaaS",
+          "Sole proprietorship"
+        ]
+      }
+    ],
+    "stats": [
+      {
+        "value": 200,
+        "suffix": "+",
+        "label": "Franchises using my work"
       },
       {
-        id: "03",
-        title: "Continuous Learning",
-        company: "Self-Development",
-        date: "Ongoing",
-        description:
-          "Deepening expertise in distributed systems. Currently building custom Kubernetes operators and exploring Rust for high-performance tooling.",
-        tags: ["R&D", "Rust", "K8s"],
+        "value": 5,
+        "suffix": "",
+        "label": "BuildNerd products"
       },
+      {
+        "value": 2025,
+        "suffix": "",
+        "label": "At Microace since April"
+      }
     ],
-    stats: [
-      { value: 3, suffix: "+", label: "Years Exp." },
-      { value: 20, suffix: "+", label: "Projects" },
-      { value: 100, suffix: "%", label: "Commitment" },
-    ],
-    ctaText: "Interested in working together?",
-    ctaHref: "#contact",
-    ctaLabel: "Let's Talk ->",
+    "ctaText": "Have a role in mind?",
+    "ctaHref": "#contact",
+    "ctaLabel": "Let’s talk"
   },
-  works: {
-    sectionLabel: "02 / PORTFOLIO",
-    titlePrimary: "Selected",
-    titleSecondary: "Works.",
-    githubUrl: "https://github.com/nirupampal",
-    githubLabel: "More on GitHub",
-    projects: [
+  "works": {
+    "sectionLabel": "SELECTED WORK",
+    "titlePrimary": "Real workflows.",
+    "titleSecondary": "Working software.",
+    "githubUrl": "https://github.com/nirupampal",
+    "githubLabel": "Explore GitHub",
+    "projects": [
       {
-        title: "CreateQRCode SaaS",
-        description:
-          "Production-ready dynamic QR generator with real-time scan telemetry, bot filtering, multi-payload engines, and Razorpay monetization.",
-        image: "/createqrcode-dashboard.png",
-        link: "https://createqrcode.in",
-        github: "https://github.com/nirupampal",
-        type: "Fullstack SaaS",
-        year: "2025",
-        badge: "Flagship Project",
-        tech: ["Next.js", "TypeScript", "Tailwind CSS", "PostgreSQL", "Razorpay"],
-        points: [
-          "Sub-10ms dynamic redirects allowing target destination updates post-print without reprinting collateral.",
-          "Time-series scan tracking that isolates real user scans by filtering out crawlers and automated bots.",
-          "5 multi-payload builders: WiFi (WPA/WPA2/WPA3), WhatsApp with prefill, URL, PDF, and Google Review.",
-          "Monetization modal powered by Razorpay: instant UPI QR, Cards, Netbanking, and Pro renewal."
+        "title": "Taste N Bite POS & Ordering",
+        "description": "A connected billing platform, mobile ordering app and admin portal built at Microace Software. Used daily across 200+ Taste N Bite franchises.",
+        "image": "/dashboard.png",
+        "link": "https://tnbpos.in",
+        "type": "Production / Microace Software",
+        "year": "2025–2026",
+        "badge": "200+ franchises",
+        "tech": [
+          "Next.js",
+          "TypeScript",
+          "Firebase"
         ],
+        "points": [
+          "Web-based POS used for daily product billing.",
+          "Companion mobile app for daily franchise ordering.",
+          "Administration portal connecting business operations."
+        ]
       },
       {
-        title: "E-Commerce Platform",
-        description:
-          "Fullstack Next.js store with Stripe payments, inventory management, and optimized performance for scale.",
-        image: "/e-commerce.png",
-        link: "https://delacruash.vercel.app/",
-        github: "https://github.com/nirupampal",
-        type: "Fullstack Store",
-        year: "2024",
-        badge: "Production Live",
-        tech: ["Next.js", "TypeScript", "Tailwind CSS", "Stripe", "PostgreSQL"],
-        points: [
-          "High-performance digital storefront with dynamic server-rendered product catalogs and instant search.",
-          "End-to-end Stripe payment gateway integration with real-time webhooks and automated order receipts.",
-          "Atomic inventory tracking and transactional cart states to prevent stock race conditions.",
-          "Mobile-first responsive UX with sub-second page transitions and modern micro-interactions."
+        "title": "Hisab Restro",
+        "description": "Web and mobile restaurant software connecting billing, kitchen order tickets and QR ordering at the table.",
+        "image": "/dashboard.png",
+        "link": "https://microacesoftware.com",
+        "type": "Restaurant operations / Microace",
+        "year": "2025–2026",
+        "badge": "Web + mobile",
+        "tech": [
+          "Billing",
+          "KOT",
+          "QR ordering"
         ],
+        "points": [
+          "Generate bills and Kitchen Order Tickets (KOT).",
+          "Let customers place orders by scanning a table QR code.",
+          "Web and mobile interfaces for small restaurants."
+        ]
       },
       {
-        title: "BuildNerd Tools",
-        description:
-          "A suite of online developer and builder utilities designed to speed up everyday workflows in a clean, fast interface.",
-        image: "/dribbble/mockup-laptop-web.jpg",
-        link: "https://github.com/nirupampal",
-        github: "https://github.com/nirupampal",
-        type: "Web Tools Platform",
-        year: "2025",
-        badge: "Tools Suite",
-        tech: ["Next.js", "TypeScript", "Tailwind CSS", "Node.js"],
-        points: [
-          "Collection of focused, instant-loading utilities that run in the browser with no sign-up friction.",
-          "Consistent, responsive tool UI with shared components so new tools ship quickly.",
-          "SEO-friendly pages per tool for discoverability and fast first paint."
-        ],
+        "title": "BuildNerd Catalogue",
+        "description": "Excel imports, dealer-specific price lists and shareable product catalogues with WhatsApp order requests.",
+        "image": "/dashboard.png",
+        "link": "https://catalogue.buildnerd.in",
+        "type": "Own product / Seller tools",
+        "year": "",
+        "tech": [
+          "Excel imports",
+          "Dealer pricing",
+          "WhatsApp orders"
+        ]
       },
       {
-        title: "POS Billing System",
-        description:
-          "Point-of-sale billing software for retail and food businesses with fast checkout, invoicing, and sales reporting.",
-        image: "/dribbble/mockup-laptop-dash.jpg",
-        link: "https://github.com/nirupampal",
-        type: "Fullstack Business App",
-        year: "2025",
-        badge: "Built at Microace",
-        tech: ["React", "Node.js", "PostgreSQL", "REST APIs"],
-        points: [
-          "Quick-billing screen with product search, discounts, taxes, and multiple payment modes.",
-          "Printable invoices and daily sales, stock, and staff reports.",
-          "Role-based access for owners, managers, and cashiers."
-        ],
+        "title": "BuildNerd Quotes",
+        "description": "Quotations and proposals with PDF export, client choices, invoicing and payment tracking.",
+        "image": "/dashboard.png",
+        "link": "https://quotes.buildnerd.in",
+        "type": "Own product / Business documents",
+        "year": "",
+        "tech": [
+          "PDF export",
+          "Client approvals",
+          "Invoicing"
+        ]
       },
       {
-        title: "Resto - Restaurant Ordering",
-        description:
-          "Mobile ordering and restaurant management app that connects tables, kitchen, and billing in real time.",
-        image: "/dribbble/mockup-phone-desk.jpg",
-        link: "https://github.com/nirupampal",
-        type: "Mobile + Web App",
-        year: "2025",
-        badge: "Built at Microace",
-        tech: ["React Native", "Node.js", "Socket.io", "PostgreSQL"],
-        points: [
-          "Customers and waiters place orders from mobile; the kitchen receives them instantly.",
-          "Live order status, table management, and menu control from an admin panel.",
-          "Integrated with the POS billing system for one-tap settlement."
-        ],
+        "title": "Catalogue Studio",
+        "description": "Batch product photo preparation and branded PDF price lists from spreadsheet data.",
+        "image": "/dashboard.png",
+        "link": "https://studio.buildnerd.in",
+        "type": "Own product / Seller tools",
+        "year": "",
+        "tech": [
+          "Product photos",
+          "CSV imports",
+          "PDF price lists"
+        ]
       },
       {
-        title: "Hotel Management System",
-        description:
-          "End-to-end hotel operations software covering reservations, room inventory, check-in/out, and billing.",
-        image: "/dribbble/mockup-dash-dark.jpg",
-        link: "https://github.com/nirupampal",
-        type: "Fullstack Business App",
-        year: "2025",
-        badge: "Built at Microace",
-        tech: ["React", "Node.js", "PostgreSQL", "REST APIs"],
-        points: [
-          "Room availability calendar, bookings, and guest records in one dashboard.",
-          "Check-in/check-out workflow with itemised folio and invoice generation.",
-          "Occupancy and revenue reports for management."
-        ],
+        "title": "Create QRcode",
+        "description": "Static QR downloads and editable dynamic links for menus, Wi-Fi and business links.",
+        "image": "/createqrcode-dashboard.png",
+        "link": "https://createqrcode.in",
+        "type": "Own product / QR platform",
+        "year": "",
+        "tech": [
+          "Static QR",
+          "Dynamic links",
+          "Business tools"
+        ]
       },
       {
-        title: "Real-time Chat & Video Calls",
-        description:
-          "Chat application with one-to-one and group messaging, video calling, and presence indicators.",
-        image: "/dribbble/mockup-phone-stone.jpg",
-        link: "https://github.com/nirupampal",
-        type: "Real-time App",
-        year: "2025",
-        badge: "Real-time Architecture",
-        tech: ["React", "Node.js", "WebRTC", "Socket.io"],
-        points: [
-          "Instant messaging over WebSockets with typing and online indicators.",
-          "Peer-to-peer video calls using WebRTC.",
-          "Persistent message history and media sharing."
-        ],
+        "title": "BuildNerd Bookings",
+        "description": "Salon appointments, staff calendars, walk-ins and customer history in one scheduling workflow.",
+        "image": "/dashboard.png",
+        "link": "https://book.buildnerd.in",
+        "type": "Own product / Scheduling",
+        "year": "",
+        "tech": [
+          "Appointments",
+          "Staff calendars",
+          "Customer history"
+        ]
       },
-    ],
+      {
+        "title": "Rupvia",
+        "description": "An offline money management mobile application, built for keeping track of money without an internet connection.",
+        "image": "/dashboard.png",
+        "link": "https://www.buildnerd.in",
+        "type": "Own project / Mobile application",
+        "year": "",
+        "tech": [
+          "Mobile app",
+          "Offline access",
+          "Money management"
+        ]
+      }
+    ]
   },
-  skills: {
-    titlePrimary: "Tech",
-    titleSecondary: "Stack.",
-    description: "A curated list of technologies I use to build digital products. Scroll down to explore my expertise.",
-    endLabel: "END OF LIST",
-    categories: [
+  "skills": {
+    "titlePrimary": "From interface",
+    "titleSecondary": "to infrastructure.",
+    "description": "The technologies and integrations I work with.",
+    "endLabel": "ALWAYS LEARNING",
+    "categories": [
       {
-        id: "frontend",
-        title: "Frontend",
-        description:
-          "Crafting pixel-perfect, responsive user interfaces with a focus on performance and accessibility. I specialize in the React ecosystem.",
-        color: "#61DAFB",
-        skills: [
-          { name: "React", icon: "react" },
-          { name: "Next.js", icon: "nextdotjs" },
-          { name: "TypeScript", icon: "typescript" },
-          { name: "Tailwind CSS", icon: "tailwindcss" },
-          { name: "Framer Motion", icon: "framer" },
-          { name: "React Native", icon: "react" },
-        ],
+        "id": "frontend",
+        "title": "Web & mobile",
+        "description": "Web & mobile",
+        "color": "#bfeb58",
+        "skills": [
+          {
+            "name": "JavaScript",
+            "icon": "code"
+          },
+          {
+            "name": "TypeScript",
+            "icon": "code"
+          },
+          {
+            "name": "React.js",
+            "icon": "code"
+          },
+          {
+            "name": "Next.js",
+            "icon": "code"
+          },
+          {
+            "name": "HTML",
+            "icon": "code"
+          },
+          {
+            "name": "CSS",
+            "icon": "code"
+          },
+          {
+            "name": "React Native",
+            "icon": "code"
+          },
+          {
+            "name": "VB.NET",
+            "icon": "code"
+          }
+        ]
       },
       {
-        id: "backend",
-        title: "Backend",
-        description:
-          "Architecting scalable server-side solutions. I build robust APIs and handle real-time communications.",
-        color: "#68A063",
-        skills: [
-          { name: "Node.js", icon: "nodedotjs" },
-          { name: "Express", icon: "express" },
-          { name: "Socket.io", icon: "socketdotio" },
-          { name: "GraphQL", icon: "graphql" },
-          { name: "Python", icon: "python" },
-        ],
+        "id": "data",
+        "title": "Databases & caching",
+        "description": "Databases & caching",
+        "color": "#bfeb58",
+        "skills": [
+          {
+            "name": "PostgreSQL",
+            "icon": "code"
+          },
+          {
+            "name": "MongoDB",
+            "icon": "code"
+          },
+          {
+            "name": "Microsoft SQL Server",
+            "icon": "code"
+          },
+          {
+            "name": "Redis",
+            "icon": "code"
+          },
+          {
+            "name": "Firebase",
+            "icon": "code"
+          },
+          {
+            "name": "Supabase",
+            "icon": "code"
+          }
+        ]
       },
       {
-        id: "database",
-        title: "Database",
-        description:
-          "Designing efficient data schemas. I work with both relational and document-based databases to ensure data integrity.",
-        color: "#336791",
-        skills: [
-          { name: "PostgreSQL", icon: "postgresql" },
-          { name: "MongoDB", icon: "mongodb" },
-          { name: "Redis", icon: "redis" },
-          { name: "Firebase", icon: "firebase" },
-          { name: "Supabase", icon: "supabase" },
-        ],
+        "id": "cloud",
+        "title": "Cloud & deployment",
+        "description": "Cloud & deployment",
+        "color": "#bfeb58",
+        "skills": [
+          {
+            "name": "Node.js",
+            "icon": "code"
+          },
+          {
+            "name": "Docker",
+            "icon": "code"
+          },
+          {
+            "name": "Nginx",
+            "icon": "code"
+          },
+          {
+            "name": "PM2",
+            "icon": "code"
+          },
+          {
+            "name": "AWS",
+            "icon": "code"
+          },
+          {
+            "name": "Google Cloud",
+            "icon": "code"
+          },
+          {
+            "name": "Google Play Console",
+            "icon": "code"
+          }
+        ]
       },
       {
-        id: "devops",
-        title: "DevOps",
-        description:
-          "Streamlining deployment pipelines. I ensure code gets to production safely and servers remain healthy.",
-        color: "#E34F26",
-        skills: [
-          { name: "Docker", icon: "docker" },
-          { name: "AWS", icon: "amazonaws" },
-          { name: "Git", icon: "git" },
-          { name: "CI/CD", icon: "githubactions" },
-          { name: "Linux", icon: "linux" },
-        ],
-      },
-    ],
+        "id": "integrations",
+        "title": "APIs & integrations",
+        "description": "APIs & integrations",
+        "color": "#bfeb58",
+        "skills": [
+          {
+            "name": "Razorpay",
+            "icon": "code"
+          },
+          {
+            "name": "Stripe",
+            "icon": "code"
+          },
+          {
+            "name": "WhatsApp API",
+            "icon": "code"
+          },
+          {
+            "name": "AI / LLM APIs",
+            "icon": "code"
+          },
+          {
+            "name": "WebSockets",
+            "icon": "code"
+          }
+        ]
+      }
+    ]
   },
-  achievements: {
-    sectionLabel: "05 / ACHIEVEMENTS",
-    title: "Proof behind the practice.",
-    description:
-      "Selected certifications, milestones, and recognitions from the work behind the screen.",
-    items: [
-      {
-        id: "hackerrank-software-engineer-2026",
-        title: "Software Engineer",
-        issuer: "HackerRank",
-        issuedOn: "09 Jan 2026",
-        description:
-          "Verified software engineering skills across problem solving, SQL, and REST API development.",
-        image: "/hacker-rank-software-engineer.png",
-        verifyUrl: "https://www.hackerrank.com/certificates/iframe/db1cfdf0bbf4",
-      },
-    ],
+  "achievements": {
+    "sectionLabel": "EDUCATION",
+    "title": "Learning by studying. And shipping.",
+    "description": "Formal education alongside hands-on software development.",
+    "items": []
   },
-  blog: {
-    eyebrow: "Notes from the build",
-    title: "Ideas, decisions, and lessons from shipping software.",
-    description:
-      "Practical notes on fullstack engineering, product craft, performance, and the systems behind modern web experiences.",
-    posts: [
-      {
-        id: "building-products-that-last",
-        slug: "building-products-that-last",
-        title: "Building products that last beyond the first release",
-        excerpt:
-          "A practical framework for balancing delivery speed, maintainability, and the user experience.",
-        coverImage: "/TechStack.png",
-        publishedAt: "2026-08-24",
-        readTime: "6 min read",
-        tags: ["Engineering", "Product", "Architecture"],
-        published: true,
-        content:
-          "Great software is rarely the result of one clever decision. It comes from hundreds of small choices that keep the product understandable, adaptable, and useful.\n\n## Start with the job to be done\n\nBefore choosing a framework or drawing a schema, get precise about the user problem. The best technical solution is the one that removes friction without creating unnecessary operational weight.\n\n## Build for change, not prediction\n\nArchitecture should make the next reasonable change inexpensive. Clear boundaries, readable naming, and observable behavior usually create more value than premature abstraction.\n\n## Make quality part of delivery\n\nPerformance, accessibility, and failure states are not polish. They are part of the feature. Treating them that way from the first commit produces calmer releases and more trustworthy products.",
-      },
-    ],
+  "blog": {
+    "eyebrow": "NOTES",
+    "title": "From the workbench",
+    "description": "Ideas and notes on building software.",
+    "posts": []
   },
-  contact: {
-    sectionLabel: "04 / CONTACT",
-    titlePrimary: "Let's work",
-    titleSecondary: "together.",
-    availabilityText: "Currently open for freelance projects and full-time opportunities.",
-    locationLabel: "KRISHNANAGAR, IN",
-    links: [
+  "contact": {
+    "sectionLabel": "CONTACT",
+    "titlePrimary": "Your next developer",
+    "titleSecondary": "could be right here.",
+    "availabilityText": "Available from 1 December 2026",
+    "locationLabel": "Krishnanagar, Nadia, West Bengal · Open to relocation",
+    "links": [
       {
-        id: "01",
-        label: "Email",
-        value: "nirupampaldev@gmail.com",
-        href: "mailto:nirupampaldev@gmail.com",
+        "id": "email",
+        "label": "Email",
+        "value": "iamnirupampal@gmail.com",
+        "href": "mailto:iamnirupampal@gmail.com"
       },
       {
-        id: "02",
-        label: "LinkedIn",
-        value: "/in/nirupam-pal",
-        href: "https://www.linkedin.com/in/nirupam-pal-0916a721b/",
+        "id": "phone",
+        "label": "Phone",
+        "value": "+91 86176 24775",
+        "href": "tel:+918617624775"
       },
       {
-        id: "03",
-        label: "GitHub",
-        value: "@nirupampal",
-        href: "https://github.com/nirupampal",
+        "id": "github",
+        "label": "GitHub",
+        "value": "nirupampal",
+        "href": "https://github.com/nirupampal"
       },
       {
-        id: "04",
-        label: "Resume",
-        value: "View PDF",
-        href: "https://drive.google.com/file/d/1WdiR6QzRi3tsuMX-d5JHZ3_t3tnH_F-z/view",
-      },
+        "id": "linkedin",
+        "label": "LinkedIn",
+        "value": "nirupampal",
+        "href": "https://www.linkedin.com/in/nirupampal/"
+      }
     ],
-    copyrightName: "Nirupam Pal",
-    rightsLabel: "All Rights Reserved",
-    backToTopLabel: "Back to Top",
-  },
+    "copyrightName": "Nirupam Pal",
+    "rightsLabel": "Built with care.",
+    "backToTopLabel": "Back to top"
+  }
+,
+  terminal: developerTerminalPreset
 };

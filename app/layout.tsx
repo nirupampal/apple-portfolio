@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/context/ThemeContext";
-import SmoothScroll from "@/components/ui/SmoothScroll";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -13,7 +12,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: "Nirupam Pal | Fullstack Developer",
-  description: "Nirupam Pal - Lead Fullstack Developer specializing in React, Next.js, Node.js, and scalable web applications. Building modern digital experiences.",
+  description: "Nirupam Pal, Full Stack Developer building web and mobile applications. Taste N Bite POS and ordering for 200+ franchises, restaurant software and BuildNerd products.",
   keywords: ["Fullstack Developer", "React", "Next.js", "Node.js", "Web Developer", "Nirupam Pal"],
   authors: [{ name: "Nirupam Pal" }],
   icons: {
@@ -26,14 +25,14 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Nirupam Pal | Fullstack Developer",
-    description: "Lead Fullstack Developer crafting modern digital experiences",
+    description: "Full Stack Developer crafting modern digital experiences",
     type: "website",
     url: "https://inirupampal.in",
     images: [
       {
-        url: "https://inirupampal.in/apple-og-image.png",
-        width: 1200,
-        height: 630,
+        url: "https://www.inirupampal.in/nirupam-pal.png",
+        width: 1254,
+        height: 1254,
         alt: "Nirupam Pal Portfolio",
       },
     ],
@@ -53,7 +52,7 @@ const jsonLd = {
     "https://github.com/nirupampal",
     "https://linkedin.com/in/nirupampal"
   ],
-  "jobTitle": "Lead Fullstack Developer",
+  "jobTitle": "Full Stack Developer",
   "description": siteDescription
 };
 
@@ -69,9 +68,7 @@ export default function RootLayout({
       <body className={`${plusJakartaSans.className} min-h-screen bg-white text-[#111111] antialiased selection:bg-neutral-900 selection:text-white`}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <ThemeProvider>
-          <SmoothScroll>
-            {children}
-          </SmoothScroll>
+          {children}
         </ThemeProvider>
       </body>
     </html>

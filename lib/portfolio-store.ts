@@ -8,11 +8,17 @@ import {
 const DOCUMENT_KEY = "portfolio";
 
 function mergePortfolioContent(data: Partial<PortfolioContent>): PortfolioContent {
+  // Migrate pre-refresh CMS content; later edits save the current revision.
+  if (!data.contentRevision || data.contentRevision < 2) {
+    return { ...defaultPortfolioContent, blog: data.blog ?? defaultPortfolioContent.blog, achievements: data.achievements ?? defaultPortfolioContent.achievements };
+  }
+
   const containsLegacyDemoCommand = data.terminal?.commands?.some(
     (item) => item.command === "git log --impact",
   );
 
   return {
+    contentRevision: 2,
     hero: { ...defaultPortfolioContent.hero, ...data.hero },
     terminal: containsLegacyDemoCommand
       ? developerTerminalPreset
