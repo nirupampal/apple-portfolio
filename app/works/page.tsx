@@ -1,5 +1,2 @@
-import { redirect } from "next/navigation";
-
-export default function Page() {
-  redirect("/#work");
-}
+import { permanentRedirect } from "next/navigation";
+export default function WorksPage(){permanentRedirect("/projects");}

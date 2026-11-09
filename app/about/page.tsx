@@ -1,5 +1,15 @@
-import { redirect } from "next/navigation";
-
-export default function Page() {
-  redirect("/#about");
-}
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowUpRight,Download,Github } from "lucide-react";
+import { defaultPortfolioContent } from "@/lib/portfolio-content";
+import { PortfolioNavigation,PortfolioFooter } from "@/components/PortfolioNavigation";
+import styles from "@/components/portfolio.module.css";
+export const metadata:Metadata={title:"About Nirupam Pal | Full Stack Developer",description:"Meet Nirupam Pal, a Full Stack Developer at Microace Software and founder of BuildNerd, based in Krishnanagar, West Bengal.",alternates:{canonical:"/about"}};
+export default function AboutPage(){return <div className={styles.site}><PortfolioNavigation/><main id="main" className={styles.caseMain}>
+  <section className={styles.aboutHero}><div><p className={styles.eyebrow}>ABOUT / NIRUPAM PAL</p><h1 className={styles.routeTitle}>Curious by nature.<br/><span>A builder by choice.</span></h1><p className={styles.caseLead}>I build web and mobile applications that connect a useful interface with the work happening behind it.</p><div className={styles.actions}><a href="/Nirupam_Pal_CV.pdf" download className={styles.primary}>Download CV <Download size={17}/></a><Link href="/contact" className={styles.secondary}>Get in touch <ArrowUpRight size={17}/></Link></div></div><div className={styles.aboutPortrait}><Image src="/nirupam-pal.png" alt="Nirupam Pal, Full Stack Developer" fill priority sizes="(max-width:700px) 90vw, 400px"/></div></section>
+  <section className={styles.caseSection}><div><p className={styles.eyebrow}>THE SHORT STORY</p><h2>Based in Bengal.<br/><span>Open to the next move.</span></h2></div><div className={styles.prose}>{defaultPortfolioContent.about.paragraphs.map(p=><p key={p}>{p}</p>)}<p>I speak English, Hindi and Bengali, and I’m open to relocation and remote work.</p></div></section>
+  <section className={styles.caseLongSection}><div className={styles.headingRow}><h2>Experience<br/><span>that reaches production.</span></h2><Link href="/experience" className={styles.inlineLink}>Full experience <ArrowUpRight size={17}/></Link></div><div className={styles.aboutExperience}>{defaultPortfolioContent.about.experiences.map(item=><article key={item.id}><p className={styles.date}>{item.date}</p><h3>{item.title}</h3><strong>{item.company}</strong><p>{item.description}</p></article>)}</div></section>
+  <section className={styles.caseSection}><div><p className={styles.eyebrow}>EDUCATION</p><h2>Learning.<br/><span>And building.</span></h2></div><div className={styles.education}><div><strong>Bachelor of Arts</strong><span>Currently pursuing</span></div><div><strong>Diploma in Information Technology</strong><span>KJNNYCC · One-year programme · Completed 2021</span></div><p>HTML, CSS, C programming and computer operations.</p><div><strong>Higher Secondary (Class XII)</strong><span>Completed</span></div></div></section>
+  <section className={styles.codeSection}><p className={styles.eyebrow}>CODE YOU CAN EXPLORE</p><h2>Look beyond<br/><span>the screenshots.</span></h2><p>The portfolio’s source is public. Explore its route structure, components and documentation on GitHub.</p><div className={styles.actions}><a href="https://github.com/nirupampal/apple-portfolio" target="_blank" rel="noreferrer" className={styles.primary}><Github size={17}/>Portfolio source <ArrowUpRight size={17}/></a><a href="https://github.com/nirupampal" target="_blank" rel="noreferrer" className={styles.secondary}>GitHub profile <ArrowUpRight size={17}/></a><Link href="/skills" className={styles.secondary}>My toolkit <ArrowUpRight size={17}/></Link></div></section>
+</main><PortfolioFooter/></div>;}

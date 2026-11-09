@@ -47,6 +47,7 @@ export type AboutContent = {
 };
 
 export type ProjectItem = {
+  slug?: string;
   screenshots?: { src: string; alt: string }[];
   mobile?: boolean;
   featured?: boolean;
@@ -238,7 +239,7 @@ export const developerTerminalPreset: TerminalContent = {
 };
 
 export const defaultPortfolioContent: PortfolioContent = {
-  "contentRevision": 4,
+  "contentRevision": 5,
   "hero": {
     "availabilityText": "Open to full-time opportunities",
     "firstName": "Nirupam",
@@ -350,7 +351,8 @@ export const defaultPortfolioContent: PortfolioContent = {
         "mobile": false,
         "featured": true,
         "category": "production",
-        "linkLabel": "Visit TNB POS"
+        "linkLabel": "Visit TNB POS",
+        "slug": "tnb-pos"
       },
       {
         "title": "Hisab Restro",
@@ -391,7 +393,8 @@ export const defaultPortfolioContent: PortfolioContent = {
         "mobile": true,
         "featured": true,
         "category": "production",
-        "linkLabel": "About Microace"
+        "linkLabel": "About Microace",
+        "slug": "hisab-restro"
       },
       {
         "title": "TNB Ordering",
@@ -414,7 +417,8 @@ export const defaultPortfolioContent: PortfolioContent = {
             "src": "/projects/tnb-order-special-order.png",
             "alt": "TNB Ordering special-order screen with catalogue options, customer details and cart"
           }
-        ]
+        ],
+        "slug": "tnb-ordering"
       },
       {
         "title": "Microace Staff",
@@ -441,7 +445,8 @@ export const defaultPortfolioContent: PortfolioContent = {
             "src": "/projects/microace-staff-workspace.png",
             "alt": "Microace Staff workspace with finance, projects and customer support tools"
           }
-        ]
+        ],
+        "slug": "microace-staff"
       },
       {
         "title": "Rupvia",
@@ -475,7 +480,8 @@ export const defaultPortfolioContent: PortfolioContent = {
         ],
         "mobile": true,
         "category": "personal",
-        "linkLabel": "Visit BuildNerd"
+        "linkLabel": "Visit BuildNerd",
+        "slug": "rupvia"
       },
       {
         "title": "BuildNerd Catalogue",
@@ -501,7 +507,8 @@ export const defaultPortfolioContent: PortfolioContent = {
           }
         ],
         "mobile": false,
-        "linkLabel": "Explore product"
+        "linkLabel": "Explore product",
+        "slug": "buildnerd-catalogue"
       },
       {
         "title": "BuildNerd Quotes",
@@ -527,7 +534,8 @@ export const defaultPortfolioContent: PortfolioContent = {
           }
         ],
         "mobile": false,
-        "linkLabel": "Explore product"
+        "linkLabel": "Explore product",
+        "slug": "buildnerd-quotes"
       },
       {
         "title": "Catalogue Studio",
@@ -553,7 +561,8 @@ export const defaultPortfolioContent: PortfolioContent = {
           }
         ],
         "mobile": false,
-        "linkLabel": "Explore product"
+        "linkLabel": "Explore product",
+        "slug": "catalogue-studio"
       },
       {
         "title": "Create QRcode",
@@ -575,7 +584,8 @@ export const defaultPortfolioContent: PortfolioContent = {
           }
         ],
         "mobile": false,
-        "linkLabel": "Explore product"
+        "linkLabel": "Explore product",
+        "slug": "create-qrcode"
       },
       {
         "title": "BuildNerd Bookings",
@@ -597,7 +607,8 @@ export const defaultPortfolioContent: PortfolioContent = {
           }
         ],
         "mobile": false,
-        "linkLabel": "Explore product"
+        "linkLabel": "Explore product",
+        "slug": "buildnerd-bookings"
       },
       {
         "title": "RMBC Community Website",
@@ -620,7 +631,8 @@ export const defaultPortfolioContent: PortfolioContent = {
             "src": "/projects/rmbc-website.png",
             "alt": "Ranirghat Mahismardini Barowari Committee website featuring Rash Yatra celebrations and community heritage"
           }
-        ]
+        ],
+        "slug": "rmbc"
       },
       {
         "title": "DOTCOM Coin",
@@ -643,7 +655,8 @@ export const defaultPortfolioContent: PortfolioContent = {
             "src": "/projects/dotcomcoin-storefront.jpg",
             "alt": "DOTCOM Coin storefront featuring British India coins, banknotes and collectible categories"
           }
-        ]
+        ],
+        "slug": "dotcom-coin"
       }
     ]
   },
@@ -815,12 +828,6 @@ export const defaultPortfolioContent: PortfolioContent = {
         "label": "Email",
         "value": "iamnirupampal@gmail.com",
         "href": "mailto:iamnirupampal@gmail.com"
-      },
-      {
-        "id": "phone",
-        "label": "Phone",
-        "value": "+91 86176 24775",
-        "href": "tel:+918617624775"
       },
       {
         "id": "github",

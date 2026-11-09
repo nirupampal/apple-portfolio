@@ -1,5 +1,6 @@
-import { redirect } from "next/navigation";
-
-export default function Page() {
-  redirect("/#contact");
-}
+import type { Metadata } from "next";
+import { PortfolioNavigation,PortfolioFooter } from "@/components/PortfolioNavigation";
+import ContactOptions from "@/components/ContactOptions";
+import styles from "@/components/portfolio.module.css";
+export const metadata:Metadata={title:"Contact | Nirupam Pal",description:"Contact Nirupam Pal about full-time developer opportunities. Based in West Bengal, open to relocation and remote work. Available from 1 December 2026.",alternates:{canonical:"/contact"}};
+export default function ContactPage(){return <div className={styles.site}><PortfolioNavigation/><main id="main" className={styles.caseMain}><section className={styles.contactPageHero}><div><div className={styles.availability}><span/>Available from 1 December 2026</div><h1 className={styles.routeTitle}>Let’s build<br/><span>what’s next.</span></h1><p className={styles.caseLead}>Have a full stack developer role in mind? Tell me about your team, the product and what you’re looking for.</p><dl className={styles.contactFacts}><div><dt>BASED IN</dt><dd>Krishnanagar, Nadia, West Bengal</dd></div><div><dt>WORK PREFERENCE</dt><dd>Open to relocation and remote work</dd></div><div><dt>LANGUAGES</dt><dd>English, Hindi, Bengali</dd></div></dl></div><ContactOptions/></section></main><PortfolioFooter/></div>;}

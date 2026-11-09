@@ -11,6 +11,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.inirupampal.in"),
   title: "Nirupam Pal | Fullstack Developer",
   description: "Nirupam Pal, Full Stack Developer building web and mobile applications. Taste N Bite POS and ordering for 200+ franchises, restaurant software and BuildNerd products.",
   keywords: ["Fullstack Developer", "React", "Next.js", "Node.js", "Web Developer", "Nirupam Pal"],
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
     title: "Nirupam Pal | Fullstack Developer",
     description: "Full Stack Developer crafting modern digital experiences",
     type: "website",
-    url: "https://inirupampal.in",
+    url: "https://www.inirupampal.in",
     images: [
       {
         url: "https://www.inirupampal.in/nirupam-pal.png",
@@ -40,7 +41,7 @@ export const metadata: Metadata = {
   },
 };
 
-const siteUrl = "https://inirupampal.in";
+const siteUrl = "https://www.inirupampal.in";
 const siteDescription = metadata.description as string;
 
 const jsonLd = {
@@ -64,7 +65,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${plusJakartaSans.variable} scroll-smooth`}>
+    <html lang="en" data-scroll-behavior="smooth" className={`${plusJakartaSans.variable} scroll-smooth`}>
       <body className={`${plusJakartaSans.className} min-h-screen bg-white text-[#111111] antialiased selection:bg-neutral-900 selection:text-white`}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <ThemeProvider>

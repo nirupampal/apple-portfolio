@@ -18,17 +18,17 @@ function mergePortfolioContent(data: Partial<PortfolioContent>): PortfolioConten
   );
 
   return {
-    contentRevision: 4,
+    contentRevision: 5,
     hero: { ...defaultPortfolioContent.hero, ...data.hero },
     terminal: containsLegacyDemoCommand
       ? developerTerminalPreset
       : { ...defaultPortfolioContent.terminal, ...data.terminal },
     about: { ...defaultPortfolioContent.about, ...data.about },
-    works: { ...defaultPortfolioContent.works, ...data.works, ...((data.contentRevision ?? 0) < 4 ? { projects: defaultPortfolioContent.works.projects } : {}) },
+    works: { ...defaultPortfolioContent.works, ...data.works, ...((data.contentRevision ?? 0) < 5 ? { projects: defaultPortfolioContent.works.projects } : {}) },
     skills: { ...defaultPortfolioContent.skills, ...data.skills },
     achievements: { ...defaultPortfolioContent.achievements, ...data.achievements },
     blog: { ...defaultPortfolioContent.blog, ...data.blog },
-    contact: { ...defaultPortfolioContent.contact, ...data.contact },
+    contact: { ...defaultPortfolioContent.contact, ...data.contact, links: (data.contact?.links ?? defaultPortfolioContent.contact.links).filter(link => link.id !== "phone" && !link.href.startsWith("tel:")) },
   };
 }
 
