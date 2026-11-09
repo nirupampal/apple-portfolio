@@ -47,6 +47,11 @@ export type AboutContent = {
 };
 
 export type ProjectItem = {
+  screenshots?: { src: string; alt: string }[];
+  mobile?: boolean;
+  featured?: boolean;
+  category?: "business" | "production" | "personal";
+  linkLabel?: string;
   title: string;
   description: string;
   image: string;
@@ -233,7 +238,7 @@ export const developerTerminalPreset: TerminalContent = {
 };
 
 export const defaultPortfolioContent: PortfolioContent = {
-  "contentRevision": 2,
+  "contentRevision": 3,
   "hero": {
     "availabilityText": "Open to full-time opportunities",
     "firstName": "Nirupam",
@@ -269,7 +274,7 @@ export const defaultPortfolioContent: PortfolioContent = {
         "title": "Full Stack Developer",
         "company": "Microace Software",
         "date": "April 2025 – Present",
-        "description": "Built the Taste N Bite POS, companion ordering app and admin portal supporting 200+ franchises. Developed Hisab Restro for restaurant billing, kitchen tickets and QR ordering, plus business websites including microacesoftware.com and tnbpos.in.",
+        "description": "Built the Taste N Bite POS, companion ordering app and admin portal supporting 200+ franchises. Developed Hisab Restro for restaurant billing, kitchen tickets and QR ordering, plus business websites including microacesoftware.com and tnbpos.in. Built Microace Staff, a mobile workspace for attendance, tasks, chat and business operations.",
         "tags": [
           "Next.js",
           "TypeScript",
@@ -319,9 +324,9 @@ export const defaultPortfolioContent: PortfolioContent = {
     "githubLabel": "Explore GitHub",
     "projects": [
       {
-        "title": "Taste N Bite POS & Ordering",
-        "description": "A connected billing platform, mobile ordering app and admin portal built at Microace Software. Used daily across 200+ Taste N Bite franchises.",
-        "image": "/dashboard.png",
+        "title": "TNB POS",
+        "description": "Web-based billing software and administration portal built at Microace Software for Taste N Bite. Part of the connected system serving its 200+ franchise network.",
+        "image": "/projects/tnb-pos-dashboard.png",
         "link": "https://tnbpos.in",
         "type": "Production / Microace Software",
         "year": "2025–2026",
@@ -335,12 +340,22 @@ export const defaultPortfolioContent: PortfolioContent = {
           "Web-based POS used for daily product billing.",
           "Companion mobile app for daily franchise ordering.",
           "Administration portal connecting business operations."
-        ]
+        ],
+        "screenshots": [
+          {
+            "src": "/projects/tnb-pos-dashboard.png",
+            "alt": "TNB POS business overview with sales, inventory and product reports"
+          }
+        ],
+        "mobile": false,
+        "featured": true,
+        "category": "production",
+        "linkLabel": "Visit TNB POS"
       },
       {
         "title": "Hisab Restro",
         "description": "Web and mobile restaurant software connecting billing, kitchen order tickets and QR ordering at the table.",
-        "image": "/dashboard.png",
+        "image": "/projects/hisab-restro-home.png",
         "link": "https://microacesoftware.com",
         "type": "Restaurant operations / Microace",
         "year": "2025–2026",
@@ -354,7 +369,113 @@ export const defaultPortfolioContent: PortfolioContent = {
           "Generate bills and Kitchen Order Tickets (KOT).",
           "Let customers place orders by scanning a table QR code.",
           "Web and mobile interfaces for small restaurants."
+        ],
+        "screenshots": [
+          {
+            "src": "/projects/hisab-restro-home.png",
+            "alt": "Hisab Restro dashboard showing live orders, running order value and table occupancy"
+          },
+          {
+            "src": "/projects/hisab-restro-tables.png",
+            "alt": "Hisab Restro table management with availability by floor"
+          },
+          {
+            "src": "/projects/hisab-restro-tools.png",
+            "alt": "Hisab Restro tools including kitchen queue, order history, bills and menu availability"
+          },
+          {
+            "src": "/projects/hisab-restro-alerts.png",
+            "alt": "Hisab Restro notifications and food-ready updates"
+          }
+        ],
+        "mobile": true,
+        "featured": true,
+        "category": "production",
+        "linkLabel": "About Microace"
+      },
+      {
+        "title": "TNB Ordering",
+        "description": "The companion mobile ordering application built at Microace Software for Taste N Bite. Used daily by 200+ franchises, with ordering, packing and special-order workflows.",
+        "image": "/projects/tnb-order-special-order.png",
+        "link": "https://play.google.com/store/apps/details?id=com.tnborder.app&hl=en",
+        "linkLabel": "Get it on Google Play",
+        "type": "Franchise ordering / Microace",
+        "year": "",
+        "badge": "On Google Play",
+        "tech": [
+          "Mobile ordering",
+          "Special orders",
+          "Franchise operations"
+        ],
+        "mobile": true,
+        "category": "production",
+        "screenshots": [
+          {
+            "src": "/projects/tnb-order-special-order.png",
+            "alt": "TNB Ordering special-order screen with catalogue options, customer details and cart"
+          }
         ]
+      },
+      {
+        "title": "Microace Staff",
+        "description": "A mobile workspace for staff attendance, tasks, chat and sales, with access to vouchers, ledgers, project workflows and customer support tickets.",
+        "image": "/projects/microace-staff-home.png",
+        "link": "https://microacesoftware.com",
+        "linkLabel": "About Microace",
+        "type": "Staff application / Microace",
+        "year": "",
+        "badge": "Mobile workspace",
+        "tech": [
+          "Attendance",
+          "Tasks & chat",
+          "Team operations"
+        ],
+        "mobile": true,
+        "category": "production",
+        "screenshots": [
+          {
+            "src": "/projects/microace-staff-home.png",
+            "alt": "Microace Staff home with attendance check-in and workday overview"
+          },
+          {
+            "src": "/projects/microace-staff-workspace.png",
+            "alt": "Microace Staff workspace with finance, projects and customer support tools"
+          }
+        ]
+      },
+      {
+        "title": "Rupvia",
+        "description": "An offline money manager with income and expense tracking, wallets, budgets, savings goals, bill reminders and spending insights.",
+        "image": "/projects/rupvia-overview.png",
+        "link": "https://www.buildnerd.in",
+        "type": "Own project / Mobile application",
+        "year": "",
+        "tech": [
+          "Mobile app",
+          "Offline access",
+          "Money management"
+        ],
+        "screenshots": [
+          {
+            "src": "/projects/rupvia-overview.png",
+            "alt": "Rupvia overview with balance, income, spending and monthly plan"
+          },
+          {
+            "src": "/projects/rupvia-transactions.png",
+            "alt": "Rupvia transaction ledger with search, category and date filters"
+          },
+          {
+            "src": "/projects/rupvia-add.png",
+            "alt": "Rupvia tools for expenses, income, lending, borrowing, bills, savings and budgets"
+          },
+          {
+            "src": "/projects/rupvia-insights.png",
+            "alt": "Rupvia weekly and monthly spending insights"
+          }
+        ],
+        "mobile": true,
+        "category": "personal",
+        "linkLabel": "Visit BuildNerd"
       },
       {
         "title": "BuildNerd Catalogue",
@@ -367,7 +488,8 @@ export const defaultPortfolioContent: PortfolioContent = {
           "Excel imports",
           "Dealer pricing",
           "WhatsApp orders"
-        ]
+        ],
+        "category": "business"
       },
       {
         "title": "BuildNerd Quotes",
@@ -380,7 +502,8 @@ export const defaultPortfolioContent: PortfolioContent = {
           "PDF export",
           "Client approvals",
           "Invoicing"
-        ]
+        ],
+        "category": "business"
       },
       {
         "title": "Catalogue Studio",
@@ -393,7 +516,8 @@ export const defaultPortfolioContent: PortfolioContent = {
           "Product photos",
           "CSV imports",
           "PDF price lists"
-        ]
+        ],
+        "category": "business"
       },
       {
         "title": "Create QRcode",
@@ -406,7 +530,8 @@ export const defaultPortfolioContent: PortfolioContent = {
           "Static QR",
           "Dynamic links",
           "Business tools"
-        ]
+        ],
+        "category": "business"
       },
       {
         "title": "BuildNerd Bookings",
@@ -419,19 +544,30 @@ export const defaultPortfolioContent: PortfolioContent = {
           "Appointments",
           "Staff calendars",
           "Customer history"
-        ]
+        ],
+        "category": "business"
       },
       {
-        "title": "Rupvia",
-        "description": "An offline money management mobile application, built for keeping track of money without an internet connection.",
-        "image": "/dashboard.png",
-        "link": "https://www.buildnerd.in",
-        "type": "Own project / Mobile application",
+        "title": "RMBC Community Website",
+        "description": "Website for Ranirghat Mahismardini Barowari Committee in Nabadwip, bringing together Rash Yatra updates, local heritage, festival photo archives, news and membership registration.",
+        "image": "/projects/rmbc-website.png",
+        "link": "https://www.rmbc.co.in/",
+        "linkLabel": "Visit RMBC",
+        "type": "Community & festival website",
         "year": "",
+        "badge": "Live website",
         "tech": [
-          "Mobile app",
-          "Offline access",
-          "Money management"
+          "Festival updates",
+          "Photo archives",
+          "Membership"
+        ],
+        "category": "production",
+        "mobile": false,
+        "screenshots": [
+          {
+            "src": "/projects/rmbc-website.png",
+            "alt": "Ranirghat Mahismardini Barowari Committee website featuring Rash Yatra celebrations and community heritage"
+          }
         ]
       }
     ]
