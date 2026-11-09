@@ -51,7 +51,8 @@ const jsonLd = {
   "url": siteUrl,
   "sameAs": [
     "https://github.com/nirupampal",
-    "https://linkedin.com/in/nirupampal"
+    "https://linkedin.com/in/nirupampal",
+    "https://x.com/nirupampaldev"
   ],
   "jobTitle": "Full Stack Developer",
   "description": siteDescription

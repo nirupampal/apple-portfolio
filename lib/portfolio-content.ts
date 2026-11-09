@@ -840,6 +840,12 @@ export const defaultPortfolioContent: PortfolioContent = {
         "label": "LinkedIn",
         "value": "nirupampal",
         "href": "https://www.linkedin.com/in/nirupampal/"
+      },
+      {
+        "id": "twitter",
+        "label": "X (Twitter)",
+        "value": "nirupampaldev",
+        "href": "https://x.com/nirupampaldev"
       }
     ],
     "copyrightName": "Nirupam Pal",
