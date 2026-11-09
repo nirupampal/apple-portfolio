@@ -9,7 +9,14 @@ for (const route of routes) {
   assert.match(html,/<h1[\s>]/,`${route} must have a primary heading`);
   assert.doesNotMatch(html,/86176[\s-]*24775|8617624775|href="tel:/,`${route} must not publish a phone contact`);
   assert.match(html,/<link rel="canonical"/,`${route} must have a canonical URL`);
-  if (route.startsWith('/projects/')) assert.match(html,/MY CONTRIBUTION/,`${route} must include a case study`);
+  if (route.startsWith('/projects/')) {
+    assert.match(html,/MY CONTRIBUTION/,`${route} must include a case study`);
+    assert.match(html,/PROBLEMS &amp; SOLUTIONS/,`${route} must include problem-solution analysis`);
+    assert.match(html,/WHO THIS IS FOR/,`${route} must identify the audience`);
+    assert.match(html,/IN PRACTICE/,`${route} must include project scenarios`);
+    assert.doesNotMatch(html,/What needed<!-- -->|From build<br/,`${route} must not use the old generic headings`);
+    if(route.endsWith('/microace-staff')) assert.doesNotMatch(html.match(/<main\b[\s\S]*?<\/main>/)?.[0] ?? html,/Moving orders out of WhatsApp|cron jobs|200\+/, 'Staff must not inherit TNB engineering claims');
+  }
   console.log(`PASS ${route}`);
 }
 const workRedirect=await fetch(base+'/works',{redirect:'manual'});
