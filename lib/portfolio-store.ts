@@ -18,13 +18,13 @@ function mergePortfolioContent(data: Partial<PortfolioContent>): PortfolioConten
   );
 
   return {
-    contentRevision: 3,
+    contentRevision: 4,
     hero: { ...defaultPortfolioContent.hero, ...data.hero },
     terminal: containsLegacyDemoCommand
       ? developerTerminalPreset
       : { ...defaultPortfolioContent.terminal, ...data.terminal },
     about: { ...defaultPortfolioContent.about, ...data.about },
-    works: { ...defaultPortfolioContent.works, ...data.works, ...((data.contentRevision ?? 0) < 3 ? { projects: defaultPortfolioContent.works.projects } : {}) },
+    works: { ...defaultPortfolioContent.works, ...data.works, ...((data.contentRevision ?? 0) < 4 ? { projects: defaultPortfolioContent.works.projects } : {}) },
     skills: { ...defaultPortfolioContent.skills, ...data.skills },
     achievements: { ...defaultPortfolioContent.achievements, ...data.achievements },
     blog: { ...defaultPortfolioContent.blog, ...data.blog },

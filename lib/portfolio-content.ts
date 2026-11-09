@@ -238,7 +238,7 @@ export const developerTerminalPreset: TerminalContent = {
 };
 
 export const defaultPortfolioContent: PortfolioContent = {
-  "contentRevision": 3,
+  "contentRevision": 4,
   "hero": {
     "availabilityText": "Open to full-time opportunities",
     "firstName": "Nirupam",
@@ -480,7 +480,7 @@ export const defaultPortfolioContent: PortfolioContent = {
       {
         "title": "BuildNerd Catalogue",
         "description": "Excel imports, dealer-specific price lists and shareable product catalogues with WhatsApp order requests.",
-        "image": "/dashboard.png",
+        "image": "/projects/buildnerd-catalogue-home.jpg",
         "link": "https://catalogue.buildnerd.in",
         "type": "Own product / Seller tools",
         "year": "",
@@ -489,12 +489,24 @@ export const defaultPortfolioContent: PortfolioContent = {
           "Dealer pricing",
           "WhatsApp orders"
         ],
-        "category": "business"
+        "category": "business",
+        "screenshots": [
+          {
+            "src": "/projects/buildnerd-catalogue-home.jpg",
+            "alt": "BuildNerd Catalogue public product page for Excel imports, dealer pricing and online catalogues"
+          },
+          {
+            "src": "/projects/buildnerd-catalogue-demo.jpg",
+            "alt": "BuildNerd Catalogue public buyer demo showing a sample product collection"
+          }
+        ],
+        "mobile": false,
+        "linkLabel": "Explore product"
       },
       {
         "title": "BuildNerd Quotes",
         "description": "Quotations and proposals with PDF export, client choices, invoicing and payment tracking.",
-        "image": "/dashboard.png",
+        "image": "/projects/buildnerd-quotes-home.jpg",
         "link": "https://quotes.buildnerd.in",
         "type": "Own product / Business documents",
         "year": "",
@@ -503,12 +515,24 @@ export const defaultPortfolioContent: PortfolioContent = {
           "Client approvals",
           "Invoicing"
         ],
-        "category": "business"
+        "category": "business",
+        "screenshots": [
+          {
+            "src": "/projects/buildnerd-quotes-home.jpg",
+            "alt": "BuildNerd Quotes product page with an example website proposal"
+          },
+          {
+            "src": "/projects/buildnerd-quotes-editor.jpg",
+            "alt": "BuildNerd Quotes proposal editor and live document preview using sample client details"
+          }
+        ],
+        "mobile": false,
+        "linkLabel": "Explore product"
       },
       {
         "title": "Catalogue Studio",
         "description": "Batch product photo preparation and branded PDF price lists from spreadsheet data.",
-        "image": "/dashboard.png",
+        "image": "/projects/buildnerd-studio-home.jpg",
         "link": "https://studio.buildnerd.in",
         "type": "Own product / Seller tools",
         "year": "",
@@ -517,12 +541,24 @@ export const defaultPortfolioContent: PortfolioContent = {
           "CSV imports",
           "PDF price lists"
         ],
-        "category": "business"
+        "category": "business",
+        "screenshots": [
+          {
+            "src": "/projects/buildnerd-studio-home.jpg",
+            "alt": "Catalogue Studio product page showing photo preparation and a sample PDF price list"
+          },
+          {
+            "src": "/projects/buildnerd-studio-editor.jpg",
+            "alt": "Catalogue Studio price-list editor with sample product details and a live PDF preview"
+          }
+        ],
+        "mobile": false,
+        "linkLabel": "Explore product"
       },
       {
         "title": "Create QRcode",
         "description": "Static QR downloads and editable dynamic links for menus, Wi-Fi and business links.",
-        "image": "/createqrcode-dashboard.png",
+        "image": "/projects/buildnerd-qr-generator.jpg",
         "link": "https://createqrcode.in",
         "type": "Own product / QR platform",
         "year": "",
@@ -531,12 +567,20 @@ export const defaultPortfolioContent: PortfolioContent = {
           "Dynamic links",
           "Business tools"
         ],
-        "category": "business"
+        "category": "business",
+        "screenshots": [
+          {
+            "src": "/projects/buildnerd-qr-generator.jpg",
+            "alt": "Create QRcode public generator with a sample BuildNerd website QR preview"
+          }
+        ],
+        "mobile": false,
+        "linkLabel": "Explore product"
       },
       {
         "title": "BuildNerd Bookings",
         "description": "Salon appointments, staff calendars, walk-ins and customer history in one scheduling workflow.",
-        "image": "/dashboard.png",
+        "image": "/projects/buildnerd-bookings-home.jpg",
         "link": "https://book.buildnerd.in",
         "type": "Own product / Scheduling",
         "year": "",
@@ -545,7 +589,15 @@ export const defaultPortfolioContent: PortfolioContent = {
           "Staff calendars",
           "Customer history"
         ],
-        "category": "business"
+        "category": "business",
+        "screenshots": [
+          {
+            "src": "/projects/buildnerd-bookings-home.jpg",
+            "alt": "BuildNerd Bookings public product page for salon appointments and staff scheduling"
+          }
+        ],
+        "mobile": false,
+        "linkLabel": "Explore product"
       },
       {
         "title": "RMBC Community Website",
@@ -567,6 +619,29 @@ export const defaultPortfolioContent: PortfolioContent = {
           {
             "src": "/projects/rmbc-website.png",
             "alt": "Ranirghat Mahismardini Barowari Committee website featuring Rash Yatra celebrations and community heritage"
+          }
+        ]
+      },
+      {
+        "title": "DOTCOM Coin",
+        "description": "E-commerce website for coins, banknotes and collectibles, with category browsing, product search, wishlists, a shopping cart and detailed collectible listings.",
+        "image": "/projects/dotcomcoin-storefront.jpg",
+        "link": "https://dotcomcoin.in",
+        "linkLabel": "Visit DOTCOM Coin",
+        "type": "E-commerce website",
+        "year": "",
+        "badge": "Live storefront",
+        "tech": [
+          "Product catalogue",
+          "Search & categories",
+          "Shopping cart"
+        ],
+        "mobile": false,
+        "category": "production",
+        "screenshots": [
+          {
+            "src": "/projects/dotcomcoin-storefront.jpg",
+            "alt": "DOTCOM Coin storefront featuring British India coins, banknotes and collectible categories"
           }
         ]
       }
