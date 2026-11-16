@@ -980,6 +980,91 @@ const cases: Record<string, CaseStudy> = {
       "outcome": "A live catalogue for specialist shopping.",
       "scenario": "Browsing and targeted discovery"
     }
+  },
+  "india-invoice-utils": {
+    "role": "Author and maintainer",
+    "context": "Open source · npm package",
+    "headline": "Making Indian invoice arithmetic exact, small and dependency-free.",
+    "introduction": "india-invoice-utils is a TypeScript library I wrote and published to npm. It covers the repeated maths and validation behind Indian invoices: INR formatting, GST split into CGST, SGST, IGST and cess, invoice totals, amounts in words and offline ID checks. It has no runtime dependencies and ships ESM, CommonJS and type declarations.",
+    "audience": "Developers building billing, invoicing and checkout software for the Indian market.",
+    "problem": "Intl.NumberFormat formats Indian numbers well, but an invoice needs more: splitting GST between CGST and SGST, allocating odd paise, back-calculating tax-inclusive prices, grouping tax by rate, rounding off to the rupee and writing the total as Rupees ... Only. Doing that with floating-point numbers produces totals that disagree by a paisa, so the library does it in integer paise.",
+    "contribution": [
+      "Designed the public API and the calculation contract: rounding rules, discounts, inclusive and exclusive tax, cess and round-off.",
+      "Implemented money maths in integer paise with exact BigInt ratios for percentages and quantities.",
+      "Wrote offline GSTIN checksum and parsing, PAN, IFSC, pincode and mobile validators, plus a GST state-code table.",
+      "Set up tests with Vitest and a 95% coverage threshold, CI, changesets-based releases and npm provenance.",
+      "Built a small GST invoice calculator demo that runs entirely in the browser."
+    ],
+    "workflow": [
+      "Describe invoice items",
+      "Round to paise per line",
+      "Apply discount, GST and cess",
+      "Group tax by rate",
+      "Round off and write the total in words"
+    ],
+    "implementation": [
+      {
+        "title": "Money in integer paise",
+        "detail": "Public amounts are rupee numbers, but arithmetic runs on integer paise. Decimal strings become exact BigInt ratios, and half ties round away from zero, so 1.005 becomes 1.01."
+      },
+      {
+        "title": "GST and invoice engine",
+        "detail": "calculateGST handles inclusive and exclusive prices, interstate supply and cess. calculateInvoice applies per-line discounts, groups tax by rate, includes extra charges and returns the grand total with a round-off value and the total in words."
+      },
+      {
+        "title": "Offline validators and lookups",
+        "detail": "GSTIN checksum and parsing, PAN holder type, IFSC, pincode and Indian mobile normalisation run without a network call. A frozen state-code table supports place-of-supply checks."
+      },
+      {
+        "title": "Packaging and release",
+        "detail": "Strict TypeScript, ESM and CommonJS builds with tsup, tree-shakeable named exports, tests in CI and releases through changesets with npm provenance."
+      }
+    ],
+    "outcome": [
+      "Published to npm as india-invoice-utils, currently at version 0.1.1.",
+      "Zero runtime dependencies, with a live StackBlitz demo of an invoice calculator.",
+      "A documented calculation contract that states how rounding, discounts, tax and limits behave."
+    ],
+    "related": [
+      "create-qrcode",
+      "buildnerd-quotes"
+    ],
+    "challenges": [
+      {
+        "title": "Totals have to agree to the paisa",
+        "problem": "Binary floating point cannot represent most decimal amounts, so adding rounded values can drift from the printed total.",
+        "detail": "Moved all money arithmetic to integer paise, rounded each line separately and allocated odd paise to SGST so CGST plus SGST always equals the GST amount."
+      },
+      {
+        "title": "Tax-inclusive prices work backwards",
+        "problem": "When a price already includes GST and cess, the taxable value has to be derived from the total without losing a paisa.",
+        "detail": "Derived taxable value from amount divided by one plus the combined rate, then allocated the remaining paise between GST and cess so the inclusive total is preserved."
+      },
+      {
+        "title": "A currency sign that silently broke",
+        "problem": "Version 0.1.0 printed a question mark instead of the rupee sign because a source file had been saved in a non-UTF-8 encoding.",
+        "detail": "Version 0.1.1 writes the sign as an escape and tests it by code point, and validators now return false or null for non-string input instead of throwing."
+      }
+    ],
+    "scenario": [
+      {
+        "title": "Billing a mixed invoice",
+        "detail": "A developer passes services and goods with different GST rates and a discount. The library returns per-line results, a tax summary grouped by rate and a grand total in numbers and words."
+      },
+      {
+        "title": "Checking a customer's GSTIN",
+        "detail": "A form validates a GSTIN offline, reads the state and PAN from it, and decides whether the supply is interstate before calculating tax."
+      }
+    ],
+    "headings": {
+      "problem": "Invoices need more than number formatting.",
+      "contribution": "What I built and shipped.",
+      "workflow": "From line items to a correct total",
+      "challenges": "Paise, inclusive tax and an encoding bug.",
+      "implementation": "A small library with a strict contract.",
+      "outcome": "Published, documented and tested.",
+      "scenario": "Where it gets used"
+    }
   }
 };
 
@@ -994,4 +1079,4 @@ export function getCaseStudy(project: ProjectItem): CaseStudy {
   if (!study) throw new Error(`Missing authored case study: ${projectSlug(project)}`);
   return study;
 }
-export const homeProjectSlugs = ["tnb-pos", "tnb-ordering", "hisab-restro", "buildnerd-quotes", "buildnerd-catalogue", "rupvia"];
+export const homeProjectSlugs = ["tnb-pos", "tnb-ordering", "hisab-restro", "buildnerd-quotes", "buildnerd-catalogue", "rupvia", "india-invoice-utils"];

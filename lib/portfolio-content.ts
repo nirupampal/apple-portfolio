@@ -657,6 +657,38 @@ export const defaultPortfolioContent: PortfolioContent = {
           }
         ],
         "slug": "dotcom-coin"
+      },
+      {
+        "title": "india-invoice-utils",
+        "description": "Open-source, zero-dependency TypeScript library for Indian invoicing: paise-accurate GST, invoice totals, INR formatting, amounts in words and offline GSTIN, PAN and IFSC validation.",
+        "image": "/projects/india-invoice-utils-demo.jpg",
+        "link": "https://www.npmjs.com/package/india-invoice-utils",
+        "github": "https://github.com/nirupampal/india-invoice-utils",
+        "type": "Open source / npm package",
+        "year": "2026",
+        "badge": "Published on npm",
+        "tech": [
+          "TypeScript",
+          "BigInt paise maths",
+          "ESM + CommonJS",
+          "Vitest",
+          "GitHub Actions"
+        ],
+        "points": [
+          "Integer-paise money maths so CGST + SGST always add up to the printed total.",
+          "Invoice totals, GST by rate, round-off and amount in words (lakh and crore).",
+          "Offline GSTIN, PAN, IFSC, pincode and mobile validation with zero dependencies."
+        ],
+        "category": "personal",
+        "screenshots": [
+          {
+            "src": "/projects/india-invoice-utils-demo.jpg",
+            "alt": "GST invoice calculator demo built with india-invoice-utils showing CGST, SGST, round off and the grand total in words"
+          }
+        ],
+        "mobile": false,
+        "linkLabel": "View on npm",
+        "slug": "india-invoice-utils"
       }
     ]
   },
